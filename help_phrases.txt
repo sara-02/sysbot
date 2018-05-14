@@ -1,0 +1,31 @@
+Getting started:
+
+"Can someone help me get started"
+"How to start contributing?"
+"Anybody help?"
+"How do I get started?"
+"I am a newcomer"
+"I would like to start contributing."
+
+Workflow and guidelines:
+"I am new to open source."
+"Contribution guidelines please"
+"help with open source workflow"
+"Could anyone please link me to the code flow?"
+
+Admins:
+"Whom can I contact to report violations?"
+"Please mention the admins."
+"As a mentor, I need github permissions"
+
+Mentors:
+"Who are the mentors for this project?"
+"List of mentors please"
+
+Issues:
+"I would like to open an issue on github"
+"open issue on github"
+
+Comment on issues:
+"Comment on #<issue number> : <comment>"
+"Add comment to #<issue number>: <comment>"
