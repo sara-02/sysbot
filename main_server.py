@@ -1,6 +1,8 @@
 from flask import Flask
 from flask import request, json
 from github_functions import label_opened_issue
+from stemming.porter2 import stem
+from nltk.tokenize import word_tokenize
 
 app = Flask(__name__)
 
@@ -26,6 +28,13 @@ def github_hook_receiver_function():
             pass
         return json.dumps(request.json)
 
+
+def get_stems(sentence):
+    result = list()
+    tokens = word_tokenize(sentence)
+    for word in tokens:
+        result.append(stem(word))
+    return result
 
 if __name__ == '__main__':
     app.run()
