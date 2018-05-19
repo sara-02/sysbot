@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, jsonify
 from flask import request, json
 from github_functions import label_opened_issue
 from stemming.porter2 import stemmer
@@ -16,17 +16,16 @@ def home():
 def github_hook_receiver_function():
     if request.headers['Content-Type'] == 'application/json':
         data = request.json
-        try:
-            #This try-catch is checking if action key is present in event data passed by hook
-            action = data['action']
+        action = data.get('action', None)
+        if action!=None:
             if action == 'opened':
-                # If it's an issue opened event
-                label_opened_issue(data)
-            #No other events are being handled currently
-        except KeyError:
-            #Currently the bot isn't handling any other cases
+                #If it's an issue opened event
+                response = label_opened_issue(data)
+            #No other events are being handeled currently
+        else:
             pass
-        return json.dumps(request.json)
+            #currently the bot isn't handeling any other cases
+        return jsonify(request.json)
 
 
 def get_stems(sentence):
