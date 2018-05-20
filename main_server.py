@@ -3,6 +3,7 @@ from flask import request, json
 from github_functions import label_opened_issue
 from stemming.porter2 import stemmer
 from nltk.tokenize import word_tokenize
+from nltk.stem import WordNetLemmatizer
 
 app = Flask(__name__)
 
@@ -32,6 +33,11 @@ def get_stems(sentence):
     #Generator expressions with joins are much faster than conversion to strings and appending to stemmed tokens to lists and overheads of string conversion.
     stemmed_sentence = ' '.join(stemmer.stem(token) for token in word_tokenize(sentence))
     return stemmed_sentence
+
+def lemmatize_sent(sentence):
+    #Generator expressions with joins are much faster than conversion to strings and appending to stemmed tokens to lists and overheads of string conversion.
+    lemmatized_sentence = ' '.join(WordNetLemmatizer().lemmatize(token) for token in word_tokenize(sentence))
+    return lemmatized_sentence
 
 if __name__ == '__main__':
     app.run()
