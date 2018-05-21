@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 MESSAGE = {
     'first_timer_message': 'Hello!\nWelcome to the Systers Open Source community!\nHow to get started:'+\
