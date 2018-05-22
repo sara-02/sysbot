@@ -1,10 +1,10 @@
 from flask import Flask, jsonify
-from flask import request, json
+from flask import request, json, Response
 from github_functions import label_opened_issue
 from stemming.porter2 import stem
 from nltk.tokenize import word_tokenize
 from auth_credentials import announcement_channel_id, BOT_ACCESS_TOKEN
-from slack_functions import dm_new_users
+from slack_functions import dm_new_users, check_newcomer_requirements
 from nltk.stem import WordNetLemmatizer
 
 app = Flask(__name__)
@@ -50,6 +50,16 @@ def slack_hook_receiver_function():
                     #Check if channel_id is the required channel, i.e, Announcements channel
                     dm_new_users(data)
         return json.dumps(request.json)
+
+#Recieve responses from sysbot_invite slash command
+@app.route('/invite', methods=['POST', 'GET'])
+def invite():
+    if request.headers['Content-Type'] == 'application/x-www-form-urlencoded':
+        slash_user_info = request.form
+        uid = slash_user_info.get('user_id','')
+        if uid != "":
+            check_newcomer_requirements(uid)
+    return Response(status=200)
 
 
 def get_stems(sentence):
