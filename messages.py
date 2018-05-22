@@ -11,6 +11,6 @@ MESSAGE = {
         '\nTo keep up with the Systers-Dev email list, join #mailing-list.'+\
         '\nTo give any thanks or recognition to other members, shoutout in the #celebrate channel.'
         '\n\nHow to operate Sysbot?'+\
-        '\nType /sysbot_help'
-        #More will be added as we go
+        '\nType /sysbot_help',
+    'newcomer_requirement_incomplete': 'Please complete the newcomers requirements! Visit http://systers.io/member-levels for more info.'
 }
