@@ -1,7 +1,7 @@
 import requests
 from flask import request, json
-from request_urls import add_label_url
-from auth_credentials import USERNAME,PASSWORD
+from request_urls import add_label_url, send_team_invite
+from auth_credentials import USERNAME,PASSWORD, newcomers_team_id
 
 #request headers
 headers = {'Accept': 'application/vnd.github.symmetra-preview+json', 'Content-Type': 'application/x-www-form-urlencoded'}
@@ -30,3 +30,18 @@ def label_opened_issue(data):
             print(r.content)
             return {'message':'Error', 'status':r.status_code}
     return {'message':'Format of data provided is wrong or misformed', 'status': 400}
+
+
+def send_github_invite(github_id):
+    session = requests.Session()
+    session.auth = (USERNAME, PASSWORD)
+    #Header as required by Github API
+    headers = {'Accept': 'application/vnd.github.hellcat-preview+json',
+               'Content-Type': 'application/x-www-form-urlencoded'}
+    request_url =  send_team_invite %(newcomers_team_id, github_id)
+    r = session.put(request_url, data=json.dumps({'role': 'member'}), headers=headers)
+    if r.status_code == 200:
+        return {'message':'Success', 'status':r.status_code}
+    else:
+        return {'message':'Error', 'status':r.status_code}
+    return {'message':'Data provided is wrong', 'status': 400}
