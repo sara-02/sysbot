@@ -67,4 +67,5 @@ def check_newcomer_requirements(uid):
         else:
             data = {"text": MESSAGE.get('newcomer_requirement_incomplete','')}
             headers = {'Content-type': 'application/json'}
+
             requests.post(url, data=json.dumps(data), headers=headers)
