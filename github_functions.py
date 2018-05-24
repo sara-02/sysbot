@@ -45,3 +45,23 @@ def send_github_invite(github_id):
     else:
         return {'message':'Error', 'status':r.status_code}
     return {'message':'Data provided is wrong', 'status': 400}
+
+
+def issue_comment_approve_github(issue_number, repo_name, repo_owner):
+    session = requests.Session()
+    session.auth = (USERNAME, PASSWORD)
+    #Name of label to be removed
+    remove_label_name = '/Not%20Approved'
+    #Label to be added
+    label = '["issue-approved"]'
+    request_url = add_label_url % (repo_owner, repo_name, issue_number)
+    #Delete the not approved label first
+    response = session.delete(request_url+remove_label_name, headers=headers)
+    if response.status_code == 200 or response.status_code == 404:
+        #Add the new label
+        response = session.post(request_url, data=label, headers=headers)
+        if response.status_code == 200:
+            return {'message':'Success', 'status':response.status_code}
+        else:
+            return {'message':'Error', 'status':response.status_code}
+    return {'message':'Data provided is wrong', 'status': 400}
