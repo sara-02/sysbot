@@ -42,7 +42,7 @@ def is_maintainer_comment(commenter_id):
         if commenter_id in maintainers:
             return {'status': 200, 'is_maintainer': True}
         else:
-            return {'status': 200, 'is_maintainer': True}
+            return {'status': 200, 'is_maintainer': False}
     else:
         return {'status': 400, 'message': 'Wrong parameters'}
 
@@ -57,13 +57,15 @@ def check_newcomer_requirements(uid):
         github_profile_present = False
         github_id = ""
         for key in custom_fields:
-            if 'https://www.github.com/' in custom_fields.get(key, {}).get('value', ''):
+            github_link = custom_fields.get(key, {}).get('value', '')
+            if github_link.startswith('https://www.github.com/'):
                 github_profile_present = True
-                github_id = custom_fields.get(key, {}).get('value', '').split('https://www.github.com/')[1]
+                github_id = github_link.split('https://www.github.com/')[1]
                 break
-        if profile.get('first_name', "") != "" and profile.get('last_name',"")!="" and profile.get('title',"")!="" and profile.get('image_original',"")!="" and github_profile_present and not profile.get('phone',"").isdigit():
+        if github_profile_present and profile.get('first_name', "") != "" and profile.get('last_name',"")!="" and profile.get('title',"")!="" and profile.get('image_original',"")!="" and not profile.get('phone',"").isdigit():
             send_github_invite(github_id)
         else:
             data = {"text": MESSAGE.get('newcomer_requirement_incomplete','')}
             headers = {'Content-type': 'application/json'}
-            r = requests.post(url, data=json.dumps(data), headers=headers)
+
+            requests.post(url, data=json.dumps(data), headers=headers)
