@@ -1,6 +1,6 @@
 import requests
 from flask import request, json
-from request_urls import add_label_url, send_team_invite
+from request_urls import add_label_url, send_team_invite, assign_issue_url
 from auth_credentials import USERNAME,PASSWORD, newcomers_team_id
 
 #request headers
@@ -75,4 +75,15 @@ def github_pull_request_label(pr_number, repo_name, repo_owner):
     #Add label of under review to new PRs
     request_url = add_label_url % (repo_owner, repo_name, pr_number)
     response = session.post(request_url, data=label, headers=headers)
+    return response.status_code
+
+
+def issue_assign(issue_number, repo_name, assignee, repo_owner):
+    session = requests.Session()
+    session.auth = (USERNAME, PASSWORD)
+    headers = {'Accept': 'application/vnd.github.symmetra-preview+json', 'Content-Type': 'application/json'}
+    label = '{"assignees": ["%s"]}' % assignee
+    #Request to assign the issue
+    request_url = assign_issue_url % (repo_owner, repo_name, issue_number)
+    response = session.patch(request_url, data=label, headers=headers)
     return response.status_code
