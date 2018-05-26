@@ -5,7 +5,7 @@ from flask import request, json, jsonify
 from auth_credentials import  BOT_ACCESS_TOKEN, maintainer_usergroup_id, legacy_token
 from request_urls import dm_channel_open_url, dm_chat_post_message_url, get_maintainer_list, get_user_profile_info_url
 from messages import MESSAGE
-from github_functions import send_github_invite
+from github_functions import send_github_invite, issue_assign
 
 headers = {'Content-type': 'application/json', 'Authorization': 'Bearer {}'.format(BOT_ACCESS_TOKEN)}
 headers_legacy_urlencoded = {'Content-type': 'application/x-www-form-urlencoded', 'Authorization': 'Bearer {}'.format(legacy_token)}
@@ -69,3 +69,34 @@ def check_newcomer_requirements(uid):
             headers = {'Content-type': 'application/json'}
 
             requests.post(url, data=json.dumps(data), headers=headers)
+
+
+def assign_issue_slack(data):
+    result = is_maintainer_comment(data.get('user_id', ''))
+    channel_id = data.get('channel_id','')
+    if result.get('is_maintainer', False):
+        params = data.get('text','')
+        tokens = params.split(' ')
+        if params != '' and len(tokens) == 3:
+            #The tokens are issue number, repo name, and assignee username
+            status = issue_assign(tokens[1], tokens[0], tokens[2], 'systers')
+            if status == 404:
+                #Information given is wrong
+                send_message_to_channels(channel_id, MESSAGE.get('wrong_info',''))
+            elif status == 200:
+                #Successful assignment
+                send_message_to_channels(channel_id, MESSAGE.get('success',''))
+            elif status == 500:
+                #Some internal error occured
+                send_message_to_channels(channel_id, MESSAGE.get('error_slash_command',''))
+        else:
+            #Wrong format of command was used
+            send_message_to_channels(channel_id, MESSAGE.get('correct_assign_format',''))
+    else:
+        #The commentor is not a maintainer
+        send_message_to_channels(channel_id, MESSAGE.get('not_a_maintainer',''))
+
+
+def send_message_to_channels(channel_id, message):
+    body = {'username': 'Sysbot', 'as_user': True, 'text': message, 'channel': channel_id}
+    requests.post(dm_chat_post_message_url, data=json.dumps(body), headers=headers)
