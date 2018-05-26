@@ -65,3 +65,14 @@ def issue_comment_approve_github(issue_number, repo_name, repo_owner):
         else:
             return {'message':'Error', 'status':response.status_code}
     return {'message':'Data provided is wrong', 'status': 400}
+
+
+def github_pull_request_label(pr_number, repo_name, repo_owner):
+    session = requests.Session()
+    session.auth = (USERNAME, PASSWORD)
+    headers = {'Accept': 'application/vnd.github.symmetra-preview+json', 'Content-Type': 'application/x-www-form-urlencoded'}
+    label = '["under review"]'
+    #Add label of under review to new PRs
+    request_url = add_label_url % (repo_owner, repo_name, pr_number)
+    response = session.post(request_url, data=label, headers=headers)
+    return response.status_code
