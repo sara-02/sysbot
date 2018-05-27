@@ -5,7 +5,7 @@ from flask import request, json, jsonify
 from auth_credentials import  BOT_ACCESS_TOKEN, maintainer_usergroup_id, legacy_token
 from request_urls import dm_channel_open_url, dm_chat_post_message_url, get_maintainer_list, get_user_profile_info_url
 from messages import MESSAGE
-from github_functions import send_github_invite, issue_assign
+from github_functions import send_github_invite, issue_comment_approve_github, issue_assign
 
 headers = {'Content-type': 'application/json', 'Authorization': 'Bearer {}'.format(BOT_ACCESS_TOKEN)}
 headers_legacy_urlencoded = {'Content-type': 'application/x-www-form-urlencoded', 'Authorization': 'Bearer {}'.format(legacy_token)}
@@ -47,6 +47,36 @@ def is_maintainer_comment(commenter_id):
         return {'status': 400, 'message': 'Wrong parameters'}
 
 
+def approve_issue_label_slack(data):
+    result = is_maintainer_comment(data.get('user_id', ''))
+    channel_id = data.get('channel_id','')
+    if result.get('is_maintainer', False):
+        params = data.get('text','')
+        if params != '' and len(params.split(' ')) == 2:
+            response = issue_comment_approve_github(params.split(' ')[1], params.split(' ')[0], 'systers')
+            status = response.get('status', 500)
+            if status == 404:
+                #Information given is wrong
+                send_message_to_channels(channel_id, MESSAGE.get('wrong_info',''))
+            elif status == 200:
+                #Successful labeling
+                send_message_to_channels(channel_id, MESSAGE.get('success',''))
+            elif status == 500:
+                #Some internal error occured
+                send_message_to_channels(channel_id, MESSAGE.get('error_slash_command',''))
+        else:
+            #Wrong format of command was used
+            send_message_to_channels(channel_id, MESSAGE.get('correct_approve_format',''))
+    else:
+        #The commentor is not a maintainer
+        send_message_to_channels(channel_id, MESSAGE.get('not_a_maintainer',''))
+
+
+def send_message_to_channels(channel_id, message):
+    body = {'username': 'Sysbot', 'as_user': True, 'text': message, 'channel': channel_id}
+    requests.post(dm_chat_post_message_url, data=json.dumps(body), headers=headers)
+
+
 def check_newcomer_requirements(uid):
     body = {'user': uid, 'include_labels': True}
     r = requests.post(get_user_profile_info_url, data=body, headers=headers_legacy_urlencoded)
@@ -68,7 +98,7 @@ def check_newcomer_requirements(uid):
             data = {"text": MESSAGE.get('newcomer_requirement_incomplete','')}
             headers = {'Content-type': 'application/json'}
 
-            requests.post(url, data=json.dumps(data), headers=headers)
+            requests.post(dm_chat_post_message_url, data=json.dumps(data), headers=headers)
 
 
 def assign_issue_slack(data):

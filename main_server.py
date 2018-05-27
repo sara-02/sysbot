@@ -4,7 +4,7 @@ from github_functions import label_opened_issue, issue_comment_approve_github, g
 from stemming.porter2 import stem
 from nltk.tokenize import word_tokenize
 from auth_credentials import announcement_channel_id, BOT_ACCESS_TOKEN
-from slack_functions import dm_new_users, check_newcomer_requirements, assign_issue_slack
+from slack_functions import dm_new_users, check_newcomer_requirements, approve_issue_label_slack, assign_issue_slack
 from nltk.stem import WordNetLemmatizer
 
 app = Flask(__name__)
@@ -73,6 +73,14 @@ def invite():
         if uid != "":
             check_newcomer_requirements(uid)
     return Response(status=200)
+
+
+@app.route('/slack_approve_issue', methods=['POST'])
+def slack_approval_receiver():
+    if request.headers['Content-Type'] == 'application/x-www-form-urlencoded':
+        data = request.form
+        approve_issue_label_slack(data)
+        return Response(status=200)
 
 
 @app.route('/slack_assign_issue', methods=['POST'])
