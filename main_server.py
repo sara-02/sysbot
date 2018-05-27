@@ -1,6 +1,6 @@
 from flask import Flask, jsonify
 from flask import request, json, Response
-from github_functions import label_opened_issue, issue_comment_approve_github, github_pull_request_label
+from github_functions import label_opened_issue, issue_comment_approve_github, github_pull_request_label, issue_assign
 from stemming.porter2 import stem
 from nltk.tokenize import word_tokenize
 from auth_credentials import announcement_channel_id, BOT_ACCESS_TOKEN
@@ -19,6 +19,7 @@ def home():
 def github_hook_receiver_function():
     if request.headers['Content-Type'] == 'application/json':
         data = request.json
+        print(json.dumps(data))
         action = data.get('action', None)
         if action!=None:
             if action == 'opened' and data.get('pull_request', '') == '':
@@ -30,8 +31,13 @@ def github_hook_receiver_function():
                 repo_name = data.get('repository', {}).get('name', '')
                 repo_owner = data.get('repository', {}).get('owner', {}).get('login', '')
                 comment_body = data.get('comment', {}).get('body', '')
-                if comment_body.lower() == '@sysbot approve':
+                tokens = comment_body.split(' ')
+                #If comment is for approving issue
+                if comment_body.lower() == '@sys-bot approve':
                     issue_comment_approve_github(issue_number, repo_name, repo_owner)
+                #If comment is to assign issue
+                elif comment_body.lower().startswith('@sys-bot assign') and len(tokens) == 3:
+                    issue_assign(issue_number, repo_name, tokens[2], repo_owner)
             elif action == 'opened' and data.get('pull_request', '') != '':
                 #If a new PR has been sent
                 pr_number = data.get('number', '')
