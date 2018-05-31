@@ -18,5 +18,7 @@ MESSAGE = {
     'correct_approve_format': 'The correct format is /sysbot_approve_issue <repo> <issue_no>',
     'error_slash_command': 'The slash command got a 500 error. Please check and try again.',
     'not_a_maintainer': 'You are not a maintainer. Please contact <@U0BKKUBQU|may> to get added.',
-    'correct_assign_format': 'The correct format is /sysbot_assign_issue <repo_name> <issue_no> <assignee_github_username>'
+    'correct_assign_format': 'The correct format is /sysbot_assign_issue <repo_name> <issue_no> <assignee_github_username>',
+    'not_an_org_member': 'You can\'t be assigned as you are not a member of the org. Join slack for more info',
+    'wrong_format_github': 'Wrong format of command'
 }
