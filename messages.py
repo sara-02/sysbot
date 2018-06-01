@@ -13,10 +13,12 @@ MESSAGE = {
         '\n\nHow to operate Sysbot?'+\
         '\nType /sysbot_help',
     'newcomer_requirement_incomplete': 'Please complete the newcomers requirements! Visit http://systers.io/member-levels for more info.',
-    'wrong_info': 'Wrong info provided',
+    'wrong_info': 'You have either provided wrong info or you are not eligible to be assigned this issue.',
     'success': 'Success',
     'correct_approve_format': 'The correct format is /sysbot_approve_issue <repo> <issue_no>',
     'error_slash_command': 'The slash command got a 500 error. Please check and try again.',
     'not_a_maintainer': 'You are not a maintainer. Please contact <@U0BKKUBQU|may> to get added.',
-    'correct_assign_format': 'The correct format is /sysbot_assign_issue <repo_name> <issue_no> <assignee_github_username>'
+    'correct_assign_format': 'The correct format is /sysbot_assign_issue <repo_name> <issue_no> <assignee_github_username>',
+    'correct_claim_format': 'The correct format is /sysbot_claim <repo_name> <issue_no> <your_github_username>',
+    'not_a_member': 'You are not a member of the org yet. Please use /sysbot_invite to get invited to newcomers team.'
 }

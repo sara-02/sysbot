@@ -1,6 +1,6 @@
 import requests
 from flask import request, json
-from request_urls import add_label_url, send_team_invite, assign_issue_url
+from request_urls import add_label_url, send_team_invite, assign_issue_url, check_assignee_url
 from auth_credentials import USERNAME,PASSWORD, newcomers_team_id
 
 #request headers
@@ -86,4 +86,11 @@ def issue_assign(issue_number, repo_name, assignee, repo_owner):
     #Request to assign the issue
     request_url = assign_issue_url % (repo_owner, repo_name, issue_number)
     response = session.patch(request_url, data=label, headers=headers)
+    return response.status_code
+
+def check_assignee_validity(repo_name, assignee, repo_owner):
+    request_url = check_assignee_url % (repo_owner, repo_name, assignee)
+    session = requests.Session()
+    session.auth = (USERNAME, PASSWORD)
+    response = session.get(request_url)
     return response.status_code
