@@ -5,7 +5,7 @@ from flask import request, json, jsonify
 from auth_credentials import  BOT_ACCESS_TOKEN, maintainer_usergroup_id, legacy_token
 from request_urls import dm_channel_open_url, dm_chat_post_message_url, get_maintainer_list, get_user_profile_info_url
 from messages import MESSAGE
-from github_functions import send_github_invite, issue_comment_approve_github, issue_assign
+from github_functions import send_github_invite, issue_comment_approve_github, issue_assign, check_assignee_validity
 
 headers = {'Content-type': 'application/json', 'Authorization': 'Bearer {}'.format(BOT_ACCESS_TOKEN)}
 headers_legacy_urlencoded = {'Content-type': 'application/x-www-form-urlencoded', 'Authorization': 'Bearer {}'.format(legacy_token)}
@@ -72,17 +72,12 @@ def approve_issue_label_slack(data):
         send_message_to_channels(channel_id, MESSAGE.get('not_a_maintainer',''))
 
 
-def send_message_to_channels(channel_id, message):
-    body = {'username': 'Sysbot', 'as_user': True, 'text': message, 'channel': channel_id}
-    requests.post(dm_chat_post_message_url, data=json.dumps(body), headers=headers)
-
-
 def check_newcomer_requirements(uid):
     body = {'user': uid, 'include_labels': True}
-    r = requests.post(get_user_profile_info_url, data=body, headers=headers_legacy_urlencoded)
-    response = r.json()
-    if response.get('ok', False):
-        profile = response.get('profile', {})
+    get_profile_response = requests.post(get_user_profile_info_url, data=body, headers=headers_legacy_urlencoded)
+    profile_response_json = get_profile_response.json()
+    if profile_response_json.get('ok', False):
+        profile = profile_response_json.get('profile', {})
         custom_fields = profile.get('fields', {})
         github_profile_present = False
         github_id = ""
@@ -125,6 +120,35 @@ def assign_issue_slack(data):
     else:
         #The commentor is not a maintainer
         send_message_to_channels(channel_id, MESSAGE.get('not_a_maintainer',''))
+
+
+def claim_issue_slack(data):
+    params = data.get('text','')
+    tokens = params.split(' ')
+    channel_id = data.get('channel_id','')
+    if params != '' and len(tokens) == 3:
+        #The tokens are issue number, repo name, and claimant's username
+        status = issue_assign(tokens[1], tokens[0], tokens[2], 'systers')
+        #If a 404 error status is raised, check if the assignee can be assigned.
+        if status == 404:
+            #Check assignee status
+            assignee_status = check_assignee_validity(tokens[0], tokens[2], 'systers')
+            if assignee_status == 404:
+                #Can't be assigned as not a member
+                send_message_to_channels(channel_id, MESSAGE.get('not_a_member',''))
+                return
+            else:
+                #Information given is wrong
+                send_message_to_channels(channel_id, MESSAGE.get('wrong_info',''))
+        elif status == 200:
+            #Successful claim
+            send_message_to_channels(channel_id, MESSAGE.get('success',''))
+        elif status == 500:
+            #Some internal error occured
+            send_message_to_channels(channel_id, MESSAGE.get('error_slash_command',''))
+    else:
+        #Wrong format of command was used
+        send_message_to_channels(channel_id, MESSAGE.get('correct_claim_format',''))
 
 
 def send_message_to_channels(channel_id, message):

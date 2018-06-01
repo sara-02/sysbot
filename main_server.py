@@ -4,7 +4,7 @@ from github_functions import label_opened_issue, issue_comment_approve_github, g
 from stemming.porter2 import stem
 from nltk.tokenize import word_tokenize
 from auth_credentials import announcement_channel_id, BOT_ACCESS_TOKEN
-from slack_functions import dm_new_users, check_newcomer_requirements, approve_issue_label_slack, assign_issue_slack
+from slack_functions import dm_new_users, check_newcomer_requirements, approve_issue_label_slack, assign_issue_slack, claim_issue_slack
 from nltk.stem import WordNetLemmatizer
 from messages import MESSAGE
 
@@ -99,6 +99,14 @@ def slack_assign_receiver():
     if request.headers['Content-Type'] == 'application/x-www-form-urlencoded':
         data = request.form
         assign_issue_slack(data)
+        return Response(status=200)
+
+
+@app.route('/claim', methods=['POST'])
+def slack_claim_receiver():
+    if request.headers['Content-Type'] == 'application/x-www-form-urlencoded':
+        claimers_info = request.form
+        claim_issue_slack(claimers_info)
         return Response(status=200)
 
 
