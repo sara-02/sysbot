@@ -1,11 +1,12 @@
 from flask import Flask, jsonify
 from flask import request, json, Response
-from github_functions import label_opened_issue, issue_comment_approve_github, github_pull_request_label, issue_assign
+from github_functions import label_opened_issue, issue_comment_approve_github, github_pull_request_label, issue_assign, github_comment, issue_claim_github
 from stemming.porter2 import stem
 from nltk.tokenize import word_tokenize
 from auth_credentials import announcement_channel_id, BOT_ACCESS_TOKEN
 from slack_functions import dm_new_users, check_newcomer_requirements, approve_issue_label_slack, assign_issue_slack, claim_issue_slack
 from nltk.stem import WordNetLemmatizer
+from messages import MESSAGE
 
 app = Flask(__name__)
 
@@ -19,7 +20,6 @@ def home():
 def github_hook_receiver_function():
     if request.headers['Content-Type'] == 'application/json':
         data = request.json
-        print(json.dumps(data))
         action = data.get('action', None)
         if action!=None:
             if action == 'opened' and data.get('pull_request', '') == '':
@@ -38,6 +38,11 @@ def github_hook_receiver_function():
                 #If comment is to assign issue
                 elif comment_body.lower().startswith('@sys-bot assign') and len(tokens) == 3:
                     issue_assign(issue_number, repo_name, tokens[2], repo_owner)
+                elif comment_body.lower().startswith('@sys-bot claim') and len(tokens) == 2:
+                    assignee = data.get('comment', {}).get('user', {}).get('login', '')
+                    issue_claim_github(assignee, issue_number, repo_name, repo_owner)
+                elif comment_body.lower().startswith('@sys-bot claim') and len(tokens) != 2:
+                    github_comment(MESSAGE.get('wrong_format_github', ''), repo_owner, repo_name, issue_number)
             elif action == 'opened' and data.get('pull_request', '') != '':
                 #If a new PR has been sent
                 pr_number = data.get('number', '')

@@ -1,7 +1,8 @@
 import requests
 from flask import request, json
-from request_urls import add_label_url, send_team_invite, assign_issue_url, check_assignee_url
+from request_urls import add_label_url, send_team_invite, assign_issue_url, check_assignee_url, github_comment_url
 from auth_credentials import USERNAME,PASSWORD, newcomers_team_id
+from messages import MESSAGE
 
 #request headers
 headers = {'Accept': 'application/vnd.github.symmetra-preview+json', 'Content-Type': 'application/x-www-form-urlencoded'}
@@ -88,9 +89,33 @@ def issue_assign(issue_number, repo_name, assignee, repo_owner):
     response = session.patch(request_url, data=label, headers=headers)
     return response.status_code
 
+
 def check_assignee_validity(repo_name, assignee, repo_owner):
-    request_url = check_assignee_url % (repo_owner, repo_name, assignee)
     session = requests.Session()
     session.auth = (USERNAME, PASSWORD)
+    request_url = check_assignee_url % (repo_owner, repo_name, assignee)
     response = session.get(request_url)
     return response.status_code
+
+
+def github_comment(message,repo_owner, repo_name,issue_number):
+    body = '{"body":"%s"}' % message
+    session = requests.Session()
+    session.auth = (USERNAME, PASSWORD)
+    headers = {'Accept': 'application/vnd.github.machine-man-preview',
+               'Content-Type': 'application/x-www-form-urlencoded'}
+    request_url = github_comment_url % (repo_owner, repo_name, issue_number)
+    response = session.post(request_url, data=body, headers=headers)
+    return response.status_code
+
+
+def issue_claim_github(assignee, issue_number, repo_name, repo_owner):
+    status = check_assignee_validity(repo_name, assignee, repo_owner)
+    #Check if the assignee is valid. For more info : https://developer.github.com/v3/issues/assignees/#check-assignee
+    if status == 404:
+        #If member cant be assigned
+        github_comment(MESSAGE.get('not_an_org_member', ''),
+                       repo_owner, repo_name, issue_number)
+    if status == 204:
+        #If member can be assigned an issue.
+        issue_assign(issue_number, repo_name, assignee, repo_owner)
