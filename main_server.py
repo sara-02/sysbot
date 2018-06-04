@@ -1,6 +1,6 @@
 from flask import Flask, jsonify
 from flask import request, json, Response
-from github_functions import label_opened_issue, issue_comment_approve_github, github_pull_request_label, issue_assign, github_comment, issue_claim_github
+from github_functions import label_opened_issue, issue_comment_approve_github, github_pull_request_label, issue_assign, github_comment, issue_claim_github, check_multiple_issue_claim
 from stemming.porter2 import stem
 from nltk.tokenize import word_tokenize
 from auth_credentials import announcement_channel_id, BOT_ACCESS_TOKEN
@@ -32,17 +32,32 @@ def github_hook_receiver_function():
                 repo_owner = data.get('repository', {}).get('owner', {}).get('login', '')
                 comment_body = data.get('comment', {}).get('body', '')
                 tokens = comment_body.split(' ')
+                is_issue_claimed_or_assigned = check_multiple_issue_claim(repo_owner, repo_name, issue_number)
                 #If comment is for approving issue
                 if comment_body.lower() == '@sys-bot approve':
                     issue_comment_approve_github(issue_number, repo_name, repo_owner)
+                    return jsonify(request.json)
+
                 #If comment is to assign issue
-                elif comment_body.lower().startswith('@sys-bot assign') and len(tokens) == 3:
-                    issue_assign(issue_number, repo_name, tokens[2], repo_owner)
-                elif comment_body.lower().startswith('@sys-bot claim') and len(tokens) == 2:
-                    assignee = data.get('comment', {}).get('user', {}).get('login', '')
-                    issue_claim_github(assignee, issue_number, repo_name, repo_owner)
-                elif comment_body.lower().startswith('@sys-bot claim') and len(tokens) != 2:
-                    github_comment(MESSAGE.get('wrong_format_github', ''), repo_owner, repo_name, issue_number)
+                if comment_body.lower().startswith('@sys-bot assign'):
+                    if len(tokens) == 3 and not is_issue_claimed_or_assigned:
+                        issue_assign(issue_number, repo_name, tokens[2], repo_owner)
+                    elif len(tokens) != 3 and not is_issue_claimed_or_assigned:
+                        github_comment(MESSAGE.get('wrong_format_github', ''), repo_owner, repo_name, issue_number)
+                    elif is_issue_claimed_or_assigned:
+                        github_comment(MESSAGE.get('already_claimed', ''), repo_owner, repo_name, issue_number)
+                    return jsonify(request.json)
+
+                #If comment is to claim issue
+                if comment_body.lower().startswith('@sys-bot claim'):
+                    if len(tokens) == 2 and not is_issue_claimed_or_assigned:
+                        assignee = data.get('comment', {}).get('user', {}).get('login', '')
+                        issue_claim_github(assignee, issue_number, repo_name, repo_owner)
+                    elif len(tokens) != 2 and not is_issue_claimed_or_assigned:
+                        github_comment(MESSAGE.get('wrong_format_github', ''), repo_owner, repo_name, issue_number)
+                    elif is_issue_claimed_or_assigned:
+                        github_comment(MESSAGE.get('already_claimed', ''), repo_owner, repo_name, issue_number)
+                    return jsonify(request.json)
             elif action == 'opened' and data.get('pull_request', '') != '':
                 #If a new PR has been sent
                 pr_number = data.get('number', '')

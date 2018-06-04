@@ -2,10 +2,10 @@
 
 import requests
 from flask import request, json, jsonify
-from auth_credentials import  BOT_ACCESS_TOKEN, maintainer_usergroup_id, legacy_token
+from auth_credentials import  BOT_ACCESS_TOKEN, maintainer_usergroup_id, legacy_token, org_repo_owner
 from request_urls import dm_channel_open_url, dm_chat_post_message_url, get_maintainer_list, get_user_profile_info_url
 from messages import MESSAGE
-from github_functions import send_github_invite, issue_comment_approve_github, issue_assign, check_assignee_validity
+from github_functions import send_github_invite, issue_comment_approve_github, issue_assign, check_assignee_validity, check_multiple_issue_claim
 
 headers = {'Content-type': 'application/json', 'Authorization': 'Bearer {}'.format(BOT_ACCESS_TOKEN)}
 headers_legacy_urlencoded = {'Content-type': 'application/x-www-form-urlencoded', 'Authorization': 'Bearer {}'.format(legacy_token)}
@@ -53,7 +53,7 @@ def approve_issue_label_slack(data):
     if result.get('is_maintainer', False):
         params = data.get('text','')
         if params != '' and len(params.split(' ')) == 2:
-            response = issue_comment_approve_github(params.split(' ')[1], params.split(' ')[0], 'systers')
+            response = issue_comment_approve_github(params.split(' ')[1], params.split(' ')[0], org_repo_owner)
             status = response.get('status', 500)
             if status == 404:
                 #Information given is wrong
@@ -104,7 +104,13 @@ def assign_issue_slack(data):
         tokens = params.split(' ')
         if params != '' and len(tokens) == 3:
             #The tokens are issue number, repo name, and assignee username
-            status = issue_assign(tokens[1], tokens[0], tokens[2], 'systers')
+            is_issue_claimed_or_assigned = check_multiple_issue_claim(org_repo_owner, tokens[0], tokens[1])
+            #If issue has been claimed, send message to the channel
+            if is_issue_claimed_or_assigned:
+                send_message_to_channels(channel_id, MESSAGE.get('already_claimed',''))
+                return
+            #If issue is available, then check for assign status
+            status = issue_assign(tokens[1], tokens[0], tokens[2], org_repo_owner)
             if status == 404:
                 #Information given is wrong
                 send_message_to_channels(channel_id, MESSAGE.get('wrong_info',''))
@@ -128,11 +134,17 @@ def claim_issue_slack(data):
     channel_id = data.get('channel_id','')
     if params != '' and len(tokens) == 3:
         #The tokens are issue number, repo name, and claimant's username
-        status = issue_assign(tokens[1], tokens[0], tokens[2], 'systers')
+        is_issue_claimed_or_assigned = check_multiple_issue_claim(org_repo_owner, tokens[0], tokens[1])
+        #If issue has been claimed, send message to the channel
+        if is_issue_claimed_or_assigned:
+            send_message_to_channels(channel_id, MESSAGE.get('already_claimed',''))
+            return
+        #If issue is available, then check for assign status
+        status = issue_assign(tokens[1], tokens[0], tokens[2], org_repo_owner)
         #If a 404 error status is raised, check if the assignee can be assigned.
         if status == 404:
             #Check assignee status
-            assignee_status = check_assignee_validity(tokens[0], tokens[2], 'systers')
+            assignee_status = check_assignee_validity(tokens[0], tokens[2], org_repo_owner)
             if assignee_status == 404:
                 #Can't be assigned as not a member
                 send_message_to_channels(channel_id, MESSAGE.get('not_a_member',''))

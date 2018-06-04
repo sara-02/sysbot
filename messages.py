@@ -20,7 +20,8 @@ MESSAGE = {
     'not_a_maintainer': 'You are not a maintainer. Please contact <@U0BKKUBQU|may> to get added.',
     'correct_assign_format': 'The correct format is /sysbot_assign_issue <repo_name> <issue_no> <assignee_github_username>',
     'not_an_org_member': 'You can\'t be assigned as you are not a member of the org. Join slack for more info.',
-    'wrong_format_github': 'Wrong format of command.'
+    'wrong_format_github': 'Wrong format of command.',
     'correct_claim_format': 'The correct format is /sysbot_claim <repo_name> <issue_no> <your_github_username>',
-    'not_a_member': 'You are not a member of the org yet. Please use /sysbot_invite to get invited to newcomers team.'
+    'not_a_member': 'You are not a member of the org yet. Please use /sysbot_invite to get invited to newcomers team.',
+    'already_claimed': 'This issue has already been assigned or claimed. Please try another issue.'
 }

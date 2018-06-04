@@ -1,6 +1,6 @@
 import requests
 from flask import request, json
-from request_urls import add_label_url, send_team_invite, assign_issue_url, check_assignee_url, github_comment_url
+from request_urls import add_label_url, send_team_invite, assign_issue_url, check_assignee_url, github_comment_url, get_issue_url
 from auth_credentials import USERNAME,PASSWORD, newcomers_team_id
 from messages import MESSAGE
 
@@ -119,3 +119,18 @@ def issue_claim_github(assignee, issue_number, repo_name, repo_owner):
     if status == 204:
         #If member can be assigned an issue.
         issue_assign(issue_number, repo_name, assignee, repo_owner)
+
+
+def check_multiple_issue_claim(repo_owner, repo_name, issue_number):
+    session = requests.Session()
+    session.auth = (USERNAME, PASSWORD)
+    request_url = get_issue_url % (repo_owner, repo_name, issue_number)
+    response = session.get(request_url).json()
+    #Get the list of assignees
+    assignee_list = response.get('assignees', [])
+    if not assignee_list:
+        #If issue hasn't been claimed send False
+        return False
+    else:
+        #If issue has been claimed send True
+        return True
