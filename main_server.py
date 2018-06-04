@@ -32,7 +32,13 @@ def github_hook_receiver_function():
                 repo_owner = data.get('repository', {}).get('owner', {}).get('login', '')
                 comment_body = data.get('comment', {}).get('body', '')
                 tokens = comment_body.split(' ')
+                commenter = data.get('comment', {}).get('user', {}).get('login', '')
                 is_issue_claimed_or_assigned = check_multiple_issue_claim(repo_owner, repo_name, issue_number)
+
+                #Check if the comment by coveralls
+                if commenter == 'coveralls' and 'Coverage decreased' in comment_body:
+                    github_comment(MESSAGE.get('add_tests', ''), repo_owner, repo_name, issue_number)
+
                 #If comment is for approving issue
                 if comment_body.lower() == '@sys-bot approve':
                     issue_comment_approve_github(issue_number, repo_name, repo_owner)
@@ -51,7 +57,7 @@ def github_hook_receiver_function():
                 #If comment is to claim issue
                 if comment_body.lower().startswith('@sys-bot claim'):
                     if len(tokens) == 2 and not is_issue_claimed_or_assigned:
-                        assignee = data.get('comment', {}).get('user', {}).get('login', '')
+                        assignee = commenter
                         issue_claim_github(assignee, issue_number, repo_name, repo_owner)
                     elif len(tokens) != 2 and not is_issue_claimed_or_assigned:
                         github_comment(MESSAGE.get('wrong_format_github', ''), repo_owner, repo_name, issue_number)

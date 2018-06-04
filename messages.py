@@ -23,5 +23,6 @@ MESSAGE = {
     'wrong_format_github': 'Wrong format of command.',
     'correct_claim_format': 'The correct format is /sysbot_claim <repo_name> <issue_no> <your_github_username>',
     'not_a_member': 'You are not a member of the org yet. Please use /sysbot_invite to get invited to newcomers team.',
-    'already_claimed': 'This issue has already been assigned or claimed. Please try another issue.'
+    'already_claimed': 'This issue has already been assigned or claimed. Please try another issue.',
+    'add_tests': 'Please add tests as the coverage has decreased.'
 }
