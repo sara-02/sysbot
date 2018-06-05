@@ -72,7 +72,7 @@ def approve_issue_label_slack(data):
         send_message_to_channels(channel_id, MESSAGE.get('not_a_maintainer',''))
 
 
-def check_newcomer_requirements(uid):
+def check_newcomer_requirements(uid, channel_id):
     body = {'user': uid, 'include_labels': True}
     get_profile_response = requests.post(get_user_profile_info_url, data=body, headers=headers_legacy_urlencoded)
     profile_response_json = get_profile_response.json()
@@ -83,17 +83,15 @@ def check_newcomer_requirements(uid):
         github_id = ""
         for key in custom_fields:
             github_link = custom_fields.get(key, {}).get('value', '')
-            if github_link.startswith('https://www.github.com/'):
+            if 'github.com/' in github_link:
                 github_profile_present = True
-                github_id = github_link.split('https://www.github.com/')[1]
+                github_id = github_link.split('github.com/')[1]
                 break
         if github_profile_present and profile.get('first_name', "") != "" and profile.get('last_name',"")!="" and profile.get('title',"")!="" and profile.get('image_original',"")!="" and not profile.get('phone',"").isdigit():
             send_github_invite(github_id)
+            send_message_to_channels(channel_id, MESSAGE.get('invite_sent',''))
         else:
-            data = {"text": MESSAGE.get('newcomer_requirement_incomplete','')}
-            headers = {'Content-type': 'application/json'}
-
-            requests.post(dm_chat_post_message_url, data=json.dumps(data), headers=headers)
+            send_message_to_channels(channel_id, MESSAGE.get('newcomer_requirement_incomplete',''))
 
 
 def assign_issue_slack(data):

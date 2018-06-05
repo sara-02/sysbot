@@ -102,8 +102,9 @@ def invite():
     if request.headers['Content-Type'] == 'application/x-www-form-urlencoded':
         slash_user_info = request.form
         uid = slash_user_info.get('user_id','')
+        channel_id = slash_user_info.get('channel_id', '')
         if uid != "":
-            check_newcomer_requirements(uid)
+            check_newcomer_requirements(uid, channel_id)
     return Response(status=200)
 
 

@@ -2,14 +2,14 @@
 
 MESSAGE = {
     'first_timer_message': 'Hello!\nWelcome to the Systers Open Source community!\nHow to get started:'+\
-        '\n• Join #intro and introduce yourself! :slightly_smiling_face:\n• Join the #code-of-conduct and read the community rules.'+\
+        '\n• Join <#C0CAF47RQ|intro> and introduce yourself! :slightly_smiling_face:\n• Join the <#C52CRK4HJ|code-of-conduct> and read the community rules.'+\
         '\n         - Update your profile in accordance with the community rules.'+\
         '\n• Find and join the other channels relevant to you (i.e. different projects).'+\
-        '\nIf you have any #questions, post them in the #questions channel! :slightly_smiling_face:\nTag @may if no one answers immediately.'+\
-        '\nTo get more information or ask questions about the larger community, post in #systers.'+\
-        '\nTo track GitHub activity of ALL Systers\' repos, join the #github-activity channel.'+\
-        '\nTo keep up with the Systers-Dev email list, join #mailing-list.'+\
-        '\nTo give any thanks or recognition to other members, shoutout in the #celebrate channel.'
+        '\nIf you have any questions, post them in the <#C0S15BFNX|questions> channel! :slightly_smiling_face:\nTag <@U0BKKUBQU|may> if no one answers immediately.'+\
+        '\nTo get more information or ask questions about the larger community, post in <#C4KLZ90SV|systers>.'+\
+        '\nTo track GitHub activity of all Systers\' repos, join the <#C6TBYMBPH|github-activity> channel.'+\
+        '\nTo keep up with the Systers-Dev email list, join <#C4TRT3UEQ|mailing-list>.'+\
+        '\nTo give any thanks or recognition to other members, shoutout in the <#C571VAZQR|celebrate> channel.'
         '\n\nHow to operate Sysbot?'+\
         '\nType /sysbot_help',
     'newcomer_requirement_incomplete': 'Please complete the newcomers requirements! Visit http://systers.io/member-levels for more info.',
@@ -24,5 +24,6 @@ MESSAGE = {
     'correct_claim_format': 'The correct format is /sysbot_claim <repo_name> <issue_no> <your_github_username>',
     'not_a_member': 'You are not a member of the org yet. Please use /sysbot_invite to get invited to newcomers team.',
     'already_claimed': 'This issue has already been assigned or claimed. Please try another issue.',
-    'add_tests': 'Please add tests as the coverage has decreased.'
+    'add_tests': 'Please add tests as the coverage has decreased.',
+    'invite_sent': 'Invitation has been sent.'
 }
