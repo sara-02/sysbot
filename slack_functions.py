@@ -3,9 +3,9 @@
 import requests
 from flask import request, json, jsonify
 from auth_credentials import  BOT_ACCESS_TOKEN, maintainer_usergroup_id, legacy_token, org_repo_owner
-from request_urls import dm_channel_open_url, dm_chat_post_message_url, get_maintainer_list, get_user_profile_info_url
+from request_urls import (dm_channel_open_url, dm_chat_post_message_url, get_maintainer_list, get_user_profile_info_url)
 from messages import MESSAGE
-from github_functions import send_github_invite, issue_comment_approve_github, issue_assign, check_assignee_validity, check_multiple_issue_claim
+from github_functions import (send_github_invite, issue_comment_approve_github, issue_assign, check_assignee_validity, check_multiple_issue_claim, open_issue_github)
 
 headers = {'Content-type': 'application/json', 'Authorization': 'Bearer {}'.format(BOT_ACCESS_TOKEN)}
 headers_legacy_urlencoded = {'Content-type': 'application/x-www-form-urlencoded', 'Authorization': 'Bearer {}'.format(legacy_token)}
@@ -164,3 +164,24 @@ def claim_issue_slack(data):
 def send_message_to_channels(channel_id, message):
     body = {'username': 'Sysbot', 'as_user': True, 'text': message, 'channel': channel_id}
     requests.post(dm_chat_post_message_url, data=json.dumps(body), headers=headers)
+
+
+def open_issue_slack(data):
+    channel_id = data.get('channel_id', '')
+    #Get the command parameters used by the user
+    command_params = data.get('text','')
+    #For getting author name and repo name
+    tokens = command_params.split(' ')
+    #For extracting title and body
+    title_body_tokens = command_params.split('*')
+    if command_params=="" or len(tokens) < 4 or len(title_body_tokens) <3 or title_body_tokens[1]=='' or title_body_tokens[2]=='':
+        send_message_to_channels(channel_id, MESSAGE.get('wrong_params_issue_command',''))
+        return
+    issue_title = title_body_tokens[1]
+    issue_body = title_body_tokens[2]
+    status = open_issue_github(org_repo_owner, tokens[0], issue_title, issue_body, tokens[1])
+    if status == 201:
+        #If issue has been opened successfully
+        send_message_to_channels(channel_id, MESSAGE.get('success_issue', ''))
+    else:
+        send_message_to_channels(channel_id, MESSAGE.get('error_issue', ''))

@@ -1,6 +1,6 @@
 import requests
 from flask import request, json
-from request_urls import add_label_url, send_team_invite, assign_issue_url, check_assignee_url, github_comment_url, get_issue_url
+from request_urls import (add_label_url, send_team_invite, assign_issue_url, check_assignee_url, github_comment_url, get_issue_url, open_issue_url)
 from auth_credentials import USERNAME,PASSWORD, newcomers_team_id
 from messages import MESSAGE
 
@@ -134,3 +134,14 @@ def check_multiple_issue_claim(repo_owner, repo_name, issue_number):
     else:
         #If issue has been claimed send True
         return True
+
+
+def open_issue_github(repo_owner, repo_name, issue_title, issue_body, author):
+    session = requests.Session()
+    session.auth = (USERNAME, PASSWORD)
+    request_url = open_issue_url % (repo_owner, repo_name)
+    headers = {'Accept': 'application/vnd.github.symmetra-preview+json', 'Content-Type': 'application/json'}
+    #Raw issue body.
+    issue_request_body = '{"title": "%s", "body": "%s.<br>Authored by %s via Slack", "assignees": [], "labels": []}' % (issue_title, issue_body, author)
+    response = session.post(request_url, data=issue_request_body, headers=headers)
+    return response.status_code
