@@ -25,5 +25,8 @@ MESSAGE = {
     'not_a_member': 'You are not a member of the org yet. Please use /sysbot_invite to get invited to newcomers team.',
     'already_claimed': 'This issue has already been assigned or claimed. Please try another issue.',
     'add_tests': 'Please add tests as the coverage has decreased.',
-    'invite_sent': 'Invitation has been sent.'
+    'invite_sent': 'Invitation has been sent.',
+    'wrong_params_issue_command': 'Insufficient or wrong parameters for issue command.',
+    'success_issue': 'Successfully opened issue.',
+    'error_issue': 'Some error occurred while opening issue. Please try again.'
 }
