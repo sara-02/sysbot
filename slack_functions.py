@@ -5,7 +5,7 @@ from flask import request, json, jsonify
 from auth_credentials import  BOT_ACCESS_TOKEN, maintainer_usergroup_id, legacy_token, org_repo_owner
 from request_urls import (dm_channel_open_url, dm_chat_post_message_url, get_maintainer_list, get_user_profile_info_url, chat_post_ephimeral_message_url)
 from messages import MESSAGE
-from github_functions import (send_github_invite, issue_comment_approve_github, issue_assign, check_assignee_validity, check_multiple_issue_claim, open_issue_github)
+from github_functions import (send_github_invite, issue_comment_approve_github, issue_assign, check_assignee_validity, check_multiple_issue_claim, open_issue_github, get_issue_author)
 
 headers = {'Content-type': 'application/json', 'Authorization': 'Bearer {}'.format(BOT_ACCESS_TOKEN)}
 headers_legacy_urlencoded = {'Content-type': 'application/x-www-form-urlencoded', 'Authorization': 'Bearer {}'.format(legacy_token)}
@@ -51,48 +51,58 @@ def approve_issue_label_slack(data):
     result = is_maintainer_comment(data.get('user_id', ''))
     channel_id = data.get('channel_id','')
     uid = data.get('user_id','')
-    if result.get('is_maintainer', False):
-        params = data.get('text','')
-        if params != '' and len(params.split(' ')) == 2:
-            response = issue_comment_approve_github(params.split(' ')[1], params.split(' ')[0], org_repo_owner)
-            status = response.get('status', 500)
-            if status == 404:
-                #Information given is wrong
-                send_message_ephimeral(channel_id, uid, MESSAGE.get('wrong_info',''))
-            elif status == 200:
-                #Successful labeling
-                send_message_ephimeral(channel_id, uid, MESSAGE.get('success',''))
-            elif status == 500:
-                #Some internal error occured
-                send_message_ephimeral(channel_id, uid, MESSAGE.get('error_slash_command',''))
+    response = get_detailed_profile(uid)
+    if response.get('ok', False):
+        profile = response.get('profile', '')
+        get_github_username = get_github_username_profile(profile)
+        github_profile_present = get_github_username.get('github_profile_present', False)
+        if not github_profile_present:
+            send_message_ephimeral(channel_id, uid, MESSAGE.get('newcomer_requirement_incomplete',''))
+            return
         else:
-            #Wrong format of command was used
-            send_message_ephimeral(channel_id, uid, MESSAGE.get('correct_approve_format',''))
+            github_id = get_github_username.get('github_id', '')
+            if result.get('is_maintainer', False):
+                params = data.get('text','')
+                if params != '' and len(params.split(' ')) == 2:
+                    issue_author = get_issue_author(org_repo_owner, params.split(' ')[0], params.split(' ')[1])
+                    if issue_author == github_id:
+                        send_message_ephimeral(channel_id, uid, MESSAGE.get('author_cannot_approve',''))
+                        return
+                    response = issue_comment_approve_github(params.split(' ')[1], params.split(' ')[0], org_repo_owner, github_id, True)
+                    status = response.get('status', 500)
+                    if status == 404:
+                        #Information given is wrong
+                        send_message_ephimeral(channel_id, uid, MESSAGE.get('wrong_info',''))
+                    elif status == 200:
+                        #Successful labeling
+                        send_message_ephimeral(channel_id, uid, MESSAGE.get('success',''))
+                    elif status == 500:
+                        #Some internal error occured
+                        send_message_ephimeral(channel_id, uid, MESSAGE.get('error_slash_command',''))
+                else:
+                    #Wrong format of command was used
+                    send_message_ephimeral(channel_id, uid, MESSAGE.get('correct_approve_format',''))
+            else:
+                #The commentor is not a maintainer
+                send_message_ephimeral(channel_id, uid, MESSAGE.get('not_a_maintainer',''))
     else:
-        #The commentor is not a maintainer
-        send_message_ephimeral(channel_id, uid, MESSAGE.get('not_a_maintainer',''))
+        send_message_ephimeral(channel_id, uid, MESSAGE.get('error_slash_command',''))
 
 
 def check_newcomer_requirements(uid, channel_id):
-    body = {'user': uid, 'include_labels': True}
-    get_profile_response = requests.post(get_user_profile_info_url, data=body, headers=headers_legacy_urlencoded)
-    profile_response_json = get_profile_response.json()
-    if profile_response_json.get('ok', False):
-        profile = profile_response_json.get('profile', {})
-        custom_fields = profile.get('fields', {})
-        github_profile_present = False
-        github_id = ""
-        for key in custom_fields:
-            github_link = custom_fields.get(key, {}).get('value', '')
-            if 'github.com/' in github_link:
-                github_profile_present = True
-                github_id = github_link.split('github.com/')[1]
-                break
-        if github_profile_present and profile.get('first_name', "") != "" and profile.get('last_name',"")!="" and profile.get('title',"")!="" and profile.get('image_original',"")!="" and not profile.get('phone',"").isdigit():
+    response = get_detailed_profile(uid)
+    if response.get('ok', False):
+        profile = response.get('profile', '')
+        get_github_username = get_github_username_profile(profile)
+        github_profile_present = get_github_username.get('github_profile_present', False)
+        if github_profile_present and profile.get('first_name', "") != "" and profile.get('last_name', "") != "" and profile.get('title', "") != "" and profile.get('image_original', "") != "" and not profile.get('phone', "").isdigit():
+            github_id = get_github_username.get('github_id', '')
             send_github_invite(github_id)
             send_message_ephimeral(channel_id, uid, MESSAGE.get('invite_sent',''))
         else:
             send_message_ephimeral(channel_id, uid, MESSAGE.get('newcomer_requirement_incomplete',''))
+    else:
+        send_message_ephimeral(channel_id, uid, MESSAGE.get('error_slash_command',''))
 
 
 def assign_issue_slack(data):
@@ -194,3 +204,22 @@ def open_issue_slack(data):
         send_message_to_channels(channel_id, MESSAGE.get('success_issue', ''))
     else:
         send_message_to_channels(channel_id, MESSAGE.get('error_issue', ''))
+
+def get_detailed_profile(uid):
+    body = {'user': uid, 'include_labels': True}
+    profile_response_json = requests.post(get_user_profile_info_url, data=body, headers=headers_legacy_urlencoded).json()
+    if profile_response_json.get('ok', False):
+        profile = profile_response_json.get('profile', {})
+        return {'profile': profile, 'ok': True}
+    return {'ok': False}
+
+
+def get_github_username_profile(profile):
+        custom_fields = profile.get('fields', {})
+        github_id = ""
+        for key in custom_fields:
+            github_link = custom_fields.get(key, {}).get('value', '')
+            if 'github.com/' in github_link:
+                github_id = github_link.split('github.com/')[1]
+                return {'github_profile_present': True, 'github_id': github_id}
+        return {'github_profile_present': False}

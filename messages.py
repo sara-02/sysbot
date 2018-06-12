@@ -28,5 +28,6 @@ MESSAGE = {
     'invite_sent': 'Invitation has been sent.',
     'wrong_params_issue_command': 'Insufficient or wrong parameters for issue command.',
     'success_issue': 'Successfully opened issue.',
-    'error_issue': 'Some error occurred while opening issue. Please try again.'
+    'error_issue': 'Some error occurred while opening issue. Please try again.',
+    'author_cannot_approve': 'The author of the issue cannot approve the issue.'
 }

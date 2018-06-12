@@ -41,7 +41,7 @@ def github_hook_receiver_function():
 
                 #If comment is for approving issue
                 if comment_body.lower() == '@sys-bot approve':
-                    issue_comment_approve_github(issue_number, repo_name, repo_owner)
+                    issue_comment_approve_github(issue_number, repo_name, repo_owner, commenter, False)
                     return jsonify(request.json)
 
                 #If comment is to assign issue

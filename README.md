@@ -39,7 +39,7 @@ Functionalities
 1. Each newly opened issue is labelled to be Not Approved by the bot.
 2. Any member of the organization can claim issues by using leaving a comment of '@sys-bot claim' on the issue.
 3. Similarly, maintainers and collaborators can assign an issue to a member by the comment '@sys-bot assign <assignee_github_username>'
-4. Any issue can be approved by maintainers and collaborators via a comment '@sys-bot approve' or via normal comments which have variants of the word approval and issue(E.g - I am approving this issue, Approve this issue, etc).
+4. Any issue can be approved by maintainers and collaborators via a comment '@sys-bot approve' or via normal comments which have variants of the word approval and issue(E.g - I am approving this issue, Approve this issue, etc). Also, a check has been kept so that the author of an issue cannot approve it.
 5. A check has been kept for multiple claims( same issue can't be claimed by or assigned to multiple members) on the same issue and also any unapproved issue cannot be claimed or assigned.
 6. Any new PR that's opened get's labelled as 'Under Review'.  
 
@@ -68,6 +68,8 @@ Function Descriptions
 6. `claim_issue_slack():` Handles claiming of issues from Slack. Extracts info from the event data and send the required data to github function for claiming.
 7. `send_message_to_channels():` Sends a message to a channel(public, private or DM channel).
 8. `send_message_ephimeral():` Sends message to channels, but is only visible to the person who caused the message from the bot.
+9. `get_detailed_profile():` Gets the detailed profile of a user( this includes custom fields like date of birth, and Github profile).
+10. `get_github_username_profile():` Extracts the github username from github field value.
 
 ####Github Functions:
 1. `label_opened_issue():` Handles the labelling(not approved) of new issues.
@@ -79,6 +81,7 @@ Function Descriptions
 7. `github_comment():` Add comments on github with the author as sys-bot
 8. `issue_claim_github():` Assigns a user to an issue,i.e., handles both assign and claim commands.
 9. `check_multiple_issue_claim():` Check if same issue is being claimed multiple times.
+10. `get_issue_author():` Gets the author of an issue.
 
 Installation
 ----------

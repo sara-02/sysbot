@@ -48,7 +48,12 @@ def send_github_invite(github_id):
     return {'message':'Data provided is wrong', 'status': 400}
 
 
-def issue_comment_approve_github(issue_number, repo_name, repo_owner):
+def issue_comment_approve_github(issue_number, repo_name, repo_owner, comment_author, is_from_slack):
+    if not is_from_slack:
+        issue_author = get_issue_author(repo_owner, repo_name, issue_number)
+        if issue_author == comment_author:
+            github_comment(MESSAGE.get('author_cannot_approve',''), repo_owner, repo_name, issue_number)
+            return
     session = requests.Session()
     session.auth = (USERNAME, PASSWORD)
     #Name of label to be removed
@@ -145,3 +150,11 @@ def open_issue_github(repo_owner, repo_name, issue_title, issue_body, author):
     issue_request_body = '{"title": "%s", "body": "%s.<br>Authored by %s via Slack", "assignees": [], "labels": []}' % (issue_title, issue_body, author)
     response = session.post(request_url, data=issue_request_body, headers=headers)
     return response.status_code
+
+
+def get_issue_author(repo_owner, repo_name, issue_number):
+    session = requests.Session()
+    session.auth = (USERNAME, PASSWORD)
+    request_url = get_issue_url % (repo_owner, repo_name, issue_number)
+    response = session.get(request_url).json()
+    return response.get('user', {}).get('login', '')
