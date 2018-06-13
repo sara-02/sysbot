@@ -1,6 +1,6 @@
 import requests
 from flask import request, json
-from request_urls import (add_label_url, send_team_invite, assign_issue_url, check_assignee_url, github_comment_url, get_issue_url, open_issue_url)
+from request_urls import (add_label_url, send_team_invite, assign_issue_url, check_assignee_url, github_comment_url, get_issue_url, open_issue_url, remove_assignee_url)
 from auth_credentials import USERNAME,PASSWORD, newcomers_team_id
 from messages import MESSAGE
 
@@ -88,10 +88,10 @@ def issue_assign(issue_number, repo_name, assignee, repo_owner):
     session = requests.Session()
     session.auth = (USERNAME, PASSWORD)
     headers = {'Accept': 'application/vnd.github.symmetra-preview+json', 'Content-Type': 'application/json'}
-    label = '{"assignees": ["%s"]}' % assignee
+    data = '{"assignees": ["%s"]}' % assignee
     #Request to assign the issue
     request_url = assign_issue_url % (repo_owner, repo_name, issue_number)
-    response = session.patch(request_url, data=label, headers=headers)
+    response = session.patch(request_url, data=data, headers=headers)
     return response.status_code
 
 
@@ -158,3 +158,13 @@ def get_issue_author(repo_owner, repo_name, issue_number):
     request_url = get_issue_url % (repo_owner, repo_name, issue_number)
     response = session.get(request_url).json()
     return response.get('user', {}).get('login', '')
+
+
+def unassign_issue(repo_owner, repo_name, issue_number, assignee):
+    session = requests.Session()
+    session.auth = (USERNAME, PASSWORD)
+    request_url = remove_assignee_url % (repo_owner, repo_name, issue_number)
+    headers = {'Accept': 'application/vnd.github.symmetra-preview+json', 'Content-Type': 'application/json'}
+    data = '{"assignees": ["%s"]}' % assignee
+    response = session.delete(request_url, data=data, headers=headers)
+    return response.status_code
