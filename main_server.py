@@ -4,7 +4,7 @@ from github_functions import label_opened_issue, issue_comment_approve_github, g
 from stemming.porter2 import stem
 from nltk.tokenize import word_tokenize
 from auth_credentials import announcement_channel_id, BOT_ACCESS_TOKEN
-from slack_functions import dm_new_users, check_newcomer_requirements, approve_issue_label_slack, assign_issue_slack, claim_issue_slack, open_issue_slack
+from slack_functions import dm_new_users, check_newcomer_requirements, approve_issue_label_slack, assign_issue_slack, claim_issue_slack, open_issue_slack, send_message_ephimeral
 from nltk.stem import WordNetLemmatizer
 from messages import MESSAGE
 
@@ -137,6 +137,14 @@ def open_issue_receiver():
     if request.headers['Content-Type'] == 'application/x-www-form-urlencoded':
         openers_info = request.form
         open_issue_slack(openers_info)
+        return Response(status=200)
+
+
+@app.route('/help', methods=['POST'])
+def help_command():
+    if request.headers['Content-Type'] == 'application/x-www-form-urlencoded':
+        user_info = request.form
+        send_message_ephimeral(user_info.get('channel_id', ''), user_info.get('user_id', ''), MESSAGE.get('help_message', ''))
         return Response(status=200)
 
 

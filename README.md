@@ -54,7 +54,8 @@ However this command can only be used by members of @maintainers team on Slack. 
 5. A slash command /sysbot_claim <repo_name> <issue_number> <assignee_github_username> or /sysbot_claim <repo_name> <issue_number> ( the latter option will work if your github URL is provided on Slack) can be used to claim any issue from Github directly via Slack.
 E.g. of usage - /sysbot_claim sysbot 23.
 [NOTE: To claim or assign an issue, it must first be approved]
-6. A slash command /sysbot_open_issue <repo_name> <author_username> *Title of issue(in between star symbols)* Issue Body  
+6. A slash command /sysbot_open_issue <repo_name> <author_username> *Title of issue(in between star symbols)* Issue Body
+7. A slash command /sysbot_help provides a list of all the commands and functionalities of the bot.  
 
 Function Descriptions
 ---------
