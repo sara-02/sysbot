@@ -5,7 +5,7 @@ from flask import request, json, jsonify
 from auth_credentials import  BOT_ACCESS_TOKEN, maintainer_usergroup_id, legacy_token, org_repo_owner
 from request_urls import (dm_channel_open_url, dm_chat_post_message_url, get_maintainer_list, get_user_profile_info_url, chat_post_ephimeral_message_url)
 from messages import MESSAGE
-from github_functions import (send_github_invite, issue_comment_approve_github, issue_assign, check_assignee_validity, check_multiple_issue_claim, open_issue_github, get_issue_author)
+from github_functions import (send_github_invite, issue_comment_approve_github, issue_assign, check_assignee_validity, check_multiple_issue_claim, open_issue_github, get_issue_author, check_approved_tag)
 
 headers = {'Content-type': 'application/json', 'Authorization': 'Bearer {}'.format(BOT_ACCESS_TOKEN)}
 headers_legacy_urlencoded = {'Content-type': 'application/x-www-form-urlencoded', 'Authorization': 'Bearer {}'.format(legacy_token)}
@@ -115,9 +115,15 @@ def assign_issue_slack(data):
         if params != '' and len(tokens) == 3:
             #The tokens are issue number, repo name, and assignee username
             is_issue_claimed_or_assigned = check_multiple_issue_claim(org_repo_owner, tokens[0], tokens[1])
+            #Check if issue is approved
+            is_issue_approved = check_approved_tag(org_repo_owner, tokens[0], tokens[1])
             #If issue has been claimed, send message to the channel
             if is_issue_claimed_or_assigned:
                 send_message_ephimeral(channel_id, uid, MESSAGE.get('already_claimed',''))
+                return
+            #If issue has not been approved, send message to the channel
+            if not is_issue_approved:
+                send_message_ephimeral(channel_id, uid, MESSAGE.get('not_approved',''))
                 return
             #If issue is available, then check for assign status
             status = issue_assign(tokens[1], tokens[0], tokens[2], org_repo_owner)
@@ -146,9 +152,15 @@ def claim_issue_slack(data):
     if params != '' and (len(tokens) == 3 or len(tokens) == 2):
         #The tokens are issue number, repo name, and claimant's username
         is_issue_claimed_or_assigned = check_multiple_issue_claim(org_repo_owner, tokens[0], tokens[1])
+        #Check if issue is approved
+        is_issue_approved = check_approved_tag(org_repo_owner, tokens[0], tokens[1])
         #If issue has been claimed, send message to the channel
         if is_issue_claimed_or_assigned:
             send_message_ephimeral(channel_id, uid, MESSAGE.get('already_claimed',''))
+            return
+        #If issue has not been approved, send message to the channel
+        if not is_issue_approved:
+            send_message_ephimeral(channel_id, uid, MESSAGE.get('not_approved',''))
             return
         github_username = ''
         #If the format /sysbot_claim <repo_name> <issue_number> is used
