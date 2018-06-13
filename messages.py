@@ -29,5 +29,6 @@ MESSAGE = {
     'wrong_params_issue_command': 'Insufficient or wrong parameters for issue command.',
     'success_issue': 'Successfully opened issue.',
     'error_issue': 'Some error occurred while opening issue. Please try again.',
-    'author_cannot_approve': 'The author of the issue cannot approve the issue.'
+    'author_cannot_approve': 'The author of the issue cannot approve the issue.',
+    'error_claim_alternate': 'To use this format of the command, please complete your Slack profile with your Github account link.'
 }

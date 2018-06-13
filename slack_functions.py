@@ -143,19 +143,37 @@ def claim_issue_slack(data):
     tokens = params.split(' ')
     channel_id = data.get('channel_id','')
     uid = data.get('user_id','')
-    if params != '' and len(tokens) == 3:
+    if params != '' and (len(tokens) == 3 or len(tokens) == 2):
         #The tokens are issue number, repo name, and claimant's username
         is_issue_claimed_or_assigned = check_multiple_issue_claim(org_repo_owner, tokens[0], tokens[1])
         #If issue has been claimed, send message to the channel
         if is_issue_claimed_or_assigned:
             send_message_ephimeral(channel_id, uid, MESSAGE.get('already_claimed',''))
             return
+        github_username = ''
+        #If the format /sysbot_claim <repo_name> <issue_number> is used
+        if len(tokens) == 2:
+            response = get_detailed_profile(uid)
+            if response.get('ok', False):
+                response = get_github_username_profile(response.get('profile', {}))
+                if response.get('github_profile_present', False):
+                    #Find if the username is present in Slack profile
+                    github_username = response.get('github_id', '')
+                else:
+                    send_message_ephimeral(channel_id, uid, MESSAGE.get('error_claim_alternate', ''))
+                    return
+            else:
+                send_message_ephimeral(channel_id, uid, MESSAGE.get('error_slash_command', ''))
+                return
+        else:
+            github_username = tokens[2]
+
         #If issue is available, then check for assign status
-        status = issue_assign(tokens[1], tokens[0], tokens[2], org_repo_owner)
+        status = issue_assign(tokens[1], tokens[0], github_username, org_repo_owner)
         #If a 404 error status is raised, check if the assignee can be assigned.
         if status == 404:
             #Check assignee status
-            assignee_status = check_assignee_validity(tokens[0], tokens[2], org_repo_owner)
+            assignee_status = check_assignee_validity(tokens[0], github_username, org_repo_owner)
             if assignee_status == 404:
                 #Can't be assigned as not a member
                 send_message_ephimeral(channel_id, uid, MESSAGE.get('not_a_member',''))
