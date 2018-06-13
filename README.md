@@ -51,7 +51,7 @@ newcomer member level is completed as mentioned [here](http://systers.io/member-
 However this command can only be used by members of @maintainers team on Slack. E.g. of usage - /sysbot_approve_issue sysbot 23 .
 4. A slash command /sysbot_assign_issue <repo_name> <issue_number> <assignee_github_username> can be used to assign any issue from Github directly via Slack.
 However this command can only be used by members of @maintainers team on Slack. E.g. of usage - /sysbot_assign_issue sysbot 23 sammy1997.
-5. A slash command /sysbot_claim <repo_name> <issue_number> <assignee_github_username> can be used to claim any issue from Github directly via Slack.
+5. A slash command /sysbot_claim <repo_name> <issue_number> <assignee_github_username> or /sysbot_claim <repo_name> <issue_number> ( the latter option will work if your github URL is provided on Slack) can be used to claim any issue from Github directly via Slack.
 E.g. of usage - /sysbot_claim sysbot 23.
 [NOTE: To claim or assign an issue, it must first be approved]
 6. A slash command /sysbot_open_issue <repo_name> <author_username> *Title of issue(in between star symbols)* Issue Body  
