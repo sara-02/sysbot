@@ -30,5 +30,22 @@ MESSAGE = {
     'success_issue': 'Successfully opened issue.',
     'error_issue': 'Some error occurred while opening issue. Please try again.',
     'author_cannot_approve': 'The author of the issue cannot approve the issue.',
-    'error_claim_alternate': 'To use this format of the command, please complete your Slack profile with your Github account link.'
+    'error_claim_alternate': 'To use this format of the command, please complete your Slack profile with your Github account link.',
+    'help_message': 'Following are the functionalities of the Sysbot:-\n'+\
+        '*On Github*:\n'+\
+        '1. Each newly opened issue is labelled to be *Not Approved*.\n'+\
+        '2. If you are a member of the org on Github, you can claim an issue by commenting *@sys-bot claim* on the issue.\n'+\
+        '3. This is for maintainers/mentors/owners: You can assign an issue to a member of the Github org using command *@sys-bot assign <assignee_github_username> *.\n'+\
+        '4. Any issue can be approved by maintainers and collaborators via a comment *@sys-bot approve* or via normal comments which have variants of the word approval'+\
+        ' and issue(E.g - I am approving this issue, Approve this issue, etc). Also, a check has been kept so that the author of an issue cannot approve it.\n'+\
+        '5. Any newly opened PRs will be labelled *Under Review*.\n\n'+\
+        '*On Slack*:\n'+\
+        '1. A slash command */sysbot_invite* can be used to get invited to the newcomers team and hence become a member of the org on Github.'+\
+        ' However it checks if the newcomer member level is completed as mentioned here(http://systers.io/member-levels).\n'+\
+        '2. A slash command */sysbot_approve_issue <repo_name> <issue_number>* can be used to approve an issue on Github directly from Slack.'+\
+        'However this command can only be used by members of *@maintainers* team on Slack.\n'+\
+        '3. A slash command */sysbot_assign_issue <repo_name> <issue_number> <assignee_github_username>* can be used to assign any issue from Github directly via Slack.'+\
+        'However this command can only be used by members of *@maintainers* team on Slack.\n'+\
+        '4. A slash command */sysbot_claim <repo_name> <issue_number> <assignee_github_username>* or */sysbot_claim <repo_name> <issue_number>* '+\
+        ' ( the latter option will work if your github URL is provided on Slack) can be used to claim any issue from Github directly via Slack.\n'
 }
