@@ -1,6 +1,6 @@
 from flask import Flask, jsonify
 from flask import request, json, Response
-from github_functions import label_opened_issue, issue_comment_approve_github, github_pull_request_label, issue_assign, github_comment, issue_claim_github, check_multiple_issue_claim, unassign_issue
+from github_functions import label_opened_issue, issue_comment_approve_github, github_pull_request_label, issue_assign, github_comment, issue_claim_github, check_multiple_issue_claim, check_approved_tag, unassign_issue
 from stemming.porter2 import stem
 from nltk.tokenize import word_tokenize
 from auth_credentials import announcement_channel_id, BOT_ACCESS_TOKEN
@@ -33,6 +33,7 @@ def github_hook_receiver_function():
                 comment_body = data.get('comment', {}).get('body', '')
                 tokens = comment_body.split(' ')
                 commenter = data.get('comment', {}).get('user', {}).get('login', '')
+                author_association = data.get('comment', {}).get('author_association', '')
                 is_issue_claimed_or_assigned = check_multiple_issue_claim(repo_owner, repo_name, issue_number)
 
                 #Check if the comment by coveralls
@@ -46,21 +47,31 @@ def github_hook_receiver_function():
 
                 #If comment is to assign issue
                 if comment_body.lower().startswith('@sys-bot assign'):
-                    if len(tokens) == 3 and not is_issue_claimed_or_assigned:
+                    is_approved = check_approved_tag(repo_owner, repo_name, issue_number)
+                    if len(tokens) == 3 and not is_issue_claimed_or_assigned and (author_association == 'COLLABORATOR' or author_association == 'OWNER') and is_approved:
                         issue_assign(issue_number, repo_name, tokens[2], repo_owner)
                     elif len(tokens) != 3 and not is_issue_claimed_or_assigned:
                         github_comment(MESSAGE.get('wrong_format_github', ''), repo_owner, repo_name, issue_number)
+                    elif not is_approved:
+                        github_comment(MESSAGE.get('not_approved', ''), repo_owner, repo_name, issue_number)
                     elif is_issue_claimed_or_assigned:
                         github_comment(MESSAGE.get('already_claimed', ''), repo_owner, repo_name, issue_number)
+                    elif author_association != 'COLLABORATOR' and author_association != 'OWNER':
+                        github_comment(MESSAGE.get('no_permission', ''), repo_owner, repo_name, issue_number)
                     return jsonify(request.json)
 
                 #If comment is to claim issue
                 if comment_body.lower().startswith('@sys-bot claim'):
-                    if len(tokens) == 2 and not is_issue_claimed_or_assigned:
+                    is_approved = check_approved_tag(repo_owner, repo_name, issue_number)
+                    if len(tokens) == 2 and not is_issue_claimed_or_assigned and is_approved:
                         assignee = commenter
                         issue_claim_github(assignee, issue_number, repo_name, repo_owner)
                     elif len(tokens) != 2 and not is_issue_claimed_or_assigned:
                         github_comment(MESSAGE.get('wrong_format_github', ''), repo_owner, repo_name, issue_number)
+                    elif is_issue_claimed_or_assigned:
+                        github_comment(MESSAGE.get('already_claimed', ''), repo_owner, repo_name, issue_number)
+                    elif not is_approved:
+                        github_comment(MESSAGE.get('not_approved', ''), repo_owner, repo_name, issue_number)
                     elif is_issue_claimed_or_assigned:
                         github_comment(MESSAGE.get('already_claimed', ''), repo_owner, repo_name, issue_number)
                     return jsonify(request.json)

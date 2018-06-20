@@ -1,6 +1,6 @@
 import requests
 from flask import request, json
-from request_urls import (add_label_url, send_team_invite, assign_issue_url, check_assignee_url, github_comment_url, get_issue_url, open_issue_url, remove_assignee_url)
+from request_urls import (add_label_url, send_team_invite, assign_issue_url, check_assignee_url, github_comment_url, get_issue_url, open_issue_url, get_labels, remove_assignee_url)
 from auth_credentials import USERNAME,PASSWORD, newcomers_team_id
 from messages import MESSAGE
 
@@ -158,6 +158,17 @@ def get_issue_author(repo_owner, repo_name, issue_number):
     request_url = get_issue_url % (repo_owner, repo_name, issue_number)
     response = session.get(request_url).json()
     return response.get('user', {}).get('login', '')
+
+
+def check_approved_tag(repo_owner, repo_name, issue_number):
+    session = requests.Session()
+    session.auth = (USERNAME, PASSWORD)
+    request_url = get_labels % (repo_owner, repo_name, issue_number)
+    labels = session.get(request_url).json()
+    for label in labels:
+        if label.get('name', '') == 'issue-approved':
+            return True
+    return False
 
 
 def unassign_issue(repo_owner, repo_name, issue_number, assignee):
