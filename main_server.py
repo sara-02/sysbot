@@ -1,6 +1,6 @@
 from flask import Flask, jsonify
 from flask import request, json, Response
-from github_functions import label_opened_issue, issue_comment_approve_github, github_pull_request_label, issue_assign, github_comment, issue_claim_github, check_multiple_issue_claim, check_approved_tag
+from github_functions import label_opened_issue, issue_comment_approve_github, github_pull_request_label, issue_assign, github_comment, issue_claim_github, check_multiple_issue_claim, check_approved_tag, unassign_issue
 from stemming.porter2 import stem
 from nltk.tokenize import word_tokenize
 from auth_credentials import announcement_channel_id, BOT_ACCESS_TOKEN
@@ -75,6 +75,21 @@ def github_hook_receiver_function():
                     elif is_issue_claimed_or_assigned:
                         github_comment(MESSAGE.get('already_claimed', ''), repo_owner, repo_name, issue_number)
                     return jsonify(request.json)
+
+                #If comment is to unclaim an issue
+                if comment_body.lower().startswith('@sys-bot unclaim'):
+                    if len(tokens) == 2:
+                        assignee = commenter
+                        unassign_issue(repo_owner, repo_name, issue_number, assignee)
+                    else:
+                        github_comment(MESSAGE.get('wrong_format_github', ''), repo_owner, repo_name, issue_number)
+
+                #If comment is to unassign an issue
+                if comment_body.lower().startswith('@sys-bot unassign'):
+                    if len(tokens) == 3:
+                        unassign_issue(repo_owner, repo_name, issue_number, tokens[2])
+                    else:
+                        github_comment(MESSAGE.get('wrong_format_github', ''), repo_owner, repo_name, issue_number)
             elif action == 'opened' and data.get('pull_request', '') != '':
                 #If a new PR has been sent
                 pr_number = data.get('number', '')

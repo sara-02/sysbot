@@ -83,6 +83,7 @@ Function Descriptions
 8. `issue_claim_github():` Assigns a user to an issue,i.e., handles both assign and claim commands.
 9. `check_multiple_issue_claim():` Check if same issue is being claimed multiple times.
 10. `get_issue_author():` Gets the author of an issue.
+11. `unassign_issue():` Unassigns a user from an issue.
 
 Installation
 ----------
