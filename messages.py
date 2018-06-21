@@ -49,5 +49,6 @@ MESSAGE = {
         '4. A slash command */sysbot_claim <repo_name> <issue_number> <assignee_github_username>* or */sysbot_claim <repo_name> <issue_number>* '+\
         ' ( the latter option will work if your github URL is provided on Slack) can be used to claim any issue from Github directly via Slack.\n',
     'no_permission': 'You do not have permissions for this action.',
-    'not_approved': 'This issue has not been approved yet. Please try a different issue.'
+    'not_approved': 'This issue has not been approved yet. Please try a different issue.',
+    'pr_to_unapproved_issue': 'Please send PRs only to approved issues.'
 }

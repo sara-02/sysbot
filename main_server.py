@@ -1,6 +1,6 @@
 from flask import Flask, jsonify
 from flask import request, json, Response
-from github_functions import label_opened_issue, issue_comment_approve_github, github_pull_request_label, issue_assign, github_comment, issue_claim_github, check_multiple_issue_claim, check_approved_tag, unassign_issue
+from github_functions import label_opened_issue, issue_comment_approve_github, github_pull_request_label, issue_assign, github_comment, issue_claim_github, check_multiple_issue_claim, check_approved_tag, unassign_issue, close_pr
 from stemming.porter2 import stem
 from nltk.tokenize import word_tokenize
 from auth_credentials import announcement_channel_id, BOT_ACCESS_TOKEN
@@ -96,6 +96,15 @@ def github_hook_receiver_function():
                 repo_name = data.get('repository', {}).get('name', '')
                 repo_owner = data.get('repository', {}).get('owner', {}).get('login', '')
                 github_pull_request_label(pr_number, repo_name, repo_owner)
+                pr_body = data.get('pull_request', {}).get('body', '')
+                if pr_body != '':
+                    #Extract the issue number mentioned in PR body if PR follows template
+                    issue_number = pr_body.split('Fixes #')[1].split('\r\n')[0].strip()
+                    if issue_number != '':
+                        is_issue_approved = check_approved_tag(repo_owner, repo_name, issue_number)
+                        if not is_issue_approved:
+                            github_comment(MESSAGE.get('pr_to_unapproved_issue', ''), repo_owner, repo_name, pr_number)
+                            close_pr(repo_owner, repo_name, pr_number)
         else:
             pass
             #currently the bot isn't handeling any other cases
