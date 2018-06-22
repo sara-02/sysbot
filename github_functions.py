@@ -1,6 +1,6 @@
 import requests
 from flask import request, json
-from request_urls import (add_label_url, send_team_invite, assign_issue_url, check_assignee_url, github_comment_url, get_issue_url, open_issue_url, get_labels, remove_assignee_url)
+from request_urls import (add_label_url, send_team_invite, assign_issue_url, check_assignee_url, github_comment_url, get_issue_url, open_issue_url, get_labels, remove_assignee_url, close_pull_request_url)
 from auth_credentials import USERNAME,PASSWORD, newcomers_team_id
 from messages import MESSAGE
 
@@ -179,3 +179,13 @@ def unassign_issue(repo_owner, repo_name, issue_number, assignee):
     data = '{"assignees": ["%s"]}' % assignee
     response = session.delete(request_url, data=data, headers=headers)
     return response.status_code
+
+
+def close_pr(repo_owner, repo_name, pr_number):
+    session = requests.Session()
+    session.auth = (USERNAME, PASSWORD)
+    request_url = close_pull_request_url % (repo_owner, repo_name, pr_number)
+    headers = {'Accept': 'application/vnd.github.symmetra-preview+json', 'Content-Type': 'application/json'}
+    request_body = '{"state": "closed"}'
+    #Update PR status to closed
+    session.patch(request_url, data=request_body, headers=headers)

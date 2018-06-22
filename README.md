@@ -15,12 +15,12 @@ Hence came the idea of Sysbot, which is a Slack-bot integrated with Github to st
 
 This project is currently hosted here - sombuddha2016.pythonanywhere.com and will be shifted to paid servers soon.  
 
-####Technological Stack
+#### Technological Stack
 
 This project is made with Python and using the Flask framework.
 Some of the other technologies used include Slack Event API, web-hooks and Github API, NLTK.
 
-#####Reading Resources :-
+##### Reading Resources :-
 The following are some links to read about the technologies used.
 The contributors can get used to these before contributing.
 
@@ -35,15 +35,16 @@ The contributors can get used to these before contributing.
 Functionalities
 -----
 
-####On Github:
+#### On Github:
 1. Each newly opened issue is labelled to be Not Approved by the bot.
 2. Any member of the organization can claim issues by using leaving a comment of '@sys-bot claim' on the issue.
 3. Similarly, maintainers and collaborators can assign an issue to a member by the comment '@sys-bot assign <assignee_github_username>'
 4. Any issue can be approved by maintainers and collaborators via a comment '@sys-bot approve' or via normal comments which have variants of the word approval and issue(E.g - I am approving this issue, Approve this issue, etc). Also, a check has been kept so that the author of an issue cannot approve it.
 5. A check has been kept for multiple claims( same issue can't be claimed by or assigned to multiple members) on the same issue and also any unapproved issue cannot be claimed or assigned.
-6. Any new PR that's opened get's labelled as 'Under Review'.  
+6. Any new PR that's opened get's labelled as 'Under Review'.
+7. If a PR is sent to un-approved issue, it will get closed.  
 
-####On Slack:
+#### On Slack:
 1. Any newcomer who joins Systers slack workspace gets a DM from the bot with a welcome message, providing help on how to start and how to use the bot.
 2. A slash command /sysbot_invite can be used to get invited to the newcomers team and hence become a member of the org. However it checks if the
 newcomer member level is completed as mentioned [here](http://systers.io/member-levels)
@@ -59,7 +60,7 @@ E.g. of usage - /sysbot_claim sysbot 23.
 
 Function Descriptions
 ---------
-####Slack Functions:
+#### Slack Functions:
 
 1. `dm_new_users():` This sends a direct message to any user.
 2. `is_maintainer_comment():` Checks if a certain commenter is a member of the Slack maintainers team.
@@ -72,7 +73,7 @@ Function Descriptions
 9. `get_detailed_profile():` Gets the detailed profile of a user( this includes custom fields like date of birth, and Github profile).
 10. `get_github_username_profile():` Extracts the github username from github field value.
 
-####Github Functions:
+#### Github Functions:
 1. `label_opened_issue():` Handles the labelling(not approved) of new issues.
 2. `send_github_invite():` Sends invite to Systers newcomer team.
 3. `issue_comment_approve_github():` Approves issues via approve comments on Github and via Slack.
@@ -95,9 +96,9 @@ First fork the project and clone the project using command :
 git clone https://github.com/<your username>/sysbot.git
 ```
 
-####Installing Pip
+#### Installing Pip
 
-#####On Windows
+##### On Windows
 1. After installing Python, first download [get-pip.py](https://bootstrap.pypa.io/get-pip.py) to a directory.
 2. Open cmd, and navigate to the folder where get-py was downloaded.
 3. Then run `python get-pip.py`.
@@ -105,7 +106,7 @@ git clone https://github.com/<your username>/sysbot.git
 Type `pip freeze` from this location to launch the Python interpreter.  
 [NOTE: `pip freeze` displays the version number of all modules installed in your Python non-standard library; On a fresh install, `pip freeze` probably won't have much info to show but we're more interested in any errors that might pop up here than the actual content]
 
-#####On Linux
+##### On Linux
 1. Update your System Software: Run the following command to update the package list and upgrade all of your system software to the latest version available:-  
 
 ```
@@ -123,7 +124,7 @@ sudo apt-get install python-pip
 pip -V
 ```
 
-####Installing virtualenv
+#### Installing virtualenv
 
 ##### Both Windows and Linux
 
