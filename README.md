@@ -1,36 +1,19 @@
 Systers Slackbot - Sysbot Project
 ==================================
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
+![coverage](https://img.shields.io/sonar/http/sonar.petalslink.com/org.ow2.petals%3Apetals-se-ase/coverage.svg)
 
-Mentors: Ramit Sawhney, Akshita Aggarwal
-Project Manager: Prachi Manchanda
-
-Systers being a vibrant open source community, participates in a lot of major open source programs throughout the year,
-like - Outreachy,RGSoC, GCI, GSoC etc. These programs go on round the year and often even overlap. To maintain the quality,
-the mentors, admins and students try to clean the repositories and also at the same time aid the newcomers to get started,
-and get comfortable with the work flow. This becomes really hectic specially when transitioning fom one program to another.
-Hence came the idea of Sysbot, which is a Slack-bot integrated with Github to streamline open source workflow.
 
 **This project is under active development.**
 
-This project is currently hosted here - sombuddha2016.pythonanywhere.com and will be shifted to paid servers soon.  
+This project is currently hosted [here](sombuddha2016.pythonanywhere.com) and will be shifted to paid servers soon.  
 
-#### Technological Stack
+About
+-----
 
-This project is made with Python and using the Flask framework.
-Some of the other technologies used include Slack Event API, web-hooks and Github API, NLTK.
-
-##### Reading Resources :-
-The following are some links to read about the technologies used.
-The contributors can get used to these before contributing.
-
-1. [Flask](http://flask.pocoo.org/)
-2. [Slack Events API](https://api.slack.com/events-api)
-3. [Slack Bot Users](https://api.slack.com/bot-users)
-4. [Slash Commands](https://api.slack.com/slash-commands)
-5. [Github API](https://developer.github.com/v3/?)
-6. [Stemmer](https://pypi.org/project/stemming/1.0/)
-7. [Lemmatizer](https://pythonprogramming.net/lemmatizing-nltk-tutorial/)
+This is a project to develop a Slack bot to streamline Open Source workflow. Some functionalities include:
+labeling, approving issues and PRs, claiming and assigning issues, both on Github and Slack,
+and replying to newcomer comments with beginner resources, and many more.
 
 Functionalities
 -----
@@ -58,33 +41,6 @@ E.g. of usage - /sysbot_claim sysbot 23.
 6. A slash command /sysbot_open_issue <repo_name> <author_username> *Title of issue(in between star symbols)* Issue Body
 7. A slash command /sysbot_help provides a list of all the commands and functionalities of the bot.  
 
-Function Descriptions
----------
-#### Slack Functions:
-
-1. `dm_new_users():` This sends a direct message to any user.
-2. `is_maintainer_comment():` Checks if a certain commenter is a member of the Slack maintainers team.
-3. `approve_issue_label_slack():` Handles approval of issue from Slack. Extracts info from the event data and send the required data to github function for approval.
-4. `check_newcomer_requirements():` Checks if a newcomer has met the reqirements as mentioned in the membership levels guidelines.
-5. `assign_issue_slack():` Handles assigning of issues from Slack. Extracts info from the event data and send the required data to github function for assigning.
-6. `claim_issue_slack():` Handles claiming of issues from Slack. Extracts info from the event data and send the required data to github function for claiming.
-7. `send_message_to_channels():` Sends a message to a channel(public, private or DM channel).
-8. `send_message_ephimeral():` Sends message to channels, but is only visible to the person who caused the message from the bot.
-9. `get_detailed_profile():` Gets the detailed profile of a user( this includes custom fields like date of birth, and Github profile).
-10. `get_github_username_profile():` Extracts the github username from github field value.
-
-#### Github Functions:
-1. `label_opened_issue():` Handles the labelling(not approved) of new issues.
-2. `send_github_invite():` Sends invite to Systers newcomer team.
-3. `issue_comment_approve_github():` Approves issues via approve comments on Github and via Slack.
-4. `github_pull_request_label():` Labels newly opened PRs with under review label.
-5. `issue_assign():` Assign issues from github and slack.
-6. `check_assignee_validity():` Checks if an assignee is valid( if the assignee is a member).
-7. `github_comment():` Add comments on github with the author as sys-bot
-8. `issue_claim_github():` Assigns a user to an issue,i.e., handles both assign and claim commands.
-9. `check_multiple_issue_claim():` Check if same issue is being claimed multiple times.
-10. `get_issue_author():` Gets the author of an issue.
-11. `unassign_issue():` Unassigns a user from an issue.
 
 Installation
 ----------
@@ -94,34 +50,6 @@ pip and virtualenv. So first you need to install pip followed by virtualenv.
 First fork the project and clone the project using command :
 ```
 git clone https://github.com/<your username>/sysbot.git
-```
-
-#### Installing Pip
-
-##### On Windows
-1. After installing Python, first download [get-pip.py](https://bootstrap.pypa.io/get-pip.py) to a directory.
-2. Open cmd, and navigate to the folder where get-py was downloaded.
-3. Then run `python get-pip.py`.
-4. Verify a successful installation by opening a command prompt window and navigating to your Python installation's script directory (default is `C:\Python27\Scripts`).
-Type `pip freeze` from this location to launch the Python interpreter.  
-[NOTE: `pip freeze` displays the version number of all modules installed in your Python non-standard library; On a fresh install, `pip freeze` probably won't have much info to show but we're more interested in any errors that might pop up here than the actual content]
-
-##### On Linux
-1. Update your System Software: Run the following command to update the package list and upgrade all of your system software to the latest version available:-  
-
-```
-sudo apt-get update && sudo apt-get -y upgrade
-```
-
-2. Install Pip on Ubuntu: Once the upgrade is completed, you can move on and install Pip. The only thing you need to do is to run the following command:-  
-```
-sudo apt-get install python-pip
-```
-
-3. Verify the Pip Installation: The apt package manager will install Pip and all the dependencies required for the software to work optimally. Once the installation is completed, you can verify that it was successful by using the following command:-  
-
-```
-pip -V
 ```
 
 #### Installing virtualenv
@@ -162,48 +90,56 @@ And **on Linux**, use:
 FLASK_APP=main_server.py flask run
 ```
 
-To test that the server is running, go to url: [127.0.0.1:5000](127.0.0.1:5000)  
+To test that the server is running, go to url: [127.0.0.1:5000](http://127.0.0.1:5000)  
 If the server is running properly, you will get a page showing `Response to test hosting`.
 And you are good to go!!
+
+#### Technological Stack
+
+This project is made with Python and using the Flask framework.
+Some of the other technologies used include Slack Event API, web-hooks and Github API, NLTK.
+
+##### Reading Resources :-
+The following are some links to read about the technologies used.
+The contributors can get used to these before contributing.
+
+1. [Flask](http://flask.pocoo.org/)
+2. [Slack Events API](https://api.slack.com/events-api)
+3. [Slack Bot Users](https://api.slack.com/bot-users)
+4. [Slash Commands](https://api.slack.com/slash-commands)
+5. [Github API](https://developer.github.com/v3/?)
+6. [Stemmer](https://pypi.org/project/stemming/1.0/)
+7. [Lemmatizer](https://pythonprogramming.net/lemmatizing-nltk-tutorial/)
+
 
 Contribute
 ----------
 
-- Issue Tracker: [sysbot/issues](http://github.com/systers/sysbot/issues)
-- Source Code: [sysbot](http://github.com/systers/sysbot/)
+- Before starting with contributions, go through [contribution guidelines](https://github.com/systers/sysbot/blob/develop/CONTRIBUTING.md) , [code of conduct](https://github.com/systers/sysbot/blob/develop/code_of_conduct.md) and [reporting guidelines](https://github.com/systers/sysbot/blob/develop/reporting_guidelines.md).  
 - Linking pull request to an issue
 
   When you create a pull request, use closes #id_of_issue or fixes #id_of_issue. It will link the issue with your pull request. It also
   automatically closes the issue if your pull request gets merged.
 
 
-Documentation
--------------
-
-User and developer documentation for Systers Sysbot project is generated
-using [Markdown](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet).
-
-
-Support
--------
-
-If you are having issues, please let us know.
-We have a mailing list located at: systers-dev@systers.org
 
 Communicate
 -----------
 
-The best way to connect with the maintainers is through GitHub comments.
 Feel free to discuss more about an issue by commenting on it or asking questions. We also have Systers Slack channel, you can request an invite [here](http://systers.io/slack-systers-opensource/).
+
 If there is something you want to discuss privately with the maintainer and you are being hesitant to discuss it on above mediums, then drop an email.
+
 For Systers Sysbot join #sysbot on Slack.
+
+If you are having issues, please let us know.
+We have a mailing list located at: [systers-dev@systers.org](mailto:systers-dev@systers.org)
 
 
 License
 -------
 
 The project is licensed under the [GNU GENERAL PUBLIC LICENSE](https://github.com/systers/sysbot/blob/develop/LICENSE).
-
 
 
 A heartfelt thank you to all wonderful contributors of software, guidance, and
