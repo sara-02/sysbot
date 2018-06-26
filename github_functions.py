@@ -25,10 +25,8 @@ def label_opened_issue(data):
         r = session.post(request_url, data=label, headers=headers)
         #check response
         if r.status_code == 201:
-            print('Success')
             return {'message':'Success', 'status':r.status_code}
         else:
-            print(r.content)
             return {'message':'Error', 'status':r.status_code}
     return {'message':'Format of data provided is wrong or misformed', 'status': 400}
 
@@ -189,3 +187,33 @@ def close_pr(repo_owner, repo_name, pr_number):
     request_body = '{"state": "closed"}'
     #Update PR status to closed
     session.patch(request_url, data=request_body, headers=headers)
+
+
+def check_issue_template(repo_owner, repo_name, issue_number, body):
+    if not are_issue_essential_components_present(body):
+        session = requests.Session()
+        session.auth = (USERNAME, PASSWORD)
+        label = '["Template Mismatch"]'
+        request_url = add_label_url % (repo_owner, repo_name,issue_number)
+        session.post(request_url, data=label, headers=headers)
+        github_comment(MESSAGE.get('template_mismatch', ''),repo_owner, repo_name,issue_number)
+
+
+def are_issue_essential_components_present(body):
+    tokens = body.split('\r\n')
+    #Remove blank strings
+    tokens = [s for s in tokens if s != '']
+    #Necessary components in the template
+    necessary_elements_set = {'## Description', '## Acceptance Criteria', '### Update [Required]',
+                              '## Definition of Done', '## Estimation'}
+    if set(tokens).intersection(necessary_elements_set) == necessary_elements_set:
+        #Check if the template format has been followed and contents under any header isn't empty
+        if tokens[tokens.index('## Description') + 1] != '## Mocks' and tokens[tokens.index('## Description') + 1] != \
+                '## Acceptance Criteria' and tokens[
+                tokens.index('## Acceptance Criteria') + 1] == '### Update [Required]' \
+                and tokens[tokens.index('### Update [Required]') + 1] != '## Definition of Done' and \
+                tokens[tokens.index('### Update [Required]') + 1] != '### Enhancement to Update [Optional]' and \
+                tokens[tokens.index('## Definition of Done') + 1] != '## Estimation' and \
+                tokens[-1] != '## Estimation':
+            return True
+    return False

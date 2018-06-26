@@ -1,6 +1,6 @@
 from flask import Flask, jsonify
 from flask import request, json, Response
-from github_functions import label_opened_issue, issue_comment_approve_github, github_pull_request_label, issue_assign, github_comment, issue_claim_github, check_multiple_issue_claim, check_approved_tag, unassign_issue, close_pr
+from github_functions import label_opened_issue, issue_comment_approve_github, github_pull_request_label, issue_assign, github_comment, issue_claim_github, check_multiple_issue_claim, check_approved_tag, unassign_issue, close_pr, check_issue_template
 from stemming.porter2 import stem
 from nltk.tokenize import word_tokenize
 from auth_credentials import announcement_channel_id, BOT_ACCESS_TOKEN
@@ -24,7 +24,14 @@ def github_hook_receiver_function():
         if action!=None:
             if action == 'opened' and data.get('pull_request', '') == '':
                 #If it's an issue opened event and not PR opened event
-                response = label_opened_issue(data)
+                issue_number = data.get('issue', {}).get('number', '')
+                repo_name = data.get('repository', {}).get('name', '')
+                repo_owner = data.get('repository', {}).get('owner', {}).get('login', '')
+                issue_body = data.get('issue', {}).get('body', '')
+                #Label newly opened issue
+                label_opened_issue(data)
+                #Check if opened issue follows issue template
+                check_issue_template(repo_owner, repo_name, issue_number, issue_body)
             elif action == 'created' and data.get('comment', '') != '':
                 #If it's a issue comment event
                 issue_number = data.get('issue', {}).get('number', '')

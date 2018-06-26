@@ -50,5 +50,6 @@ MESSAGE = {
         ' ( the latter option will work if your github URL is provided on Slack) can be used to claim any issue from Github directly via Slack.\n',
     'no_permission': 'You do not have permissions for this action.',
     'not_approved': 'This issue has not been approved yet. Please try a different issue.',
-    'pr_to_unapproved_issue': 'Please send PRs only to approved issues.'
+    'pr_to_unapproved_issue': 'Please send PRs only to approved issues.',
+    'template_mismatch': 'Please make sure that your issue follows the provided template.'
 }
