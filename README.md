@@ -24,7 +24,7 @@ Functionalities
 3. Similarly, maintainers and collaborators can assign an issue to a member by the comment '@sys-bot assign <assignee_github_username>'
 4. Any issue can be approved by maintainers and collaborators via a comment '@sys-bot approve' or via normal comments which have variants of the word approval and issue(E.g - I am approving this issue, Approve this issue, etc). Also, a check has been kept so that the author of an issue cannot approve it.
 5. A check has been kept for multiple claims( same issue can't be claimed by or assigned to multiple members) on the same issue and also any unapproved issue cannot be claimed or assigned.
-6. Any new PR that's opened get's labelled as 'Under Review'.
+6. Any new PR that's opened get's labelled as 'not reviewed'.
 7. If a PR is sent to un-approved issue, it will get closed.  
 
 #### On Slack:
@@ -40,6 +40,7 @@ E.g. of usage - /sysbot_claim sysbot 23.
 [NOTE: To claim or assign an issue, it must first be approved]
 6. A slash command /sysbot_open_issue <repo_name> <author_username> *Title of issue(in between star symbols)* Issue Body
 7. A slash command /sysbot_help provides a list of all the commands and functionalities of the bot.  
+8. Each week prs which have been opened that week but have not been reviewed yet are collected and sent to respective Slack channels.
 
 
 Installation

@@ -1,15 +1,57 @@
 from flask import Flask, jsonify
 from flask import request, json, Response
-from github_functions import label_opened_issue, issue_comment_approve_github, github_pull_request_label, issue_assign, github_comment, issue_claim_github, check_multiple_issue_claim, check_approved_tag, unassign_issue, close_pr, check_issue_template
+from github_functions import label_opened_issue, issue_comment_approve_github, \
+    github_pull_request_label, issue_assign, github_comment, issue_claim_github, \
+    check_multiple_issue_claim, check_approved_tag, unassign_issue, close_pr, \
+    check_issue_template, list_open_prs_from_repo
 from stemming.porter2 import stem
 from nltk.tokenize import word_tokenize
 from auth_credentials import announcement_channel_id, BOT_ACCESS_TOKEN
-from slack_functions import dm_new_users, check_newcomer_requirements, approve_issue_label_slack, assign_issue_slack, claim_issue_slack, open_issue_slack, send_message_ephimeral
+from slack_functions import dm_new_users, check_newcomer_requirements, \
+    approve_issue_label_slack, assign_issue_slack, claim_issue_slack, \
+    open_issue_slack, send_message_ephimeral, send_message_to_channels
 from nltk.stem import WordNetLemmatizer
 from messages import MESSAGE
+from apscheduler.schedulers.background import BackgroundScheduler
 
 app = Flask(__name__)
 
+#Channel ids for each repo
+repo_vs_channel_id_dict = {
+    'sysbot': 'CAEDCBACW',
+    'vms': 'C0FSZS007',
+    'powerup-iOS': 'C0C9VK8UE',
+    'powerup-android': 'C0C9VK8UE',
+    'mentorship-backend': 'CAE8QK41L',
+    'mentorship-android': 'CAE8QK41L',
+    'portal': 'C0FGYV50U',
+    'PC-Prep-Kit': 'C35G5QAFQ',
+    'pchub': 'C0C9VKA8N',
+    'language-translation': 'C0QKAE73K',
+    'malaria-app-ios': 'C0BS7FC5U',
+    'malaria-app-android': 'C0BS7FC5U',
+    'mailman3': 'C0QK5PCNS',
+    'systers.github.io': 'C99N86T43',
+    'hyperkitty': 'CAU75GQLU',
+    'macc': 'C0QJX393L',
+    'mailmanclient': 'C0QJX393L'
+}
+
+
+def collect_unreviewed_prs():
+    for key, value in repo_vs_channel_id_dict.iteritems():
+        #Collect PRs for each repo
+        pr_list = list_open_prs_from_repo('systers', key)
+        if pr_list != '':
+            #Constructing message( excluding the last comma from pr_list)
+            message = MESSAGE.get('list_of_unreviewed_prs', '%s') % pr_list[0:-1]
+            #Send pr_list to respective channels
+            send_message_to_channels(value, message)
+
+
+schedule = BackgroundScheduler(daemon=True)
+schedule.add_job(collect_unreviewed_prs, 'interval', days=7)
+schedule.start()
 
 @app.route('/')
 def home():
