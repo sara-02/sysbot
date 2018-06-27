@@ -217,23 +217,29 @@ def send_message_ephimeral(channel_id, uid, message):
 
 def open_issue_slack(data):
     channel_id = data.get('channel_id', '')
+    uid = data.get('user_id','')
     #Get the command parameters used by the user
     command_params = data.get('text','')
     #For getting author name and repo name
     tokens = command_params.split(' ')
-    #For extracting title and body
+    #For extracting title, description, update list item, and estimation
     title_body_tokens = command_params.split('*')
-    if command_params=="" or len(tokens) < 4 or len(title_body_tokens) <3 or title_body_tokens[1]=='' or title_body_tokens[2]=='':
-        send_message_to_channels(channel_id, MESSAGE.get('wrong_params_issue_command',''))
+    if command_params=="" or len(tokens) < 6 or len(title_body_tokens) < 5 or \
+        title_body_tokens[1]=='' or title_body_tokens[2]=='' or \
+        title_body_tokens[3]=='' or title_body_tokens[4]=='':
+        send_message_ephimeral(channel_id, uid, MESSAGE.get('wrong_params_issue_command',''))
         return
+    #Each part is extracted and will be put into the template
     issue_title = title_body_tokens[1]
-    issue_body = title_body_tokens[2]
-    status = open_issue_github(org_repo_owner, tokens[0], issue_title, issue_body, tokens[1])
+    issue_description = title_body_tokens[2]
+    update_list_item = title_body_tokens[3]
+    estimation = title_body_tokens[4]
+    status = open_issue_github(org_repo_owner, tokens[0], issue_title, issue_description, update_list_item, estimation, tokens[1])
     if status == 201:
         #If issue has been opened successfully
-        send_message_to_channels(channel_id, MESSAGE.get('success_issue', ''))
+        send_message_ephimeral(channel_id, uid, MESSAGE.get('success_issue', ''))
     else:
-        send_message_to_channels(channel_id, MESSAGE.get('error_issue', ''))
+        send_message_ephimeral(channel_id, uid, MESSAGE.get('error_issue', ''))
 
 def get_detailed_profile(uid):
     body = {'user': uid, 'include_labels': True}

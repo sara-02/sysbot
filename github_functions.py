@@ -141,14 +141,17 @@ def check_multiple_issue_claim(repo_owner, repo_name, issue_number):
         return True
 
 
-def open_issue_github(repo_owner, repo_name, issue_title, issue_body, author):
+def open_issue_github(repo_owner, repo_name, issue_title, issue_description, update_list_item, estimation, author):
     session = requests.Session()
     session.auth = (USERNAME, PASSWORD)
     request_url = open_issue_url % (repo_owner, repo_name)
-    headers = {'Accept': 'application/vnd.github.symmetra-preview+json', 'Content-Type': 'application/json'}
-    #Raw issue body.
-    issue_request_body = '{"title": "%s", "body": "%s.<br>Authored by %s via Slack", "assignees": [], "labels": []}' % (issue_title, issue_body, author)
-    response = session.post(request_url, data=issue_request_body, headers=headers)
+    headers = {'Accept': 'application/vnd.github.symmetra-preview+json', 'Content-Type': 'application/x-www-form-urlencoded'}
+    #JSON issue body.
+    issue_request_body = {
+        "title": "%s" % issue_title,
+        "body": MESSAGE.get("issue_template") % (author, issue_description, update_list_item, estimation)
+        }
+    response = session.post(request_url, json=issue_request_body, headers=headers)
     return response.status_code
 
 
