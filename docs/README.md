@@ -116,7 +116,7 @@ The contributors can get used to these before contributing.
 Contribute
 ----------
 
-- Before starting with contributions, go through [contribution guidelines](https://github.com/systers/sysbot/blob/develop/CONTRIBUTING.md) , [code of conduct](https://github.com/systers/sysbot/blob/develop/code_of_conduct.md) and [reporting guidelines](https://github.com/systers/sysbot/blob/develop/reporting_guidelines.md).  
+- Before starting with contributions, go through [contribution guidelines](https://github.com/systers/sysbot/blob/develop/docs/CONTRIBUTING.md) , [code of conduct](https://github.com/systers/sysbot/blob/develop/docs/code_of_conduct.md) and [reporting guidelines](https://github.com/systers/sysbot/blob/develop/docs/reporting_guidelines.md).  
 - Linking pull request to an issue
 
   When you create a pull request, use closes #id_of_issue or fixes #id_of_issue. It will link the issue with your pull request. It also
