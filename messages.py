@@ -51,5 +51,12 @@ MESSAGE = {
     'no_permission': 'You do not have permissions for this action.',
     'not_approved': 'This issue has not been approved yet. Please try a different issue.',
     'pr_to_unapproved_issue': 'Please send PRs only to approved issues.',
-    'template_mismatch': 'Please make sure that your issue follows the provided template.'
+    'template_mismatch': 'Please make sure that your issue follows the provided template.',
+    'list_of_unreviewed_prs': 'Following are the list of not reviewed PRs:\n %s',
+    "issue_template": "Created via Slack by @%s \r\n ## Description\r\n" \
+             "%s\r\n\r\n ## Acceptance Criteria\r\n" \
+             "### Update [Required]\r\n - [ ] %s \r\n\r\n" \
+             "## Definition of Done\r\n - [ ] All of the required " \
+             "items are completed.\r\n - [ ] Approval by 1 mentor.\r\n\r\n" \
+             "## Estimation\r\n %s hours.\r\n"
 }

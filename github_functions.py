@@ -1,6 +1,8 @@
 import requests
 from flask import request, json
-from request_urls import (add_label_url, send_team_invite, assign_issue_url, check_assignee_url, github_comment_url, get_issue_url, open_issue_url, get_labels, remove_assignee_url, close_pull_request_url)
+from request_urls import (add_label_url, send_team_invite, assign_issue_url, \
+    check_assignee_url, github_comment_url, get_issue_url, open_issue_url, \
+    get_labels, remove_assignee_url, close_pull_request_url, list_open_prs_url)
 from auth_credentials import USERNAME,PASSWORD, newcomers_team_id
 from messages import MESSAGE
 
@@ -75,7 +77,7 @@ def github_pull_request_label(pr_number, repo_name, repo_owner):
     session = requests.Session()
     session.auth = (USERNAME, PASSWORD)
     headers = {'Accept': 'application/vnd.github.symmetra-preview+json', 'Content-Type': 'application/x-www-form-urlencoded'}
-    label = '["under review"]'
+    label = '["not reviewed"]'
     #Add label of under review to new PRs
     request_url = add_label_url % (repo_owner, repo_name, pr_number)
     response = session.post(request_url, data=label, headers=headers)
@@ -139,14 +141,17 @@ def check_multiple_issue_claim(repo_owner, repo_name, issue_number):
         return True
 
 
-def open_issue_github(repo_owner, repo_name, issue_title, issue_body, author):
+def open_issue_github(repo_owner, repo_name, issue_title, issue_description, update_list_item, estimation, author):
     session = requests.Session()
     session.auth = (USERNAME, PASSWORD)
     request_url = open_issue_url % (repo_owner, repo_name)
-    headers = {'Accept': 'application/vnd.github.symmetra-preview+json', 'Content-Type': 'application/json'}
-    #Raw issue body.
-    issue_request_body = '{"title": "%s", "body": "%s.<br>Authored by %s via Slack", "assignees": [], "labels": []}' % (issue_title, issue_body, author)
-    response = session.post(request_url, data=issue_request_body, headers=headers)
+    headers = {'Accept': 'application/vnd.github.symmetra-preview+json', 'Content-Type': 'application/x-www-form-urlencoded'}
+    #JSON issue body.
+    issue_request_body = {
+        "title": "%s" % issue_title,
+        "body": MESSAGE.get("issue_template") % (author, issue_description, update_list_item, estimation)
+        }
+    response = session.post(request_url, json=issue_request_body, headers=headers)
     return response.status_code
 
 
@@ -217,3 +222,22 @@ def are_issue_essential_components_present(body):
                 tokens[-1] != '## Estimation':
             return True
     return False
+
+
+def list_open_prs_from_repo(repo_owner, repo_name):
+    request_url = list_open_prs_url % (repo_owner, repo_name)
+    pr_list = session.get(request_url).json()
+    pr_url_list = ""
+    for pr in pr_list:
+        today = datetime.now()
+        try:
+            opened_date = datetime.strptime(pr.get('created_at', ''), "%Y-%m-%dT%H:%M:%SZ")
+            if (today-opened_date).days <= 7:
+                labels = pr.get('labels', '')
+                for label in labels:
+                    if label.get('name', '') == "not reviewed":
+                        pr_url_list = pr_url_list + pr.get('html_url', '') + ','
+                        break
+        except AttributeError:
+            pass
+    return pr_url_list
