@@ -5,25 +5,27 @@ from request_urls import (add_label_url, send_team_invite, assign_issue_url, \
     get_labels, remove_assignee_url, close_pull_request_url, list_open_prs_url)
 from auth_credentials import USERNAME,PASSWORD, newcomers_team_id
 from messages import MESSAGE
+from datetime import datetime
 
-#request headers
+
+# Request headers
 headers = {'Accept': 'application/vnd.github.symmetra-preview+json', 'Content-Type': 'application/x-www-form-urlencoded'}
 
-#labels newly opened issues with "Not Approved" tag
+# Labels newly opened issues with "Not Approved" tag
 def label_opened_issue(data):
     session = requests.Session()
-    #create a authenticated session
+    # Create a authenticated session
     session.auth = (USERNAME, PASSWORD)
-    #extract issue and repo data from webhook's response
-    issue_number = data.get('issue',{}).get('number',-1)
-    repo_name = data.get('repository',{}).get('name','')
-    repo_owner = data.get('repository',{}).get('owner',{}).get('login',"")
-    #raw body( string ) with list of tags
+    # Extract issue and repo data from webhook's response
+    issue_number = data.get('issue', {}).get('number', -1)
+    repo_name = data.get('repository', {}).get('name', '')
+    repo_owner = data.get('repository', {}).get('owner', {}).get('login', "")
+    # Raw body( string ) with list of tags
     label = '["Not Approved"]'
-    #construct the request url
+    # Construct the request url
     request_url = add_label_url % (repo_owner, repo_name,issue_number)
     if issue_number !=-1 and repo_name !="" and repo_owner!="":
-        #send request
+        # Send request
         r = session.post(request_url, data=label, headers=headers)
         #check response
         if r.status_code == 201:
@@ -36,7 +38,7 @@ def label_opened_issue(data):
 def send_github_invite(github_id):
     session = requests.Session()
     session.auth = (USERNAME, PASSWORD)
-    #Header as required by Github API
+    # Header as required by Github API
     headers = {'Accept': 'application/vnd.github.hellcat-preview+json',
                'Content-Type': 'application/x-www-form-urlencoded'}
     request_url =  send_team_invite %(newcomers_team_id, github_id)
@@ -52,7 +54,7 @@ def issue_comment_approve_github(issue_number, repo_name, repo_owner, comment_au
     if not is_from_slack:
         issue_author = get_issue_author(repo_owner, repo_name, issue_number)
         if issue_author == comment_author:
-            github_comment(MESSAGE.get('author_cannot_approve',''), repo_owner, repo_name, issue_number)
+            github_comment(MESSAGE.get('author_cannot_approve', ''), repo_owner, repo_name, issue_number)
             return
     session = requests.Session()
     session.auth = (USERNAME, PASSWORD)
@@ -78,7 +80,7 @@ def github_pull_request_label(pr_number, repo_name, repo_owner):
     session.auth = (USERNAME, PASSWORD)
     headers = {'Accept': 'application/vnd.github.symmetra-preview+json', 'Content-Type': 'application/x-www-form-urlencoded'}
     label = '["not reviewed"]'
-    #Add label of under review to new PRs
+    # Add label of under review to new PRs
     request_url = add_label_url % (repo_owner, repo_name, pr_number)
     response = session.post(request_url, data=label, headers=headers)
     return response.status_code
@@ -89,7 +91,7 @@ def issue_assign(issue_number, repo_name, assignee, repo_owner):
     session.auth = (USERNAME, PASSWORD)
     headers = {'Accept': 'application/vnd.github.symmetra-preview+json', 'Content-Type': 'application/json'}
     data = '{"assignees": ["%s"]}' % assignee
-    #Request to assign the issue
+    # Request to assign the issue
     request_url = assign_issue_url % (repo_owner, repo_name, issue_number)
     response = session.patch(request_url, data=data, headers=headers)
     return response.status_code
@@ -116,14 +118,17 @@ def github_comment(message,repo_owner, repo_name,issue_number):
 
 def issue_claim_github(assignee, issue_number, repo_name, repo_owner):
     status = check_assignee_validity(repo_name, assignee, repo_owner)
-    #Check if the assignee is valid. For more info : https://developer.github.com/v3/issues/assignees/#check-assignee
+    # Check if the assignee is valid
     if status == 404:
-        #If member cant be assigned
+        # If member cant be assigned
         github_comment(MESSAGE.get('not_an_org_member', ''),
                        repo_owner, repo_name, issue_number)
+        return {"message": "Not a member of the organization", "status": 404}
     if status == 204:
-        #If member can be assigned an issue.
+        # If member can be assigned an issue.
         issue_assign(issue_number, repo_name, assignee, repo_owner)
+        return {"message": "Issue claimed", "status": 204}
+    return {"status": status}
 
 
 def check_multiple_issue_claim(repo_owner, repo_name, issue_number):
@@ -131,13 +136,13 @@ def check_multiple_issue_claim(repo_owner, repo_name, issue_number):
     session.auth = (USERNAME, PASSWORD)
     request_url = get_issue_url % (repo_owner, repo_name, issue_number)
     response = session.get(request_url).json()
-    #Get the list of assignees
+    # Get the list of assignees
     assignee_list = response.get('assignees', [])
     if not assignee_list:
-        #If issue hasn't been claimed send False
+        # If issue hasn't been claimed send False
         return False
     else:
-        #If issue has been claimed send True
+        # If issue has been claimed send True
         return True
 
 
@@ -146,7 +151,7 @@ def open_issue_github(repo_owner, repo_name, issue_title, issue_description, upd
     session.auth = (USERNAME, PASSWORD)
     request_url = open_issue_url % (repo_owner, repo_name)
     headers = {'Accept': 'application/vnd.github.symmetra-preview+json', 'Content-Type': 'application/x-www-form-urlencoded'}
-    #JSON issue body.
+    # JSON issue body.
     issue_request_body = {
         "title": "%s" % issue_title,
         "body": MESSAGE.get("issue_template") % (author, issue_description, update_list_item, estimation)
@@ -190,8 +195,9 @@ def close_pr(repo_owner, repo_name, pr_number):
     request_url = close_pull_request_url % (repo_owner, repo_name, pr_number)
     headers = {'Accept': 'application/vnd.github.symmetra-preview+json', 'Content-Type': 'application/json'}
     request_body = '{"state": "closed"}'
-    #Update PR status to closed
-    session.patch(request_url, data=request_body, headers=headers)
+    # Update PR status to closed
+    response = session.patch(request_url, data=request_body, headers=headers)
+    return response.status_code
 
 
 def check_issue_template(repo_owner, repo_name, issue_number, body):
@@ -199,20 +205,22 @@ def check_issue_template(repo_owner, repo_name, issue_number, body):
         session = requests.Session()
         session.auth = (USERNAME, PASSWORD)
         label = '["Template Mismatch"]'
-        request_url = add_label_url % (repo_owner, repo_name,issue_number)
-        session.post(request_url, data=label, headers=headers)
-        github_comment(MESSAGE.get('template_mismatch', ''),repo_owner, repo_name,issue_number)
+        request_url = add_label_url % (repo_owner, repo_name, issue_number)
+        response = session.post(request_url, data=label, headers=headers)
+        github_comment(MESSAGE.get('template_mismatch', ''), repo_owner, repo_name, issue_number)
+        return {"message": "Issue Template mismatch", "label_status": response.status_code}
+    return {"message": "Issue Template match"}
 
 
 def are_issue_essential_components_present(body):
     tokens = body.split('\r\n')
-    #Remove blank strings
+    # Remove blank strings
     tokens = [s for s in tokens if s != '']
-    #Necessary components in the template
+    # Necessary components in the template
     necessary_elements_set = {'## Description', '## Acceptance Criteria', '### Update [Required]',
                               '## Definition of Done', '## Estimation'}
     if set(tokens).intersection(necessary_elements_set) == necessary_elements_set:
-        #Check if the template format has been followed and contents under any header isn't empty
+        # Check if the template format has been followed and contents under any header isn't empty
         if tokens[tokens.index('## Description') + 1] != '## Mocks' and tokens[tokens.index('## Description') + 1] != \
                 '## Acceptance Criteria' and tokens[
                 tokens.index('## Acceptance Criteria') + 1] == '### Update [Required]' \
@@ -225,6 +233,8 @@ def are_issue_essential_components_present(body):
 
 
 def list_open_prs_from_repo(repo_owner, repo_name):
+    session = requests.Session()
+    session.auth = (USERNAME, PASSWORD)
     request_url = list_open_prs_url % (repo_owner, repo_name)
     pr_list = session.get(request_url).json()
     pr_url_list = ""

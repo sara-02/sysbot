@@ -11,34 +11,33 @@ headers = {'Content-type': 'application/json', 'Authorization': 'Bearer {}'.form
 headers_legacy_urlencoded = {'Content-type': 'application/x-www-form-urlencoded', 'Authorization': 'Bearer {}'.format(legacy_token)}
 
 def dm_new_users(data):
-    #Get user id of the user who joined
-    uid = data.get('event',{}).get('user',None)
+    # Get user id of the user who joined
+    uid = data.get('event', {}).get('user', None)
     if uid != None:
         body = {'user': uid}
-        #Open a DM channel to the user. Request goes to im.open
+        # Open a DM channel to the user. Request goes to im.open
         r = requests.post(dm_channel_open_url, data=json.dumps(body), headers=headers)
         response = r.json()
-        if response.get('ok',False):
-            #Get the channel just opened for DM
-            dm_channel_id = response.get('channel',{}).get('id','')
+        if response.get('ok', False):
+            # Get the channel just opened for DM
+            dm_channel_id = response.get('channel', {}).get('id', '')
             if dm_channel_id != '':
-                body = {'username': 'Sysbot', 'as_user': True, 'text': MESSAGE.get('first_timer_message','Some error occured'), 'channel': dm_channel_id}
-                #Send a DM request
+                body = {'username': 'Sysbot', 'as_user': True, 'text': MESSAGE.get('first_timer_message', 'Some error occured'), 'channel': dm_channel_id}
+                # Send a DM request
                 r = requests.post(dm_chat_post_message_url, data=json.dumps(body), headers=headers)
-                print("Response: %s" % json.dumps(r.json()))
                 return {'message':'Success','status': 200}
     return {'message':'Data format wrong', 'status':400}
 
 
 def is_maintainer_comment(commenter_id):
-    #Using the id of usergroup maintainers
+    # Using the id of usergroup maintainers
     body = {'usergroup': maintainer_usergroup_id, 'include_disabled': True}
-    #Get list of maintainers. For more info :  usergroups.users.list in Slack API
+    # Get list of maintainers. For more info :  usergroups.users.list in Slack API
     r = requests.post(get_maintainer_list, data= body, headers=headers_legacy_urlencoded)
     response = r.json()
-    if response.get('ok',False):
-        #Extract the maintainers
-        maintainers = response.get('users',[])
+    if response.get('ok', False):
+        # Extract the maintainers
+        maintainers = response.get('users', [])
         if commenter_id in maintainers:
             return {'status': 200, 'is_maintainer': True}
         else:
@@ -49,44 +48,50 @@ def is_maintainer_comment(commenter_id):
 
 def approve_issue_label_slack(data):
     result = is_maintainer_comment(data.get('user_id', ''))
-    channel_id = data.get('channel_id','')
-    uid = data.get('user_id','')
+    channel_id = data.get('channel_id', '')
+    uid = data.get('user_id', '')
     response = get_detailed_profile(uid)
     if response.get('ok', False):
         profile = response.get('profile', '')
         get_github_username = get_github_username_profile(profile)
         github_profile_present = get_github_username.get('github_profile_present', False)
         if not github_profile_present:
-            send_message_ephimeral(channel_id, uid, MESSAGE.get('newcomer_requirement_incomplete',''))
-            return
+            send_message_ephimeral(channel_id, uid, MESSAGE.get('newcomer_requirement_incomplete', ''))
+            return {"message": "Newcomer Requirement Incomplete"}
         else:
             github_id = get_github_username.get('github_id', '')
             if result.get('is_maintainer', False):
-                params = data.get('text','')
+                params = data.get('text', '')
                 if params != '' and len(params.split(' ')) == 2:
                     issue_author = get_issue_author(org_repo_owner, params.split(' ')[0], params.split(' ')[1])
                     if issue_author == github_id:
-                        send_message_ephimeral(channel_id, uid, MESSAGE.get('author_cannot_approve',''))
-                        return
+                        send_message_ephimeral(channel_id, uid, MESSAGE.get('author_cannot_approve', ''))
+                        return {"message": "Author cannot approve an issue"}
                     response = issue_comment_approve_github(params.split(' ')[1], params.split(' ')[0], org_repo_owner, github_id, True)
                     status = response.get('status', 500)
                     if status == 404:
-                        #Information given is wrong
-                        send_message_ephimeral(channel_id, uid, MESSAGE.get('wrong_info',''))
+                        # Information given is wrong
+                        send_message_ephimeral(channel_id, uid, MESSAGE.get('wrong_info', ''))
+                        return {"message": "Information provided is wrong", "status": 404}
                     elif status == 200:
-                        #Successful labeling
-                        send_message_ephimeral(channel_id, uid, MESSAGE.get('success',''))
+                        # Successful labeling
+                        send_message_ephimeral(channel_id, uid, MESSAGE.get('success', ''))
+                        return {"message": "Success", "status": 200}
                     elif status == 500:
-                        #Some internal error occured
-                        send_message_ephimeral(channel_id, uid, MESSAGE.get('error_slash_command',''))
+                        # Some internal error occured
+                        send_message_ephimeral(channel_id, uid, MESSAGE.get('error_slash_command', ''))
+                        return {"message": "Error with slash command", "status": 500}
                 else:
-                    #Wrong format of command was used
-                    send_message_ephimeral(channel_id, uid, MESSAGE.get('correct_approve_format',''))
+                    # Wrong format of command was used
+                    send_message_ephimeral(channel_id, uid, MESSAGE.get('correct_approve_format', ''))
+                    return {"message": "Wrong parameters for for approval command"}
             else:
-                #The commentor is not a maintainer
-                send_message_ephimeral(channel_id, uid, MESSAGE.get('not_a_maintainer',''))
+                # The commentor is not a maintainer
+                send_message_ephimeral(channel_id, uid, MESSAGE.get('not_a_maintainer', ''))
+                return {"message": "Non-maintainer cannot use the command"}
     else:
-        send_message_ephimeral(channel_id, uid, MESSAGE.get('error_slash_command',''))
+        send_message_ephimeral(channel_id, uid, MESSAGE.get('error_slash_command', ''))
+        return {"message": "Error with slash command"}
 
 
 def check_newcomer_requirements(uid, channel_id):
@@ -98,148 +103,164 @@ def check_newcomer_requirements(uid, channel_id):
         if github_profile_present and profile.get('first_name', "") != "" and profile.get('last_name', "") != "" and profile.get('title', "") != "" and profile.get('image_original', "") != "" and not profile.get('phone', "").isdigit():
             github_id = get_github_username.get('github_id', '')
             send_github_invite(github_id)
-            send_message_ephimeral(channel_id, uid, MESSAGE.get('invite_sent',''))
+            send_message_ephimeral(channel_id, uid, MESSAGE.get('invite_sent', ''))
+            return {"message": "Invittion sent"}
         else:
-            send_message_ephimeral(channel_id, uid, MESSAGE.get('newcomer_requirement_incomplete',''))
+            send_message_ephimeral(channel_id, uid, MESSAGE.get('newcomer_requirement_incomplete', ''))
+            return {"message": "Newcomer requirements incomplete"}
     else:
-        send_message_ephimeral(channel_id, uid, MESSAGE.get('error_slash_command',''))
+        send_message_ephimeral(channel_id, uid, MESSAGE.get('error_slash_command', ''))
+        return {"message": "Error with slash command"}
 
 
 def assign_issue_slack(data):
     result = is_maintainer_comment(data.get('user_id', ''))
-    channel_id = data.get('channel_id','')
-    uid = data.get('user_id','')
+    channel_id = data.get('channel_id', '')
+    uid = data.get('user_id', '')
     if result.get('is_maintainer', False):
-        params = data.get('text','')
+        params = data.get('text', '')
         tokens = params.split(' ')
         if params != '' and len(tokens) == 3:
-            #The tokens are issue number, repo name, and assignee username
+            # The tokens are issue number, repo name, and assignee username
             is_issue_claimed_or_assigned = check_multiple_issue_claim(org_repo_owner, tokens[0], tokens[1])
-            #Check if issue is approved
+            # Check if issue is approved
             is_issue_approved = check_approved_tag(org_repo_owner, tokens[0], tokens[1])
-            #If issue has been claimed, send message to the channel
+            # If issue has been claimed, send message to the channel
             if is_issue_claimed_or_assigned:
-                send_message_ephimeral(channel_id, uid, MESSAGE.get('already_claimed',''))
-                return
-            #If issue has not been approved, send message to the channel
+                send_message_ephimeral(channel_id, uid, MESSAGE.get('already_claimed', ''))
+                return {"message": "Issue already claimed"}
+            # If issue has not been approved, send message to the channel
             if not is_issue_approved:
-                send_message_ephimeral(channel_id, uid, MESSAGE.get('not_approved',''))
-                return
-            #If issue is available, then check for assign status
+                send_message_ephimeral(channel_id, uid, MESSAGE.get('not_approved', ''))
+                return {"message": "Issue not approved"}
+            # If issue is available, then check for assign status
             status = issue_assign(tokens[1], tokens[0], tokens[2], org_repo_owner)
             if status == 404:
-                #Information given is wrong
-                send_message_ephimeral(channel_id, uid, MESSAGE.get('wrong_info',''))
+                # Information given is wrong
+                send_message_ephimeral(channel_id, uid, MESSAGE.get('wrong_info', ''))
+                return {"message": "Wrong information provided", "status": 404}
             elif status == 200:
-                #Successful assignment
-                send_message_ephimeral(channel_id, uid, MESSAGE.get('success',''))
+                # Successful assignment
+                send_message_ephimeral(channel_id, uid, MESSAGE.get('success', ''))
+                return {"message": "Success", "status": 200}
             elif status == 500:
-                #Some internal error occured
-                send_message_ephimeral(channel_id, uid, MESSAGE.get('error_slash_command',''))
+                # Some internal error occured
+                send_message_ephimeral(channel_id, uid, MESSAGE.get('error_slash_command', ''))
+                return {"message": "Author cannot approve an issue", "status": 500}
         else:
-            #Wrong format of command was used
-            send_message_ephimeral(channel_id, uid, MESSAGE.get('correct_assign_format',''))
+            # Wrong format of command was used
+            send_message_ephimeral(channel_id, uid, MESSAGE.get('correct_assign_format', ''))
+            return {"message": "Wrong format of command"}
     else:
-        #The commentor is not a maintainer
-        send_message_ephimeral(channel_id, uid, MESSAGE.get('not_a_maintainer',''))
+        # The commentor is not a maintainer
+        send_message_ephimeral(channel_id, uid, MESSAGE.get('not_a_maintainer', ''))
+        return {"message": "Not a maintainer"}
 
 
 def claim_issue_slack(data):
-    params = data.get('text','')
+    params = data.get('text', '')
     tokens = params.split(' ')
-    channel_id = data.get('channel_id','')
-    uid = data.get('user_id','')
+    channel_id = data.get('channel_id', '')
+    uid = data.get('user_id', '')
     if params != '' and (len(tokens) == 3 or len(tokens) == 2):
-        #The tokens are issue number, repo name, and claimant's username
+        # The tokens are issue number, repo name, and claimant's username
         is_issue_claimed_or_assigned = check_multiple_issue_claim(org_repo_owner, tokens[0], tokens[1])
-        #Check if issue is approved
+        # Check if issue is approved
         is_issue_approved = check_approved_tag(org_repo_owner, tokens[0], tokens[1])
-        #If issue has been claimed, send message to the channel
+        # If issue has been claimed, send message to the channel
         if is_issue_claimed_or_assigned:
-            send_message_ephimeral(channel_id, uid, MESSAGE.get('already_claimed',''))
-            return
-        #If issue has not been approved, send message to the channel
+            send_message_ephimeral(channel_id, uid, MESSAGE.get('already_claimed', ''))
+            return {"message": "Issue already claimed"}
+        # If issue has not been approved, send message to the channel
         if not is_issue_approved:
-            send_message_ephimeral(channel_id, uid, MESSAGE.get('not_approved',''))
-            return
+            send_message_ephimeral(channel_id, uid, MESSAGE.get('not_approved', ''))
+            return {"message": "Issue not approved"}
         github_username = ''
-        #If the format /sysbot_claim <repo_name> <issue_number> is used
+        # If the format /sysbot_claim <repo_name> <issue_number> is used
         if len(tokens) == 2:
             response = get_detailed_profile(uid)
             if response.get('ok', False):
                 response = get_github_username_profile(response.get('profile', {}))
                 if response.get('github_profile_present', False):
-                    #Find if the username is present in Slack profile
+                    # Find if the username is present in Slack profile
                     github_username = response.get('github_id', '')
                 else:
                     send_message_ephimeral(channel_id, uid, MESSAGE.get('error_claim_alternate', ''))
-                    return
+                    return {"message": "Incomplete profile for using command"}
             else:
                 send_message_ephimeral(channel_id, uid, MESSAGE.get('error_slash_command', ''))
-                return
+                return {"message": "Error in command parameters"}
         else:
             github_username = tokens[2]
 
-        #If issue is available, then check for assign status
+        # If issue is available, then check for assign status
         status = issue_assign(tokens[1], tokens[0], github_username, org_repo_owner)
-        #If a 404 error status is raised, check if the assignee can be assigned.
+        # If a 404 error status is raised, check if the assignee can be assigned.
         if status == 404:
-            #Check assignee status
+            # Check assignee status
             assignee_status = check_assignee_validity(tokens[0], github_username, org_repo_owner)
             if assignee_status == 404:
-                #Can't be assigned as not a member
-                send_message_ephimeral(channel_id, uid, MESSAGE.get('not_a_member',''))
-                return
+                # Can't be assigned as not a member
+                send_message_ephimeral(channel_id, uid, MESSAGE.get('not_a_member', ''))
+                return {"message": "Not a member", "status": 404}
             else:
-                #Information given is wrong
-                send_message_ephimeral(channel_id, uid, MESSAGE.get('wrong_info',''))
+                # Information given is wrong
+                send_message_ephimeral(channel_id, uid, MESSAGE.get('wrong_info', ''))
+                return {"message": "Wrong information provided"}
         elif status == 200:
-            #Successful claim
-            send_message_ephimeral(channel_id, uid, MESSAGE.get('success',''))
+            # Successful claim
+            send_message_ephimeral(channel_id, uid, MESSAGE.get('success', ''))
+            return {"message": "Success", "status": 404}
         elif status == 500:
-            #Some internal error occured
-            send_message_ephimeral(channel_id, uid, MESSAGE.get('error_slash_command',''))
+            # Some internal error occured
+            send_message_ephimeral(channel_id, uid, MESSAGE.get('error_slash_command', ''))
+            return {"message": "Error slash command", "status": 500}
     else:
-        #Wrong format of command was used
-        send_message_ephimeral(channel_id, uid, MESSAGE.get('correct_claim_format',''))
+        # Wrong format of command was used
+        send_message_ephimeral(channel_id, uid, MESSAGE.get('correct_claim_format', ''))
+        return {"message": "Correct claim format"}
 
 
 def send_message_to_channels(channel_id, message):
     body = {'username': 'Sysbot', 'as_user': True, 'text': message, 'channel': channel_id}
-    requests.post(dm_chat_post_message_url, data=json.dumps(body), headers=headers)
-
+    response = requests.post(dm_chat_post_message_url, data=json.dumps(body), headers=headers)
+    return response.status_code
 
 
 def send_message_ephimeral(channel_id, uid, message):
     body = {'username': 'Sysbot', 'as_user': True, 'text': message, 'channel': channel_id, 'user': uid}
-    requests.post(chat_post_ephimeral_message_url, data=json.dumps(body), headers=headers)
+    response = requests.post(chat_post_ephimeral_message_url, data=json.dumps(body), headers=headers)
+    return response.status_code
 
 
 def open_issue_slack(data):
     channel_id = data.get('channel_id', '')
-    uid = data.get('user_id','')
-    #Get the command parameters used by the user
-    command_params = data.get('text','')
-    #For getting author name and repo name
+    uid = data.get('user_id', '')
+    # Get the command parameters used by the user
+    command_params = data.get('text', '')
+    # For getting author name and repo name
     tokens = command_params.split(' ')
-    #For extracting title, description, update list item, and estimation
+    # For extracting title, description, update list item, and estimation
     title_body_tokens = command_params.split('*')
     if command_params=="" or len(tokens) < 6 or len(title_body_tokens) < 5 or \
         title_body_tokens[1]=='' or title_body_tokens[2]=='' or \
         title_body_tokens[3]=='' or title_body_tokens[4]=='':
-        send_message_ephimeral(channel_id, uid, MESSAGE.get('wrong_params_issue_command',''))
-        return
-    #Each part is extracted and will be put into the template
+        send_message_ephimeral(channel_id, uid, MESSAGE.get('wrong_params_issue_command', ''))
+        return {"message": "Wrong parameters for command"}
+    # Each part is extracted and will be put into the template
     issue_title = title_body_tokens[1]
     issue_description = title_body_tokens[2]
     update_list_item = title_body_tokens[3]
     estimation = title_body_tokens[4]
     status = open_issue_github(org_repo_owner, tokens[0], issue_title, issue_description, update_list_item, estimation, tokens[1])
     if status == 201:
-        #If issue has been opened successfully
+        # If issue has been opened successfully
         send_message_ephimeral(channel_id, uid, MESSAGE.get('success_issue', ''))
+        return {"message": "Successfully opened issue", "status": 201}
     else:
         send_message_ephimeral(channel_id, uid, MESSAGE.get('error_issue', ''))
+        return {"message": "Error in opening issue", "status": status}
+
 
 def get_detailed_profile(uid):
     body = {'user': uid, 'include_labels': True}
