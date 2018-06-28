@@ -16,7 +16,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 app = Flask(__name__)
 
-#Channel ids for each repo
+# Channel ids for each repo
 repo_vs_channel_id_dict = {
     'sysbot': 'CAEDCBACW',
     'vms': 'C0FSZS007',
@@ -40,12 +40,12 @@ repo_vs_channel_id_dict = {
 
 def collect_unreviewed_prs():
     for key, value in repo_vs_channel_id_dict.iteritems():
-        #Collect PRs for each repo
+        # Collect PRs for each repo
         pr_list = list_open_prs_from_repo('systers', key)
         if pr_list != '':
-            #Constructing message( excluding the last comma from pr_list)
+            # Constructing message( excluding the last comma from pr_list)
             message = MESSAGE.get('list_of_unreviewed_prs', '%s') % pr_list[0:-1]
-            #Send pr_list to respective channels
+            # Send pr_list to respective channels
             send_message_to_channels(value, message)
 
 
@@ -57,7 +57,7 @@ schedule.start()
 def home():
     return 'Response to test hosting.'
 
-#This function will recieve all the github events
+# This function will recieve all the github events
 @app.route('/web_hook', methods=['POST'])
 def github_hook_receiver_function():
     if request.headers['Content-Type'] == 'application/json':
@@ -65,17 +65,17 @@ def github_hook_receiver_function():
         action = data.get('action', None)
         if action!=None:
             if action == 'opened' and data.get('pull_request', '') == '':
-                #If it's an issue opened event and not PR opened event
+                # If it's an issue opened event and not PR opened event
                 issue_number = data.get('issue', {}).get('number', '')
                 repo_name = data.get('repository', {}).get('name', '')
                 repo_owner = data.get('repository', {}).get('owner', {}).get('login', '')
                 issue_body = data.get('issue', {}).get('body', '')
-                #Label newly opened issue
+                # Label newly opened issue
                 label_opened_issue(data)
-                #Check if opened issue follows issue template
+                # Check if opened issue follows issue template
                 check_issue_template(repo_owner, repo_name, issue_number, issue_body)
             elif action == 'created' and data.get('comment', '') != '':
-                #If it's a issue comment event
+                # If it's a issue comment event
                 issue_number = data.get('issue', {}).get('number', '')
                 repo_name = data.get('repository', {}).get('name', '')
                 repo_owner = data.get('repository', {}).get('owner', {}).get('login', '')
@@ -85,16 +85,16 @@ def github_hook_receiver_function():
                 author_association = data.get('comment', {}).get('author_association', '')
                 is_issue_claimed_or_assigned = check_multiple_issue_claim(repo_owner, repo_name, issue_number)
 
-                #Check if the comment by coveralls
+                # Check if the comment by coveralls
                 if commenter == 'coveralls' and 'Coverage decreased' in comment_body:
                     github_comment(MESSAGE.get('add_tests', ''), repo_owner, repo_name, issue_number)
 
-                #If comment is for approving issue
+                # If comment is for approving issue
                 if comment_body.lower() == '@sys-bot approve':
                     issue_comment_approve_github(issue_number, repo_name, repo_owner, commenter, False)
                     return jsonify(request.json)
 
-                #If comment is to assign issue
+                # If comment is to assign issue
                 if comment_body.lower().startswith('@sys-bot assign'):
                     is_approved = check_approved_tag(repo_owner, repo_name, issue_number)
                     if len(tokens) == 3 and not is_issue_claimed_or_assigned and (author_association == 'COLLABORATOR' or author_association == 'OWNER') and is_approved:
@@ -109,7 +109,7 @@ def github_hook_receiver_function():
                         github_comment(MESSAGE.get('no_permission', ''), repo_owner, repo_name, issue_number)
                     return jsonify(request.json)
 
-                #If comment is to claim issue
+                # If comment is to claim issue
                 if comment_body.lower().startswith('@sys-bot claim'):
                     is_approved = check_approved_tag(repo_owner, repo_name, issue_number)
                     if len(tokens) == 2 and not is_issue_claimed_or_assigned and is_approved:
@@ -125,7 +125,7 @@ def github_hook_receiver_function():
                         github_comment(MESSAGE.get('already_claimed', ''), repo_owner, repo_name, issue_number)
                     return jsonify(request.json)
 
-                #If comment is to unclaim an issue
+                # If comment is to unclaim an issue
                 if comment_body.lower().startswith('@sys-bot unclaim'):
                     if len(tokens) == 2:
                         assignee = commenter
@@ -133,21 +133,21 @@ def github_hook_receiver_function():
                     else:
                         github_comment(MESSAGE.get('wrong_format_github', ''), repo_owner, repo_name, issue_number)
 
-                #If comment is to unassign an issue
+                # If comment is to unassign an issue
                 if comment_body.lower().startswith('@sys-bot unassign'):
                     if len(tokens) == 3:
                         unassign_issue(repo_owner, repo_name, issue_number, tokens[2])
                     else:
                         github_comment(MESSAGE.get('wrong_format_github', ''), repo_owner, repo_name, issue_number)
             elif action == 'opened' and data.get('pull_request', '') != '':
-                #If a new PR has been sent
+                # If a new PR has been sent
                 pr_number = data.get('number', '')
                 repo_name = data.get('repository', {}).get('name', '')
                 repo_owner = data.get('repository', {}).get('owner', {}).get('login', '')
                 github_pull_request_label(pr_number, repo_name, repo_owner)
                 pr_body = data.get('pull_request', {}).get('body', '')
                 if pr_body != '':
-                    #Extract the issue number mentioned in PR body if PR follows template
+                    # Extract the issue number mentioned in PR body if PR follows template
                     issue_number = pr_body.split('Fixes #')[1].split('\r\n')[0].strip()
                     if issue_number != '':
                         is_issue_approved = check_approved_tag(repo_owner, repo_name, issue_number)
@@ -156,7 +156,7 @@ def github_hook_receiver_function():
                             close_pr(repo_owner, repo_name, pr_number)
         else:
             pass
-            #currently the bot isn't handeling any other cases
+            # Currently the bot isn't handeling any other cases
         return jsonify(request.json)
 
 
@@ -165,22 +165,22 @@ def slack_hook_receiver_function():
     if request.headers['Content-Type'] == 'application/json':
         data = request.json
         challenge = data.get('challenge',None)
-        #The url is sent a challenge data first time to verify the url
+        # The url is sent a challenge data first time to verify the url
         if challenge != None:
-            #If challenge is made, return challenge key as required by the API
+            # If challenge is made, return challenge key as required by the API
             return challenge
         else:
-            #Else get the event type
+            # Else get the event type
             event = data.get('event',{}).get('type', None)
             if event == 'member_joined_channel':
-                #Check that it's a member_joined_channel event
+                # Check that it's a member_joined_channel event
                 channel = data.get('event',{}).get('channel', None)
                 if channel == announcement_channel_id:
-                    #Check if channel_id is the required channel, i.e, Announcements channel
+                    # Check if channel_id is the required channel, i.e, Announcements channel
                     dm_new_users(data)
         return json.dumps(request.json)
 
-#Recieve responses from sysbot_invite slash command
+# Recieve responses from sysbot_invite slash command
 @app.route('/invite', methods=['POST', 'GET'])
 def invite():
     if request.headers['Content-Type'] == 'application/x-www-form-urlencoded':
@@ -233,12 +233,12 @@ def help_command():
 
 
 def get_stems(sentence):
-    #Generator expressions with joins are much faster than conversion to strings and appending to stemmed tokens to lists and overheads of string conversion.
+    # Generator expressions with joins are much faster than conversion to strings and appending to stemmed tokens to lists and overheads of string conversion.
     stemmed_sentence = ' '.join(stem(token) for token in word_tokenize(sentence))
     return stemmed_sentence
 
 def lemmatize_sent(sentence):
-    #Generator expressions with joins are much faster than conversion to strings and appending to stemmed tokens to lists and overheads of string conversion.
+    # Generator expressions with joins are much faster than conversion to strings and appending to stemmed tokens to lists and overheads of string conversion.
     lemmatized_sentence = ' '.join(WordNetLemmatizer().lemmatize(token) for token in word_tokenize(sentence))
     return lemmatized_sentence
 
