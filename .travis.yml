@@ -1,0 +1,16 @@
+sudo: false
+language: python
+python:
+  - "2.7"
+install:
+  - pip install -r requirements.txt
+  - pip install coveralls==0.4.4
+script:
+  - python -m unittest discover -s tests
+  - flake8 code
+notifications:
+  email:
+    - sombuddha2016@gmail.com
+    - ramits.co@nsit.net.in
+after_success:
+  coveralls --rcfile=.coveragerc

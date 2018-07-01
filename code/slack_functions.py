@@ -1,19 +1,26 @@
 # -*- coding: utf-8 -*-
 
 import requests
-from flask import request, json, jsonify
-from auth_credentials import  BOT_ACCESS_TOKEN, maintainer_usergroup_id, legacy_token, org_repo_owner
-from request_urls import (dm_channel_open_url, dm_chat_post_message_url, get_maintainer_list, get_user_profile_info_url, chat_post_ephimeral_message_url)
+from flask import json
+from auth_credentials import BOT_ACCESS_TOKEN, maintainer_usergroup_id, legacy_token, org_repo_owner
+from request_urls import (dm_channel_open_url, dm_chat_post_message_url, get_maintainer_list,
+                          get_user_profile_info_url, chat_post_ephimeral_message_url)
 from messages import MESSAGE
-from github_functions import (send_github_invite, issue_comment_approve_github, issue_assign, check_assignee_validity, check_multiple_issue_claim, open_issue_github, get_issue_author, check_approved_tag)
+from github_functions import (send_github_invite, issue_comment_approve_github, issue_assign,
+                              check_assignee_validity, check_multiple_issue_claim,
+                              open_issue_github, get_issue_author, check_approved_tag)
 
 headers = {'Content-type': 'application/json', 'Authorization': 'Bearer {}'.format(BOT_ACCESS_TOKEN)}
-headers_legacy_urlencoded = {'Content-type': 'application/x-www-form-urlencoded', 'Authorization': 'Bearer {}'.format(legacy_token)}
+headers_legacy_urlencoded = {
+    'Content-type': 'application/x-www-form-urlencoded',
+    'Authorization': 'Bearer {}'.format(legacy_token)
+}
+
 
 def dm_new_users(data):
     # Get user id of the user who joined
     uid = data.get('event', {}).get('user', None)
-    if uid != None:
+    if uid is not None:
         body = {'user': uid}
         # Open a DM channel to the user. Request goes to im.open
         r = requests.post(dm_channel_open_url, data=json.dumps(body), headers=headers)
@@ -22,18 +29,22 @@ def dm_new_users(data):
             # Get the channel just opened for DM
             dm_channel_id = response.get('channel', {}).get('id', '')
             if dm_channel_id != '':
-                body = {'username': 'Sysbot', 'as_user': True, 'text': MESSAGE.get('first_timer_message', 'Some error occured'), 'channel': dm_channel_id}
+                body = {
+                    'username': 'Sysbot', 'as_user': True,
+                    'text': MESSAGE.get('first_timer_message', 'Some error occured'),
+                    'channel': dm_channel_id
+                }
                 # Send a DM request
                 r = requests.post(dm_chat_post_message_url, data=json.dumps(body), headers=headers)
-                return {'message':'Success','status': 200}
-    return {'message':'Data format wrong', 'status':400}
+                return {'message': 'Success', 'status': 200}
+    return {'message': 'Data format wrong', 'status': 400}
 
 
 def is_maintainer_comment(commenter_id):
     # Using the id of usergroup maintainers
     body = {'usergroup': maintainer_usergroup_id, 'include_disabled': True}
     # Get list of maintainers. For more info :  usergroups.users.list in Slack API
-    r = requests.post(get_maintainer_list, data= body, headers=headers_legacy_urlencoded)
+    r = requests.post(get_maintainer_list, data=body, headers=headers_legacy_urlencoded)
     response = r.json()
     if response.get('ok', False):
         # Extract the maintainers
@@ -67,7 +78,8 @@ def approve_issue_label_slack(data):
                     if issue_author == github_id:
                         send_message_ephimeral(channel_id, uid, MESSAGE.get('author_cannot_approve', ''))
                         return {"message": "Author cannot approve an issue"}
-                    response = issue_comment_approve_github(params.split(' ')[1], params.split(' ')[0], org_repo_owner, github_id, True)
+                    response = issue_comment_approve_github(params.split(' ')[1], params.split(' ')[0],
+                                                            org_repo_owner, github_id, True)
                     status = response.get('status', 500)
                     if status == 404:
                         # Information given is wrong
@@ -100,7 +112,9 @@ def check_newcomer_requirements(uid, channel_id):
         profile = response.get('profile', '')
         get_github_username = get_github_username_profile(profile)
         github_profile_present = get_github_username.get('github_profile_present', False)
-        if github_profile_present and profile.get('first_name', "") != "" and profile.get('last_name', "") != "" and profile.get('title', "") != "" and profile.get('image_original', "") != "" and not profile.get('phone', "").isdigit():
+        if github_profile_present and profile.get('first_name', "") != "" and profile.get('last_name', "") != "" \
+                and profile.get('title', "") != "" and profile.get('image_original', "") != "" \
+                and not profile.get('phone', "").isdigit():
             github_id = get_github_username.get('github_id', '')
             send_github_invite(github_id)
             send_message_ephimeral(channel_id, uid, MESSAGE.get('invite_sent', ''))
@@ -242,9 +256,9 @@ def open_issue_slack(data):
     tokens = command_params.split(' ')
     # For extracting title, description, update list item, and estimation
     title_body_tokens = command_params.split('*')
-    if command_params=="" or len(tokens) < 6 or len(title_body_tokens) < 5 or \
-        title_body_tokens[1]=='' or title_body_tokens[2]=='' or \
-        title_body_tokens[3]=='' or title_body_tokens[4]=='':
+    if command_params == "" or len(tokens) < 6 or len(title_body_tokens) < 5 or \
+            title_body_tokens[1] == '' or title_body_tokens[2] == '' or \
+            title_body_tokens[3] == '' or title_body_tokens[4] == '':
         send_message_ephimeral(channel_id, uid, MESSAGE.get('wrong_params_issue_command', ''))
         return {"message": "Wrong parameters for command"}
     # Each part is extracted and will be put into the template
@@ -252,7 +266,8 @@ def open_issue_slack(data):
     issue_description = title_body_tokens[2]
     update_list_item = title_body_tokens[3]
     estimation = title_body_tokens[4]
-    status = open_issue_github(org_repo_owner, tokens[0], issue_title, issue_description, update_list_item, estimation, tokens[1])
+    status = open_issue_github(org_repo_owner, tokens[0], issue_title, issue_description,
+                               update_list_item, estimation, tokens[1])
     if status == 201:
         # If issue has been opened successfully
         send_message_ephimeral(channel_id, uid, MESSAGE.get('success_issue', ''))
