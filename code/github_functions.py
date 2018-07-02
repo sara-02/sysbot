@@ -32,7 +32,7 @@ def label_opened_issue(data):
         # Send request
         r = session.post(request_url, data=label, headers=headers)
         # Check response
-        if r.status_code == 201:
+        if r.status_code == 200:
             return {'message': 'Success', 'status': r.status_code}
         else:
             return {'message': 'Error', 'status': r.status_code}
@@ -51,7 +51,6 @@ def send_github_invite(github_id):
         return {'message': 'Success', 'status': r.status_code}
     else:
         return {'message': 'Error', 'status': r.status_code}
-    return {'message': 'Data provided is wrong', 'status': 400}
 
 
 def issue_comment_approve_github(issue_number, repo_name, repo_owner, comment_author, is_from_slack):
@@ -59,7 +58,7 @@ def issue_comment_approve_github(issue_number, repo_name, repo_owner, comment_au
         issue_author = get_issue_author(repo_owner, repo_name, issue_number)
         if issue_author == comment_author:
             github_comment(MESSAGE.get('author_cannot_approve', ''), repo_owner, repo_name, issue_number)
-            return
+            return {'message': 'Author cannot approve.', 'status': 400}
     session = requests.Session()
     session.auth = (USERNAME, PASSWORD)
     # Name of label to be removed
