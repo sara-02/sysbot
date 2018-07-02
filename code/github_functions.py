@@ -1,15 +1,19 @@
 import requests
-from flask import request, json
-from request_urls import (add_label_url, send_team_invite, assign_issue_url, \
-    check_assignee_url, github_comment_url, get_issue_url, open_issue_url, \
-    get_labels, remove_assignee_url, close_pull_request_url, list_open_prs_url)
-from auth_credentials import USERNAME,PASSWORD, newcomers_team_id
+from flask import json
+from request_urls import (add_label_url, send_team_invite, assign_issue_url,
+                          check_assignee_url, github_comment_url, get_issue_url, open_issue_url,
+                          get_labels, remove_assignee_url, close_pull_request_url, list_open_prs_url)
+from auth_credentials import USERNAME, PASSWORD, newcomers_team_id
 from messages import MESSAGE
 from datetime import datetime
 
 
 # Request headers
-headers = {'Accept': 'application/vnd.github.symmetra-preview+json', 'Content-Type': 'application/x-www-form-urlencoded'}
+headers = {
+    'Accept': 'application/vnd.github.symmetra-preview+json',
+    'Content-Type': 'application/x-www-form-urlencoded'
+}
+
 
 # Labels newly opened issues with "Not Approved" tag
 def label_opened_issue(data):
@@ -23,16 +27,16 @@ def label_opened_issue(data):
     # Raw body( string ) with list of tags
     label = '["Not Approved"]'
     # Construct the request url
-    request_url = add_label_url % (repo_owner, repo_name,issue_number)
-    if issue_number !=-1 and repo_name !="" and repo_owner!="":
+    request_url = add_label_url % (repo_owner, repo_name, issue_number)
+    if issue_number != -1 and repo_name != "" and repo_owner != "":
         # Send request
         r = session.post(request_url, data=label, headers=headers)
-        #check response
+        # Check response
         if r.status_code == 201:
-            return {'message':'Success', 'status':r.status_code}
+            return {'message': 'Success', 'status': r.status_code}
         else:
-            return {'message':'Error', 'status':r.status_code}
-    return {'message':'Format of data provided is wrong or misformed', 'status': 400}
+            return {'message': 'Error', 'status': r.status_code}
+    return {'message': 'Format of data provided is wrong or misformed', 'status': 400}
 
 
 def send_github_invite(github_id):
@@ -41,13 +45,13 @@ def send_github_invite(github_id):
     # Header as required by Github API
     headers = {'Accept': 'application/vnd.github.hellcat-preview+json',
                'Content-Type': 'application/x-www-form-urlencoded'}
-    request_url =  send_team_invite %(newcomers_team_id, github_id)
+    request_url = send_team_invite % (newcomers_team_id, github_id)
     r = session.put(request_url, data=json.dumps({'role': 'member'}), headers=headers)
     if r.status_code == 200:
-        return {'message':'Success', 'status':r.status_code}
+        return {'message': 'Success', 'status': r.status_code}
     else:
-        return {'message':'Error', 'status':r.status_code}
-    return {'message':'Data provided is wrong', 'status': 400}
+        return {'message': 'Error', 'status': r.status_code}
+    return {'message': 'Data provided is wrong', 'status': 400}
 
 
 def issue_comment_approve_github(issue_number, repo_name, repo_owner, comment_author, is_from_slack):
@@ -58,27 +62,26 @@ def issue_comment_approve_github(issue_number, repo_name, repo_owner, comment_au
             return
     session = requests.Session()
     session.auth = (USERNAME, PASSWORD)
-    #Name of label to be removed
+    # Name of label to be removed
     remove_label_name = '/Not%20Approved'
-    #Label to be added
+    # Label to be added
     label = '["issue-approved"]'
     request_url = add_label_url % (repo_owner, repo_name, issue_number)
-    #Delete the not approved label first
-    response = session.delete(request_url+remove_label_name, headers=headers)
+    # Delete the not approved label first
+    response = session.delete(request_url + remove_label_name, headers=headers)
     if response.status_code == 200 or response.status_code == 404:
-        #Add the new label
+        # Add the new label
         response = session.post(request_url, data=label, headers=headers)
         if response.status_code == 200:
-            return {'message':'Success', 'status':response.status_code}
+            return {'message': 'Success', 'status': response.status_code}
         else:
-            return {'message':'Error', 'status':response.status_code}
-    return {'message':'Data provided is wrong', 'status': 400}
+            return {'message': 'Error', 'status': response.status_code}
+    return {'message': 'Data provided is wrong', 'status': 400}
 
 
 def github_pull_request_label(pr_number, repo_name, repo_owner):
     session = requests.Session()
     session.auth = (USERNAME, PASSWORD)
-    headers = {'Accept': 'application/vnd.github.symmetra-preview+json', 'Content-Type': 'application/x-www-form-urlencoded'}
     label = '["not reviewed"]'
     # Add label of under review to new PRs
     request_url = add_label_url % (repo_owner, repo_name, pr_number)
@@ -105,7 +108,7 @@ def check_assignee_validity(repo_name, assignee, repo_owner):
     return response.status_code
 
 
-def github_comment(message,repo_owner, repo_name,issue_number):
+def github_comment(message, repo_owner, repo_name, issue_number):
     body = '{"body":"%s"}' % message
     session = requests.Session()
     session.auth = (USERNAME, PASSWORD)
@@ -150,12 +153,11 @@ def open_issue_github(repo_owner, repo_name, issue_title, issue_description, upd
     session = requests.Session()
     session.auth = (USERNAME, PASSWORD)
     request_url = open_issue_url % (repo_owner, repo_name)
-    headers = {'Accept': 'application/vnd.github.symmetra-preview+json', 'Content-Type': 'application/x-www-form-urlencoded'}
     # JSON issue body.
     issue_request_body = {
         "title": "%s" % issue_title,
         "body": MESSAGE.get("issue_template") % (author, issue_description, update_list_item, estimation)
-        }
+    }
     response = session.post(request_url, json=issue_request_body, headers=headers)
     return response.status_code
 
@@ -242,7 +244,7 @@ def list_open_prs_from_repo(repo_owner, repo_name):
         today = datetime.now()
         try:
             opened_date = datetime.strptime(pr.get('created_at', ''), "%Y-%m-%dT%H:%M:%SZ")
-            if (today-opened_date).days <= 7:
+            if (today - opened_date).days <= 7:
                 labels = pr.get('labels', '')
                 for label in labels:
                     if label.get('name', '') == "not reviewed":

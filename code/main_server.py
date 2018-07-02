@@ -6,7 +6,7 @@ from github_functions import label_opened_issue, issue_comment_approve_github, \
     check_issue_template, list_open_prs_from_repo
 from stemming.porter2 import stem
 from nltk.tokenize import word_tokenize
-from auth_credentials import announcement_channel_id, BOT_ACCESS_TOKEN
+from auth_credentials import announcement_channel_id
 from slack_functions import dm_new_users, check_newcomer_requirements, \
     approve_issue_label_slack, assign_issue_slack, claim_issue_slack, \
     open_issue_slack, send_message_ephimeral, send_message_to_channels
@@ -53,9 +53,11 @@ schedule = BackgroundScheduler(daemon=True)
 schedule.add_job(collect_unreviewed_prs, 'interval', days=7)
 schedule.start()
 
+
 @app.route('/')
 def home():
     return 'Response to test hosting.'
+
 
 # This function will recieve all the github events
 @app.route('/web_hook', methods=['POST'])
@@ -63,7 +65,7 @@ def github_hook_receiver_function():
     if request.headers['Content-Type'] == 'application/json':
         data = request.json
         action = data.get('action', None)
-        if action!=None:
+        if action is not None:
             if action == 'opened' and data.get('pull_request', '') == '':
                 # If it's an issue opened event and not PR opened event
                 issue_number = data.get('issue', {}).get('number', '')
@@ -97,7 +99,8 @@ def github_hook_receiver_function():
                 # If comment is to assign issue
                 if comment_body.lower().startswith('@sys-bot assign'):
                     is_approved = check_approved_tag(repo_owner, repo_name, issue_number)
-                    if len(tokens) == 3 and not is_issue_claimed_or_assigned and (author_association == 'COLLABORATOR' or author_association == 'OWNER') and is_approved:
+                    if len(tokens) == 3 and not is_issue_claimed_or_assigned and \
+                            (author_association == 'COLLABORATOR' or author_association == 'OWNER') and is_approved:
                         issue_assign(issue_number, repo_name, tokens[2], repo_owner)
                     elif len(tokens) != 3 and not is_issue_claimed_or_assigned:
                         github_comment(MESSAGE.get('wrong_format_github', ''), repo_owner, repo_name, issue_number)
@@ -164,28 +167,29 @@ def github_hook_receiver_function():
 def slack_hook_receiver_function():
     if request.headers['Content-Type'] == 'application/json':
         data = request.json
-        challenge = data.get('challenge',None)
+        challenge = data.get('challenge', None)
         # The url is sent a challenge data first time to verify the url
-        if challenge != None:
+        if challenge is not None:
             # If challenge is made, return challenge key as required by the API
             return challenge
         else:
             # Else get the event type
-            event = data.get('event',{}).get('type', None)
+            event = data.get('event', {}).get('type', None)
             if event == 'member_joined_channel':
                 # Check that it's a member_joined_channel event
-                channel = data.get('event',{}).get('channel', None)
+                channel = data.get('event', {}).get('channel', None)
                 if channel == announcement_channel_id:
                     # Check if channel_id is the required channel, i.e, Announcements channel
                     dm_new_users(data)
         return json.dumps(request.json)
+
 
 # Recieve responses from sysbot_invite slash command
 @app.route('/invite', methods=['POST', 'GET'])
 def invite():
     if request.headers['Content-Type'] == 'application/x-www-form-urlencoded':
         slash_user_info = request.form
-        uid = slash_user_info.get('user_id','')
+        uid = slash_user_info.get('user_id', '')
         channel_id = slash_user_info.get('channel_id', '')
         if uid != "":
             check_newcomer_requirements(uid, channel_id)
@@ -228,17 +232,21 @@ def open_issue_receiver():
 def help_command():
     if request.headers['Content-Type'] == 'application/x-www-form-urlencoded':
         user_info = request.form
-        send_message_ephimeral(user_info.get('channel_id', ''), user_info.get('user_id', ''), MESSAGE.get('help_message', ''))
+        send_message_ephimeral(user_info.get('channel_id', ''),
+                               user_info.get('user_id', ''), MESSAGE.get('help_message', ''))
         return Response(status=200)
 
 
 def get_stems(sentence):
-    # Generator expressions with joins are much faster than conversion to strings and appending to stemmed tokens to lists and overheads of string conversion.
+    # Generator expressions with joins are much faster than conversion to strings
+    # and appending to stemmed tokens to lists and overheads of string conversion.
     stemmed_sentence = ' '.join(stem(token) for token in word_tokenize(sentence))
     return stemmed_sentence
 
+
 def lemmatize_sent(sentence):
-    # Generator expressions with joins are much faster than conversion to strings and appending to stemmed tokens to lists and overheads of string conversion.
+    # Generator expressions with joins are much faster than conversion to strings
+    # and appending to stemmed tokens to lists and overheads of string conversion.
     lemmatized_sentence = ' '.join(WordNetLemmatizer().lemmatize(token) for token in word_tokenize(sentence))
     return lemmatized_sentence
 

@@ -1,7 +1,3 @@
-#credentials and urls file added
-code/auth_credentials.py
-code/request_urls.py
-
  Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
