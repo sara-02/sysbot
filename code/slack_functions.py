@@ -118,7 +118,7 @@ def check_newcomer_requirements(uid, channel_id):
             github_id = get_github_username.get('github_id', '')
             send_github_invite(github_id)
             send_message_ephimeral(channel_id, uid, MESSAGE.get('invite_sent', ''))
-            return {"message": "Invittion sent"}
+            return {"message": "Invitation sent"}
         else:
             send_message_ephimeral(channel_id, uid, MESSAGE.get('newcomer_requirement_incomplete', ''))
             return {"message": "Newcomer requirements incomplete"}
@@ -238,7 +238,10 @@ def claim_issue_slack(data):
 def send_message_to_channels(channel_id, message):
     body = {'username': 'Sysbot', 'as_user': True, 'text': message, 'channel': channel_id}
     response = requests.post(dm_chat_post_message_url, data=json.dumps(body), headers=headers)
-    return response.status_code
+    if response.json().get('ok', False):
+        return {'message': 'Success', 'status': 200}
+    else:
+        return {'message': 'Wrong information', 'status': 404}
 
 
 def send_message_ephimeral(channel_id, uid, message):
@@ -288,10 +291,10 @@ def get_detailed_profile(uid):
 
 def get_github_username_profile(profile):
         custom_fields = profile.get('fields', {})
-        github_id = ""
-        for key in custom_fields:
-            github_link = custom_fields.get(key, {}).get('value', '')
-            if 'github.com/' in github_link:
-                github_id = github_link.split('github.com/')[1]
-                return {'github_profile_present': True, 'github_id': github_id}
+        if custom_fields is not None:
+            for key in custom_fields:
+                github_link = custom_fields.get(key, {}).get('value', '')
+                if 'github.com/' in github_link:
+                    github_id = github_link.split('github.com/')[1]
+                    return {'github_profile_present': True, 'github_id': github_id}
         return {'github_profile_present': False}

@@ -216,7 +216,7 @@ def check_issue_template(repo_owner, repo_name, issue_number, body):
 def are_issue_essential_components_present(body):
     tokens = body.split('\r\n')
     # Remove blank strings
-    tokens = [s for s in tokens if s != '']
+    tokens = [s.strip() for s in tokens if s != '']
     # Necessary components in the template
     necessary_elements_set = {'## Description', '## Acceptance Criteria', '### Update [Required]',
                               '## Definition of Done', '## Estimation'}
