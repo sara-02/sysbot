@@ -21,3 +21,7 @@ USERNAME = os.environ['USERNAME']
 PASSWORD = os.environ['PASSWORD']
 newcomers_team_id = '2767388'
 org_repo_owner = 'systers'
+
+# Luis API
+api_key = os.environ['api_key']
+path_secret = os.environ['path_secret']

@@ -47,7 +47,9 @@ MESSAGE = {
         '3. A slash command */sysbot_assign_issue <repo_name> <issue_number> <assignee_github_username>* can be used to assign any issue from Github directly via Slack.'+\
         'However this command can only be used by members of *@maintainers* team on Slack.\n'+\
         '4. A slash command */sysbot_claim <repo_name> <issue_number> <assignee_github_username>* or */sysbot_claim <repo_name> <issue_number>* '+\
-        ' ( the latter option will work if your github URL is provided on Slack) can be used to claim any issue from Github directly via Slack.\n',
+        ' ( the latter option will work if your github URL is provided on Slack) can be used to claim any issue from Github directly via Slack.\n'+\
+        '5. You can mention the bot in a channel and query it about slack team for the channel. Format: @Sysbot <Your query>. The bot will always respond to the command:'+\
+        '@Sysbot maintainer team name . You can play around and try some other variants. Eg: "@Sysbot I have a doubt about this project. Who to contact?" and similar questions',
     'no_permission': 'You do not have permissions for this action.',
     'not_approved': 'This issue has not been approved yet. Please try a different issue.',
     'pr_to_unapproved_issue': 'Please send PRs only to approved issues.',
@@ -58,5 +60,9 @@ MESSAGE = {
              "### Update [Required]\r\n - [ ] %s \r\n\r\n" \
              "## Definition of Done\r\n - [ ] All of the required " \
              "items are completed.\r\n - [ ] Approval by 1 mentor.\r\n\r\n" \
-             "## Estimation\r\n %s hours.\r\n"
+             "## Estimation\r\n %s hours.\r\n",
+    'slack_team_message': 'For any doubt related to this project, mention <!subteam^%s|%s> in your queries.',
+    'slack_team_DNE': 'I have no information about the team for this channel.',
+    'wrong_query_format': 'Query format is wrong. Please read the docs or use /sysbot_help to know more',
+    'no_answer': 'I have no answer for this query! Please type /sysbot_help to know more.'
 }

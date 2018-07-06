@@ -22,3 +22,7 @@ get_labels = 'https://api.github.com/repos/%s/%s/issues/%s/labels'
 get_contributors = 'https://api.github.com/repos/%s/%s/contributors'
 close_pull_request_url = 'https://api.github.com/repos/%s/%s/pulls/%s'
 list_open_prs_url = 'https://api.github.com/repos/%s/%s/pulls?state=open'
+
+# LUIS API URL
+luis_agent_intent_classify_call = 'https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/%s?subscription-key=%s' \
+                                  '&verbose=true&timezoneOffset=0&q=%s'

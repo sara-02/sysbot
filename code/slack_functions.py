@@ -2,13 +2,15 @@
 
 import requests
 from flask import json
-from auth_credentials import BOT_ACCESS_TOKEN, maintainer_usergroup_id, legacy_token, org_repo_owner
+from auth_credentials import (BOT_ACCESS_TOKEN, maintainer_usergroup_id, legacy_token, org_repo_owner, path_secret,
+                              api_key)
 from request_urls import (dm_channel_open_url, dm_chat_post_message_url, get_maintainer_list,
-                          get_user_profile_info_url, chat_post_ephimeral_message_url)
+                          get_user_profile_info_url, chat_post_ephimeral_message_url, luis_agent_intent_classify_call)
 from messages import MESSAGE
 from github_functions import (send_github_invite, issue_comment_approve_github, issue_assign,
                               check_assignee_validity, check_multiple_issue_claim,
                               open_issue_github, get_issue_author, check_approved_tag)
+from dictionaries import slack_team_vs_repo_dict
 
 headers = {'Content-type': 'application/json', 'Authorization': 'Bearer {}'.format(BOT_ACCESS_TOKEN)}
 headers_legacy_urlencoded = {
@@ -298,3 +300,41 @@ def get_github_username_profile(profile):
                     github_id = github_link.split('github.com/')[1]
                     return {'github_profile_present': True, 'github_id': github_id}
         return {'github_profile_present': False}
+
+
+def slack_team_name_reply(data):
+    message = data.get('event', {}).get('text', '')
+    channel_id = data.get('event', {}).get('channel', '')
+    uid = data.get('event', {}).get('user', '')
+    # Check if query format is ok
+    if message == '' or len(message.split('<@UASFP3GHW>')) >= 2:
+        # Extracting the query text from message. Here <@UASFP3GHW> is the bot mention.
+        query = message.split('<@UASFP3GHW>')[1].strip()
+        team_details = slack_team_vs_repo_dict.get(channel_id, '')
+        # Check if query is empty or if channel doesn't have a team.
+        if query != '' and team_details != '':
+            # This is a constant command which will always work
+            if query == 'maintainer team name':
+                send_message_to_channels(channel_id, MESSAGE.get('slack_team_message') % (
+                    team_details[0], team_details[1]))
+                return {'message': 'Team name requested'}
+            else:
+                query = query.replace(' ', '%20')
+                request_url = luis_agent_intent_classify_call % (path_secret, api_key, query)
+                response = requests.get(request_url).json()
+                # Checking by matching intent. Keeping score high to prevent false positives.
+                condition1 = response.get('topScoringIntent', {}).get('intent', '') == 'Maintainers'
+                condition2 = float(response.get('topScoringIntent', {}).get('score', '0')) > 0.965
+                if condition1 and condition2:
+                    send_message_to_channels(channel_id, MESSAGE.get('slack_team_message') % (
+                        team_details[0], team_details[1]))
+                    return {'message': 'Team name requested'}
+                else:
+                    # If query isn't recognized, return default answer
+                    send_message_ephimeral(channel_id, uid, MESSAGE.get('no_answer'))
+                    return {'message': 'Not classified query'}
+        elif team_details == '':
+            send_message_ephimeral(channel_id, uid, MESSAGE.get('slack_team_DNE'))
+            return {'message': 'Team does not exist in records.'}
+    send_message_ephimeral(channel_id, uid, MESSAGE.get('wrong_query_format'))
+    return {'message': 'Illegitimate query.'}
