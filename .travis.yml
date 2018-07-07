@@ -1,16 +1,20 @@
-sudo: false
+sudo: required
 language: python
 python:
   - "2.7"
 install:
   - pip install -r requirements.txt
   - pip install coveralls==0.4.4
+before_script:
+ - chmod +x deploy.sh
+ - chmod +x testing.sh
 script:
-  - coverage run --source code -m unittest discover tests
+  - ./testing.sh
   - flake8 code
 notifications:
   email:
     - sombuddha2016@gmail.com
     - ramits.co@nsit.net.in
 after_success:
-  coveralls --rcfile=.coveragerc
+  - ./deploy.sh
+  - coveralls --rcfile=.coveragerc

@@ -16,3 +16,4 @@ urllib3==1.22
 websocket-client==0.47.0
 Werkzeug==0.14.1
 flake8==2.4.1
+awsebcli==3.14.1
