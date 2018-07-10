@@ -233,7 +233,7 @@ def are_issue_essential_components_present(body):
     return False
 
 
-def list_open_prs_from_repo(repo_owner, repo_name):
+def list_open_prs_from_repo(repo_owner, repo_name):  # pragma: no cover
     session = requests.Session()
     session.auth = (USERNAME, PASSWORD)
     request_url = list_open_prs_url % (repo_owner, repo_name)

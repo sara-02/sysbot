@@ -116,7 +116,3 @@ class TestGithubFunctions(unittest.TestCase):
         wrong_template = are_issue_essential_components_present("Test test")
         self.assertEqual(correct_template, True)
         self.assertEqual(wrong_template, False)
-
-    def test_list_open_prs_from_repo(self):
-        no_prs_listed = list_open_prs_from_repo('systers', 'sysbot-test')
-        self.assertEqual(no_prs_listed, "")

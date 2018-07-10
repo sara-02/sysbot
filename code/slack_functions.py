@@ -237,7 +237,7 @@ def claim_issue_slack(data):
         return {"message": "Correct claim format"}
 
 
-def send_message_to_channels(channel_id, message):
+def send_message_to_channels(channel_id, message):  # pragma: no cover
     body = {'username': 'Sysbot', 'as_user': True, 'text': message, 'channel': channel_id}
     response = requests.post(dm_chat_post_message_url, data=json.dumps(body), headers=headers)
     if response.json().get('ok', False):
@@ -252,7 +252,7 @@ def send_message_ephimeral(channel_id, uid, message):
     return response.status_code
 
 
-def open_issue_slack(data):
+def open_issue_slack(data):  # pragma: no cover
     channel_id = data.get('channel_id', '')
     uid = data.get('user_id', '')
     # Get the command parameters used by the user
