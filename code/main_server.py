@@ -9,7 +9,7 @@ from nltk.tokenize import word_tokenize
 from auth_credentials import announcement_channel_id
 from slack_functions import (dm_new_users, check_newcomer_requirements,
                              approve_issue_label_slack, assign_issue_slack, claim_issue_slack,
-                             open_issue_slack, send_message_ephimeral, send_message_to_channels,
+                             open_issue_slack, send_message_ephemeral, send_message_to_channels,
                              slack_team_name_reply)
 from nltk.stem import WordNetLemmatizer
 from messages import MESSAGE
@@ -216,7 +216,7 @@ def open_issue_receiver():
 def help_command():
     if request.headers['Content-Type'] == 'application/x-www-form-urlencoded':
         user_info = request.form
-        send_message_ephimeral(user_info.get('channel_id', ''),
+        send_message_ephemeral(user_info.get('channel_id', ''),
                                user_info.get('user_id', ''), MESSAGE.get('help_message', ''))
         return Response(status=200)
 
