@@ -35,3 +35,35 @@ slack_team_vs_repo_dict = {
     'CAU75GQLU': ['SBHP9AY5P', 'mailman3-team'],
     'C0QJX393L': ['SBJ37KL84', 'macc-team']
 }
+
+# Projects versus technical stacks
+techstack_vs_projects = {
+    'HTML': ['slack-systers-opensource', 'vms', 'PC-Prep-Kit', 'systers.github.io', 'portal', 'macc',
+             'slack-ghc', 'communities', 'pchub', 'language-translation', 'FirstAide-web'],
+    'CSS': ['slack-systers-opensource', 'vms', 'PC-Prep-Kit', 'systers.github.io', 'portal', 'macc',
+            'slack-ghc', 'communities', 'pchub', 'language-translation', 'FirstAide-web'],
+    'JAVASCRIPT': ['slack-systers-opensource', 'vms', 'PC-Prep-Kit', 'systers.github.io', 'portal',
+                   'powerup-story-designer', 'powerup-scenario-builder', 'macc', 'slack-ghc',
+                   'communities', 'pchub', 'language-translation'],
+    'JAVA': ['powerup-android', 'malaria-app-android', 'volunteers-android', 'conference-android',
+             'mentorship-android', 'peacetrack-android', 'realtrack-android', 'FirstAide-Android'],
+    'ANDROID': ['powerup-android', 'malaria-app-android', 'volunteers-android', 'conference-android',
+                'mentorship-android', 'peacetrack-android', 'realtrack-android', 'FirstAide-Android'],
+    'SWIFT': ['powerup-iOS', 'peacetrack-ios', 'realtrack-ios', 'malaria-app-ios', 'conference-iOS',
+              'FirstAide-iOS'],
+    'IOS': ['powerup-iOS', 'peacetrack-ios', 'realtrack-ios', 'malaria-app-ios', 'conference-iOS',
+            'FirstAide-iOS'],
+    'ANGULARJS': ['PC-Prep-Kit', 'systers.github.io', 'communities'],
+    'WEB DEVELOPMENT': ['PC-Prep-Kit', 'systers.github.io', 'vms', 'hyperkitty', 'portal',
+                        'slack-systers-opensource', 'systers.github.io', 'macc', 'postorius',
+                        'slack-ghc', 'communities', 'pchub', 'language-translation', 'crowdmap',
+                        'FirstAide-web'],
+    'PYTHON': ['vms', 'sysbot', 'portal', 'hyperkitty', 'macc', 'postorius', 'mailmanclient',
+               'mailman3'],
+    'DJANGO': ['vms', 'portal', 'hyperkitty', 'macc', 'postorius', 'mailman3'],
+    'FLASK': ['mentorship-backend', 'sysbot'],
+    'NODEJS': ['PC-Prep-Kit', 'systers.github.io'],
+    'BOTS': ['sysbot'],
+    'RUBY': ['pchub', 'language-translation'],
+    'PHP': ['crowdmap', 'FirstAide-web']
+}
