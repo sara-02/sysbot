@@ -10,7 +10,7 @@ from messages import MESSAGE
 from github_functions import (send_github_invite, issue_comment_approve_github, issue_assign,
                               check_assignee_validity, check_multiple_issue_claim,
                               open_issue_github, get_issue_author, check_approved_tag)
-from dictionaries import slack_team_vs_repo_dict
+from dictionaries import slack_team_vs_repo_dict, techstack_vs_projects
 
 headers = {'Content-type': 'application/json', 'Authorization': 'Bearer {}'.format(BOT_ACCESS_TOKEN)}
 headers_legacy_urlencoded = {
@@ -246,6 +246,12 @@ def send_message_to_channels(channel_id, message):  # pragma: no cover
         return {'message': 'Wrong information', 'status': 404}
 
 
+def send_message_thread(channel_id, message, thread_timestamp):  # pragma: no cover
+    body = {'username': 'Sysbot', 'as_user': True, 'text': message, 'channel': channel_id, 'thread_ts': thread_timestamp}
+    response = requests.post(dm_chat_post_message_url, data=json.dumps(body), headers=headers)
+    return response.status_code
+
+
 def send_message_ephemeral(channel_id, uid, message):
     body = {'username': 'Sysbot', 'as_user': True, 'text': message, 'channel': channel_id, 'user': uid}
     response = requests.post(chat_post_ephimeral_message_url, data=json.dumps(body), headers=headers)
@@ -338,3 +344,45 @@ def slack_team_name_reply(data):
             return {'message': 'Team does not exist in records.'}
     send_message_ephemeral(channel_id, uid, MESSAGE.get('wrong_query_format'))
     return {'message': 'Illegitimate query.'}
+
+
+def handle_message_answering(event_data):
+    # Time stamp  of thread if present
+    thread_ts = event_data.get('thread_ts', None)
+    # Message time stamp
+    reply_ts = event_data.get('ts', None)
+    # If message is in a thread, then the UID of commenter of main message
+    parent_uid = event_data.get('parent_user_id', None)
+    # Current comment's author
+    comment_user_uid = event_data.get('user', None)
+    text = str(event_data.get('text', None))
+    channel = event_data.get('channel', None)
+    # Checking if it's a reply to a thread by any other user
+    if thread_ts is not None and parent_uid != comment_user_uid:
+        return
+    # If the message is in a thread and made by the parent commenter
+    elif thread_ts is not None and parent_uid == comment_user_uid:
+        reply_ts = thread_ts
+    if channel == 'C0CAF47RQ':
+        techs = techstack_vs_projects.keys()
+        suggest_projects_set = set()
+        for tech in techs:
+            if tech in text.upper():
+                suggest_projects_set = suggest_projects_set.union(set(techstack_vs_projects[tech]))
+        suggest_projects_list = list(suggest_projects_set)
+        # No tech stack found in intro comment.
+        if not suggest_projects_list and thread_ts is None:
+            message = MESSAGE.get('answer_to_intro') % (MESSAGE.get('no_project'))
+            send_message_thread(channel, message, reply_ts)
+        elif suggest_projects_list:
+            projects = ""
+            for i, project in enumerate(suggest_projects_list):
+                projects = projects + "\n" + str(i) + ". www.github.com/systers/" + project + ", "
+            # Message is not in a thread. Reply with full message.
+            if thread_ts is None:
+                message = MESSAGE.get('answer_to_intro') % (MESSAGE.get('projects_message') % projects[0:-2])
+                send_message_thread(channel, message, reply_ts)
+            # Message in thread. Reply with projects.
+            elif thread_ts is not None:
+                message = MESSAGE.get('projects_message') % projects[0:-2]
+                send_message_thread(channel, message, reply_ts)
