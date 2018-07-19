@@ -67,3 +67,12 @@ techstack_vs_projects = {
     'RUBY': ['pchub', 'language-translation'],
     'PHP': ['crowdmap', 'FirstAide-web']
 }
+
+message_key_vs_list_of_alternatives = {
+    'systers': ["systers", "systers community"],
+    'anita_borg': ["anitab", "anita borg", "anitaborg institution", "anitab.org"],
+    'outreachy': ["outreachy"],
+    'gsoc_info': ["gsoc", "google summer of code"],
+    'gci_info':  ["gci",  "google code-in", "google codein", "google code in"],
+    'rgsoc_info': ["rgsoc"]
+}

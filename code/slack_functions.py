@@ -2,15 +2,18 @@
 
 import requests
 from flask import json
+from nltk.tokenize import sent_tokenize
+
 from auth_credentials import (BOT_ACCESS_TOKEN, maintainer_usergroup_id, legacy_token, org_repo_owner, path_secret,
                               api_key)
+from topic_extractor import NPExtractor
 from request_urls import (dm_channel_open_url, dm_chat_post_message_url, get_maintainer_list,
                           get_user_profile_info_url, chat_post_ephimeral_message_url, luis_agent_intent_classify_call)
-from messages import MESSAGE
+from messages import MESSAGE, ANSWERS_FAQS
 from github_functions import (send_github_invite, issue_comment_approve_github, issue_assign,
                               check_assignee_validity, check_multiple_issue_claim,
                               open_issue_github, get_issue_author, check_approved_tag)
-from dictionaries import slack_team_vs_repo_dict, techstack_vs_projects
+from dictionaries import slack_team_vs_repo_dict, techstack_vs_projects, message_key_vs_list_of_alternatives
 
 headers = {'Content-type': 'application/json', 'Authorization': 'Bearer {}'.format(BOT_ACCESS_TOKEN)}
 headers_legacy_urlencoded = {
@@ -191,7 +194,6 @@ def claim_issue_slack(data):
         if not is_issue_approved:
             send_message_ephemeral(channel_id, uid, MESSAGE.get('not_approved', ''))
             return {"message": "Issue not approved"}
-        github_username = ''
         # If the format /sysbot_claim <repo_name> <issue_number> is used
         if len(tokens) == 2:
             response = get_detailed_profile(uid)
@@ -376,10 +378,8 @@ def handle_message_answering(event_data):
             send_message_thread(channel, message, reply_ts)
         elif suggest_projects_list:
             projects = ""
-            i = 0
-            for project in suggest_projects_list:
-                i = i + 1
-                projects = projects + "\n" + str(i) + ". www.github.com/systers/" + project + ", "
+            for i, project in enumerate(suggest_projects_list):
+                projects = projects + "\n" + str(i + 1) + ". www.github.com/systers/" + project + ", "
             # Message is not in a thread. Reply with full message.
             if thread_ts is None:
                 message = MESSAGE.get('answer_to_intro') % (MESSAGE.get('projects_message') % projects[0:-2])
@@ -388,3 +388,44 @@ def handle_message_answering(event_data):
             elif thread_ts is not None:
                 message = MESSAGE.get('projects_message') % projects[0:-2]
                 send_message_thread(channel, message, reply_ts)
+    # Answering some FAQs
+    answer_keyword_faqs(text, channel, reply_ts)
+    # Answering classification questions only on questions and intro and not in threads
+    if thread_ts is None and (channel == 'C0S15BFNX' or channel == 'C0CAF47RQ'):
+        luis_classifier(text, channel, reply_ts)
+
+
+def answer_keyword_faqs(comment_text, channel, reply_ts):
+    sentences = sent_tokenize(comment_text)
+    for sentence in sentences:
+        is_question = check_is_question(sentence)
+        if not is_question:
+            continue
+        main_subjects = NPExtractor(sentence).extract()
+        for topic in main_subjects:
+            for key in message_key_vs_list_of_alternatives.keys():
+                if topic.lower() in message_key_vs_list_of_alternatives[key]:
+                    send_message_thread(channel, ANSWERS_FAQS.get(key, ""), reply_ts)
+                    break
+
+
+def check_is_question(sentence):
+    start_words = ["who", "what", "when", "where", "why", "how", "is", "can", "does", "do"]
+    if sentence.endswith("?"):
+        return True
+    for word in start_words:
+        if sentence.startswith(word):
+            return True
+    return False
+
+
+def luis_classifier(query, channel, reply_ts):
+    query = query.replace(' ', '%20')
+    request_url = luis_agent_intent_classify_call % (path_secret, api_key, query)
+    response = requests.get(request_url).json()
+    top_intent = response.get('topScoringIntent', {}).get('intent', '')
+    top_intent_score = float(response.get('topScoringIntent', {}).get('score', '0'))
+    if top_intent == 'participation-gender' and top_intent_score > 0.6:
+        send_message_thread(channel, ANSWERS_FAQS.get('contributor_gender'), reply_ts)
+    elif top_intent == 'getting-started' and top_intent_score > 0.6:
+        send_message_thread(channel, ANSWERS_FAQS.get('getting_started'), reply_ts)

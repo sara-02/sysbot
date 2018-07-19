@@ -16,7 +16,7 @@ from messages import MESSAGE
 from apscheduler.schedulers.background import BackgroundScheduler
 from dictionaries import repo_vs_channel_id_dict
 # The list of channels on which the bot will respond to queries
-CHANNEL_LIST = ['C0CAF47RQ', 'C0S15BFNX', 'CAM6T4AGH']
+CHANNEL_LIST = {'C0CAF47RQ', 'C0S15BFNX', 'CAM6T4AGH'}
 
 app = Flask(__name__)
 
@@ -157,7 +157,6 @@ def slack_hook_receiver_function():
             return challenge
         else:
             # Else get the event type
-            print data
             event = data.get('event', {}).get('type', None)
             user = data.get('event', {}).get('user', None)
             channel = data.get('event', {}).get('channel', None)
