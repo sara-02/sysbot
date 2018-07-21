@@ -70,6 +70,69 @@ MESSAGE = {
                        " and contribution guidelines. %s",
     'no_project': "With the given information, I was unable to find any project for you. "
                   "Please mention the languages you are familiar with so that I can suggest some projects.",
-    'projects_message': "From the tech stack you mentioned, I suggest you to look into the following "
+    'projects_message': "From the techstack you mentioned, I suggest you to look into the following "
                         "projects: You can go to www.github.com/systers and look for these projects -- %s"
+}
+
+ANSWERS_FAQS = {
+    'getting_started': 'If you have given your intro in the <#C0CAF47RQ|intro> channel, you can get '
+                       'started by going through the guidelines mentioned here: \n'
+                       '1. http://systers.io/code-of-conduct.html \n'
+                       '2. http://systers.io/reporting-guidelines \n\n'
+                       'After reading the code of conduct, comment that you have done so in '
+                       '<#C52CRK4HJ|code-of-conduct>. \nAfter that, go through the following links '
+                       'to get familiar with the workflow and style guidelines: \n'
+                       '1. https://udacity.github.io/git-styleguide/ \n'
+                       '2. http://systers.io/open-source-workflow \n'
+                       '3. http://systers.io/member-levels \n'
+                       '4. http://systers.io/newcomers \n\n'
+                       'As a newcomer, you may post your doubts on <#CAM6T4AGH|newcomers> and '
+                       '<#C0S15BFNX|questions>. \nTo start contributing to projects, take a look here '
+                       'http://systers.io/index.html#projects to know more, '
+                       'and then you can find the respective repos here: www.github.com/systers',
+    'contributor_gender': 'Systers is a community which was built with the vision to get more women '
+                          'into technological field and hence is only available for women. However, '
+                          'Systers Open Source, being an open source organisation is open to all for '
+                          'participation. You are free to contribute to any project or the community '
+                          'as you want. However certain OS programs, like - Outreachy, RGSoC and Moonshot '
+                          'challenge are open only for women and under-represented communities. But GSoC '
+                          'and GCI are open for all. Also, applications for mentoring these programs are '
+                          'open for everyone.',
+    'systers': 'Systers is an online community founded by Anita Borg that '
+               'provides an encouraging atmosphere to all women who are '
+               'interested in computer science. The members of the community '
+               'collaborate with each other and give each other support while '
+               'they continue with the development of their careers. Join their '
+               'mailing list here - http://systers.anitab.org/mailman/listinfo/systers .'
+               ' To find more about the community, go to http://systers.io/',
+    'anita_borg': 'Anita Borg combined technical expertise with a fearless vision to inspire, '
+                  'motivate, and move women in technology. Her legacy continues to touch and '
+                  'change the lives of countless women in the fields of computing and beyond.\n '
+                  'In 1987, computer scientist Anita Borg founded a digital community for women '
+                  'in computing. Today, AnitaB.org works with technologists in more than 80 '
+                  'countries, and partners with academic institutions and Fortune 500 companies '
+                  'worldwide.\n AnitaB.org helps women make significant contributions to technical '
+                  'fields. Our programs and awards highlight the accomplishments of women '
+                  'technologists, while our events and communities enable women to establish '
+                  'their peer networks. You can know more here https://anitab.org/',
+    'gsoc_info': 'Google Summer of Code is a global program focused on bringing more student '
+                 'developers into open source software development. Students work with an open source '
+                 'organization on a 3 month programming project during their break from school. \n'
+                 'Link: https://summerofcode.withgoogle.com/ ',
+    'gci_info': 'Google CodeIn is a contest to introduce pre-university students '
+                '(ages 13-17) to open source software development. Since 2010, 8,108 students from '
+                '107 countries have completed over 40,100 open source tasks! \n'
+                'Link: https://codein.withgoogle.com/archive/ ',
+    'rgsoc_info': 'Rails Girls Summer of Code is a global fellowship program for women and '
+                  'non-binary coders. Students receive a three-month scholarship to work on existing '
+                  'Open Source projects and expand their skill set.\n Link: https://railsgirlssummerofcode.org/ \n',
+    'outreachy': 'Outreachy: It provides three-month internships for people from groups traditionally '
+                 'underrepresented in tech. Interns are paid a stipend of $5,500 and have a $500 travel '
+                 'stipend available to them. Interns work remotely with mentors from Free and Open Source '
+                 'Software (FOSS) communities on projects ranging from programming, user experience, '
+                 'documentation, illustration and graphical design, to data science. Outreachy internships '
+                 'are open internationally to women (cis and trans), trans men, and genderqueer people. '
+                 'Internships are also open to residents and nationals of the United States of any gender '
+                 'who are Black/African American, Hispanic/Latin, Native American/American Indian, Alaska '
+                 'Native, Native Hawaiian, or Pacific Islander.\n Link: https://www.outreachy.org/'
 }
