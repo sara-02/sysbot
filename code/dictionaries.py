@@ -74,5 +74,5 @@ message_key_vs_list_of_alternatives = {
     'outreachy': ["outreachy"],
     'gsoc_info': ["gsoc", "google summer of code"],
     'gci_info':  ["gci",  "google code-in", "google codein", "google code in"],
-    'rgsoc_info': ["rgsoc"]
+    'rgsoc_info': ["rgsoc", "rails girls summer of code"]
 }
