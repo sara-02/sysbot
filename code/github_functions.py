@@ -217,9 +217,17 @@ def are_issue_essential_components_present(body):
     tokens = body.split('\r\n')
     # Remove blank strings
     tokens = [s.strip() for s in tokens if s != '']
-    # Necessary components in the template
+    # Necessary components in the template: user story
     necessary_elements_set = {'## Description', '## Acceptance Criteria', '### Update [Required]',
                               '## Definition of Done', '## Estimation'}
+    # Necessary components in the template: feature request
+    necessary_elements_set_feature = {"**Is your feature request related to a problem? Please describe.**",
+                                      "**Describe the solution you'd like**", "**Describe alternatives you've considered**"}
+    # Necessary components in the template: bug report
+    necessary_elements_set_bug_desktop = {"**Describe the bug**", "**To Reproduce**", "**Expected behavior**",
+                                          "**Desktop (please complete the following information):**"}
+    necessary_elements_set_bug_phone = {"**Describe the bug**", "**To Reproduce**", "**Expected behavior**",
+                                        "**Smartphone (please complete the following information):**"}
     if set(tokens).intersection(necessary_elements_set) == necessary_elements_set:
         # Check if the template format has been followed and contents under any header isn't empty
         if tokens[tokens.index('## Description') + 1] != '## Mocks' and tokens[tokens.index('## Description') + 1] != \
@@ -229,6 +237,21 @@ def are_issue_essential_components_present(body):
                 tokens[tokens.index('### Update [Required]') + 1] != '### Enhancement to Update [Optional]' and \
                 tokens[tokens.index('## Definition of Done') + 1] != '## Estimation' and \
                 tokens[-1] != '## Estimation':
+            return True
+    elif set(tokens).intersection(necessary_elements_set_feature) == necessary_elements_set_feature:
+        if tokens[tokens.index("**Is your feature request related to a problem? Please describe.**") + 1] != \
+                "**Describe the solution you'd like**" and tokens[
+                tokens.index("**Describe the solution you'd like**") + 1] != \
+                "**Describe alternatives you've considered**":
+            return True
+    elif set(tokens).intersection(necessary_elements_set_bug_desktop) == necessary_elements_set_bug_desktop or \
+            set(tokens).intersection(necessary_elements_set_bug_phone) == necessary_elements_set_bug_phone:
+        if tokens[tokens.index("**Describe the bug**") + 1] != "**To Reproduce**" and \
+                tokens[tokens.index("**To Reproduce**") + 1] != "**Expected behavior**" and \
+                (tokens[tokens.index("**Expected behavior**") + 1] !=
+                 "**Desktop (please complete the following information):**" or
+                 tokens[tokens.index("**Expected behavior**") + 1] !=
+                 "**Smartphone (please complete the following information):**"):
             return True
     return False
 
