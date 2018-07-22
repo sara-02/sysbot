@@ -3,7 +3,7 @@ from flask import request, json, Response
 from github_functions import (label_opened_issue, issue_comment_approve_github,
                               github_pull_request_label, issue_assign, github_comment, issue_claim_github,
                               check_multiple_issue_claim, check_approved_tag, unassign_issue, close_pr,
-                              check_issue_template, list_open_prs_from_repo)
+                              check_issue_template, list_open_prs_from_repo, check_pr_template)
 from stemming.porter2 import stem
 from nltk.tokenize import word_tokenize
 from auth_credentials import announcement_channel_id, BOT_UID
@@ -49,7 +49,7 @@ def github_hook_receiver_function():
         data = request.json
         action = data.get('action', None)
         if action is not None:
-            if action == 'opened' and data.get('pull_request', '') == '':
+            if (action == 'opened' or action == 'reopened') and data.get('pull_request', '') == '':
                 # If it's an issue opened event and not PR opened event
                 issue_number = data.get('issue', {}).get('number', '')
                 repo_name = data.get('repository', {}).get('name', '')
@@ -125,21 +125,23 @@ def github_hook_receiver_function():
                         unassign_issue(repo_owner, repo_name, issue_number, tokens[2])
                     else:
                         github_comment(MESSAGE.get('wrong_format_github', ''), repo_owner, repo_name, issue_number)
-            elif action == 'opened' and data.get('pull_request', '') != '':
+            elif (action == 'opened' or action == 'reopened') and data.get('pull_request', '') != '':
                 # If a new PR has been sent
                 pr_number = data.get('number', '')
                 repo_name = data.get('repository', {}).get('name', '')
                 repo_owner = data.get('repository', {}).get('owner', {}).get('login', '')
-                github_pull_request_label(pr_number, repo_name, repo_owner)
                 pr_body = data.get('pull_request', {}).get('body', '')
-                if pr_body != '':
-                    # Extract the issue number mentioned in PR body if PR follows template
-                    issue_number = pr_body.split('Fixes #')[1].split('\r\n')[0].strip()
-                    if issue_number != '':
-                        is_issue_approved = check_approved_tag(repo_owner, repo_name, issue_number)
-                        if not is_issue_approved:
-                            github_comment(MESSAGE.get('pr_to_unapproved_issue', ''), repo_owner, repo_name, pr_number)
-                            close_pr(repo_owner, repo_name, pr_number)
+                is_template_followed = check_pr_template(pr_body, repo_owner, repo_name, pr_number)
+                if is_template_followed:
+                    github_pull_request_label(pr_number, repo_name, repo_owner)
+                    if pr_body != '':
+                        # Extract the issue number mentioned in PR body if PR follows template
+                        issue_number = pr_body.split('Fixes #')[1].split('\r\n')[0].strip()
+                        if issue_number != '':
+                            is_issue_approved = check_approved_tag(repo_owner, repo_name, issue_number)
+                            if not is_issue_approved:
+                                github_comment(MESSAGE.get('pr_to_unapproved_issue', ''), repo_owner, repo_name, pr_number)
+                                close_pr(repo_owner, repo_name, pr_number)
         else:
             pass
             # Currently the bot isn't handeling any other cases
