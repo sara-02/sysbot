@@ -81,7 +81,7 @@ def issue_comment_approve_github(issue_number, repo_name, repo_owner, comment_au
 def github_pull_request_label(pr_number, repo_name, repo_owner):
     session = requests.Session()
     session.auth = (USERNAME, PASSWORD)
-    label = '["not reviewed"]'
+    label = '["Not Reviewed"]'
     # Add label of under review to new PRs
     request_url = add_label_url % (repo_owner, repo_name, pr_number)
     response = session.post(request_url, data=label, headers=headers)
@@ -275,3 +275,37 @@ def list_open_prs_from_repo(repo_owner, repo_name):  # pragma: no cover
         except AttributeError:
             pass
     return pr_url_list
+
+
+def check_pr_template(pr_body, repo_owner, repo_name, pr_number):
+    tokens = pr_body.split('\r\n')
+    # Remove blank strings
+    tokens = [s.strip() for s in tokens if s != '']
+    # Necessary components in the PR template
+    necessary_elements_set = {'# Description', '# Type of Change:', '# How Has This Been Tested?',
+                              '# Checklist:'}
+    # Check if issue linking statement is present
+    if 'Fixes #' not in pr_body:
+        github_comment(MESSAGE.get('pr_not_linked_to_issue'), repo_owner, repo_name, pr_number)
+        close_pr(repo_owner, repo_name, pr_number)
+        return False
+    else:
+        # Checking if issue number is provided
+        for token in tokens:
+            if 'Fixes #' in token:
+                issue_number = token.split('Fixes #')[1]
+                if not issue_number.isdigit():
+                    github_comment(MESSAGE.get('pr_not_linked_to_issue'), repo_owner, repo_name, pr_number)
+                    close_pr(repo_owner, repo_name, pr_number)
+                    return False
+    # Check if the template format has been followed and contents under any header isn't empty
+    if set(tokens).intersection(necessary_elements_set) == necessary_elements_set:
+        if tokens[tokens.index('# Description') + 1] != '# Type of Change:' and \
+                tokens[tokens.index('# Type of Change:') + 1] != '# How Has This Been Tested?' and \
+                tokens[tokens.index('# How Has This Been Tested?') + 1] != '# Checklist:' and \
+                tokens[-1] != '# Checklist:':
+            return True
+
+    github_comment(MESSAGE.get('pr_template_not_followed'), repo_owner, repo_name, pr_number)
+    close_pr(repo_owner, repo_name, pr_number)
+    return False

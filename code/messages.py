@@ -71,7 +71,9 @@ MESSAGE = {
     'no_project': "With the given information, I was unable to find any project for you. "
                   "Please mention the languages you are familiar with so that I can suggest some projects.",
     'projects_message': "From the techstack you mentioned, I suggest you to look into the following "
-                        "projects: You can go to www.github.com/systers and look for these projects -- %s"
+                        "projects: You can go to www.github.com/systers and look for these projects -- %s",
+    'pr_not_linked_to_issue': "This PR is not linked to any issue. Please follow the template and link it to an issue.",
+    'pr_template_not_followed': "This PR does not follow the PR template"
 }
 
 ANSWERS_FAQS = {
