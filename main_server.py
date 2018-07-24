@@ -1,20 +1,20 @@
 from flask import Flask, jsonify
 from flask import request, json, Response
-from github_functions import (label_opened_issue, issue_comment_approve_github,
-                              github_pull_request_label, issue_assign, github_comment, issue_claim_github,
-                              check_multiple_issue_claim, check_approved_tag, unassign_issue, close_pr,
-                              check_issue_template, list_open_prs_from_repo, check_pr_template)
+from code.github_functions import (label_opened_issue, issue_comment_approve_github,
+                                   github_pull_request_label, issue_assign, github_comment, issue_claim_github,
+                                   check_multiple_issue_claim, check_approved_tag, unassign_issue, close_pr,
+                                   check_issue_template, list_open_prs_from_repo, check_pr_template)
 from stemming.porter2 import stem
 from nltk.tokenize import word_tokenize
-from auth_credentials import announcement_channel_id, BOT_UID
-from slack_functions import (dm_new_users, check_newcomer_requirements,
-                             approve_issue_label_slack, assign_issue_slack, claim_issue_slack,
-                             open_issue_slack, send_message_ephemeral, send_message_to_channels,
-                             slack_team_name_reply, handle_message_answering)
+from code.auth_credentials import announcement_channel_id, BOT_UID
+from code.slack_functions import (dm_new_users, check_newcomer_requirements,
+                                  approve_issue_label_slack, assign_issue_slack, claim_issue_slack,
+                                  open_issue_slack, send_message_ephemeral, send_message_to_channels,
+                                  slack_team_name_reply, handle_message_answering)
 from nltk.stem import WordNetLemmatizer
-from messages import MESSAGE
+from code.messages import MESSAGE
 from apscheduler.schedulers.background import BackgroundScheduler
-from dictionaries import repo_vs_channel_id_dict
+from code.dictionaries import repo_vs_channel_id_dict
 # The list of channels on which the bot will respond to queries
 CHANNEL_LIST = {'C0CAF47RQ', 'C0S15BFNX', 'CAM6T4AGH'}
 
@@ -163,6 +163,9 @@ def slack_hook_receiver_function():
             user = data.get('event', {}).get('user', None)
             channel = data.get('event', {}).get('channel', None)
             channel_type = data.get('event', {}).get('channel_type', None)
+            msg_sub_type = data.get('event', {}).get('subtype')
+            condition_subtype = msg_sub_type == '' or msg_sub_type == 'message_replied'
+            condition_user = user != BOT_UID and user != ''
             if event == 'member_joined_channel':
                 # Check that it's a member_joined_channel event
                 if channel == announcement_channel_id:
@@ -172,7 +175,8 @@ def slack_hook_receiver_function():
                 # Check if app has been mentioned in a query
                 slack_team_name_reply(data)
             # Check if the message is made on the 3 required channels
-            elif event == 'message' and user != BOT_UID and channel_type == 'channel' and channel in CHANNEL_LIST:
+            elif event == 'message' and condition_user and condition_subtype and \
+                    channel_type == 'channel' and channel in CHANNEL_LIST:
                 handle_message_answering(data.get('event', {}))
         return json.dumps(request.json)
 
