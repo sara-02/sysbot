@@ -14,10 +14,8 @@ fi
 
 # Checking branch
 if [ "$TRAVIS_BRANCH" == "develop" ]; then
-    FLASK_ENVIRONMENT_CONFIG="dev"
-    SERVER="Staging"
+    SERVER="Development"
 elif [ "$TRAVIS_BRANCH" == "production" ]; then
-    FLASK_ENVIRONMENT_CONFIG="prod"
     SERVER="Production"
 else
     echo "Skip publishing, we don't publish for '$TRAVIS_BRANCH' branch"
@@ -36,7 +34,6 @@ echo "aws_access_key_id = $AWS_ACCESS_ID" >> ~/.aws/config
 echo "aws_secret_access_key = $AWS_SECRET_KEY" >> ~/.aws/config
 
 # Add environment variables
-eb setenv FLASK_ENVIRONMENT_CONFIG=$FLASK_ENVIRONMENT_CONFIG
 eb setenv USERNAME=$USERNAME
 eb setenv PASSWORD=$PASSWORD
 eb setenv path_secret=$path_secret

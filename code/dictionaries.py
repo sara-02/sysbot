@@ -59,7 +59,7 @@ techstack_vs_projects = {
                         'slack-ghc', 'communities', 'pchub', 'language-translation', 'crowdmap',
                         'FirstAide-web'],
     'PYTHON': ['vms', 'sysbot', 'portal', 'hyperkitty', 'macc', 'postorius', 'mailmanclient',
-               'mailman3'],
+               'mailman3', 'mentorship-backend'],
     'DJANGO': ['vms', 'portal', 'hyperkitty', 'macc', 'postorius', 'mailman3'],
     'FLASK': ['mentorship-backend', 'sysbot'],
     'NODEJS': ['PC-Prep-Kit', 'systers.github.io'],
