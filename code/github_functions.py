@@ -174,10 +174,13 @@ def check_approved_tag(repo_owner, repo_name, issue_number):
     session.auth = (USERNAME, PASSWORD)
     request_url = get_labels % (repo_owner, repo_name, issue_number)
     labels = session.get(request_url).json()
+    label_approved_present = False
     for label in labels:
         if label.get('name', '') == 'issue-approved':
-            return True
-    return False
+            label_approved_present = True
+        if label.get('name', '') == 'Template Mismatch':
+            return False
+    return label_approved_present
 
 
 def unassign_issue(repo_owner, repo_name, issue_number, assignee):
