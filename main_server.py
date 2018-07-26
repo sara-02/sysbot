@@ -75,12 +75,12 @@ def github_hook_receiver_function():
                     github_comment(MESSAGE.get('add_tests', ''), repo_owner, repo_name, issue_number)
 
                 # If comment is for approving issue
-                if comment_body.lower() == '@sys-bot approve':
+                if comment_body.lower().strip().startswith('@sys-bot approve'):
                     issue_comment_approve_github(issue_number, repo_name, repo_owner, commenter, False)
                     return jsonify(request.json)
 
                 # If comment is to assign issue
-                if comment_body.lower().startswith('@sys-bot assign'):
+                if comment_body.lower().strip().startswith('@sys-bot assign'):
                     is_approved = check_approved_tag(repo_owner, repo_name, issue_number)
                     if len(tokens) == 3 and not is_issue_claimed_or_assigned and \
                             (author_association == 'COLLABORATOR' or author_association == 'OWNER') and is_approved:
@@ -96,7 +96,7 @@ def github_hook_receiver_function():
                     return jsonify(request.json)
 
                 # If comment is to claim issue
-                if comment_body.lower().startswith('@sys-bot claim'):
+                if comment_body.lower().strip().startswith('@sys-bot claim'):
                     is_approved = check_approved_tag(repo_owner, repo_name, issue_number)
                     if len(tokens) == 2 and not is_issue_claimed_or_assigned and is_approved:
                         assignee = commenter
@@ -164,7 +164,7 @@ def slack_hook_receiver_function():
             channel = data.get('event', {}).get('channel', None)
             channel_type = data.get('event', {}).get('channel_type', None)
             msg_sub_type = data.get('event', {}).get('subtype')
-            condition_subtype = msg_sub_type == '' or msg_sub_type == 'message_replied'
+            condition_subtype = msg_sub_type is None or msg_sub_type == 'message_replied'
             condition_user = user != BOT_UID and user != ''
             if event == 'member_joined_channel':
                 # Check that it's a member_joined_channel event
