@@ -315,7 +315,7 @@ def slack_team_name_reply(data):
     channel_id = data.get('event', {}).get('channel', '')
     uid = data.get('event', {}).get('user', '')
     # Check if query format is ok
-    if message == '' or len(message.split('<@UASFP3GHW>')) >= 2:
+    if message != '' and len(message.split('<@UASFP3GHW>')) >= 2:
         # Extracting the query text from message. Here <@UASFP3GHW> is the bot mention.
         query = message.split('<@UASFP3GHW>')[1].strip()
         team_details = slack_team_vs_repo_dict.get(channel_id, '')
@@ -323,7 +323,7 @@ def slack_team_name_reply(data):
         if query != '' and team_details != '':
             # This is a constant command which will always work
             if query == 'maintainer team name':
-                send_message_to_channels(channel_id, MESSAGE.get('slack_team_message') % (
+                send_message_ephemeral(channel_id, uid, MESSAGE.get('slack_team_message') % (
                     team_details[0], team_details[1]))
                 return {'message': 'Team name requested'}
             else:
@@ -361,11 +361,11 @@ def handle_message_answering(event_data):
     channel = event_data.get('channel', None)
     # Checking if it's a reply to a thread by any other user
     if thread_ts is not None and parent_uid != comment_user_uid:
-        return
+        return {'message': 'Not handling replies made by others'}
     # If the message is in a thread and made by the parent commenter
     elif thread_ts is not None and parent_uid == comment_user_uid:
         reply_ts = thread_ts
-    if channel == 'C0CAF47RQ':
+    if channel == 'C0CAF47RQ':  # pragma: no cover
         techs = techstack_vs_projects.keys()
         suggest_projects_set = set()
         for tech in techs:
@@ -393,6 +393,8 @@ def handle_message_answering(event_data):
     # Answering classification questions only on questions and intro and not in threads
     if thread_ts is None and (channel == 'C0S15BFNX' or channel == 'C0CAF47RQ'):
         luis_classifier(text, channel, reply_ts)
+        return {'message': 'Sent for intent classification'}
+    return {'message': 'Not sent for classification'}
 
 
 def answer_keyword_faqs(comment_text, channel, reply_ts):
@@ -427,5 +429,7 @@ def luis_classifier(query, channel, reply_ts):
     top_intent_score = float(response.get('topScoringIntent', {}).get('score', '0'))
     if top_intent == 'participation-gender' and top_intent_score > 0.6:
         send_message_thread(channel, ANSWERS_FAQS.get('contributor_gender'), reply_ts)
+        return {'message': 'Participant gender question'}
     elif top_intent == 'getting-started' and top_intent_score > 0.6:
         send_message_thread(channel, ANSWERS_FAQS.get('getting_started'), reply_ts)
+        return {'message': 'Getting started question'}

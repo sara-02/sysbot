@@ -119,7 +119,7 @@ profile_without_github = {
     }
 }
 
-slash_command_data = {
+slash_command_help_data = {
     "channel_id": "CAP9GA5MJ",
     "channel_name": "sysbot-testing",
     "command": "/sysbot_help",
@@ -160,3 +160,106 @@ slash_command_data_command_params_missing = {
     "user_id": "U7KMRCS5Q",
     "user_name": "f2016165"
 }
+
+sentence = "Approve approved approving"
+
+slash_command_open_issue_data = {
+    "channel_id": "CAP9GA5MJ",
+    "channel_name": "sysbot-testing",
+    "command": "/sysbot_open_issue",
+    "response_url": "https://hooks.slack.com/commands/T08C86GE8/392362793973/VpLXVTSsEwMsMmTMfBL0OJ8Y",
+    "team_domain": "systers-opensource",
+    "team_id": "T08C86GE8",
+    "text": "sysbot-test sammy1997 *Test issue from Slack* Sample issue description * Requirement * 1",
+    "token": "9WMeKrR9ig79X8PY1jGnzkn5",
+    "trigger_id": "393282244247.8416220484.c13108a9fb90e2f6da8d76c04f2823e9",
+    "user_id": "U7KMRCS5Q",
+    "user_name": "f2016165"
+}
+
+slash_command_claim_data = {
+    "channel_id": "CAP9GA5MJ",
+    "channel_name": "sysbot-testing",
+    "command": "/sysbot_claim",
+    "response_url": "https://hooks.slack.com/commands/T08C86GE8/392362793973/VpLXVTSsEwMsMmTMfBL0OJ8Y",
+    "team_domain": "systers-opensource",
+    "team_id": "T08C86GE8",
+    "text": "sysbot-test 144",
+    "token": "9WMeKrR9ig79X8PY1jGnzkn5",
+    "trigger_id": "393282244247.8416220484.c13108a9fb90e2f6da8d76c04f2823e9",
+    "user_id": "U7KMRCS5Q",
+    "user_name": "f2016165"
+}
+
+slash_command_assign_issue_data = {
+    "channel_id": "CAP9GA5MJ",
+    "channel_name": "sysbot-testing",
+    "command": "/sysbot_assign_issue",
+    "response_url": "https://hooks.slack.com/commands/T08C86GE8/392362793973/VpLXVTSsEwMsMmTMfBL0OJ8Y",
+    "team_domain": "systers-opensource",
+    "team_id": "T08C86GE8",
+    "text": "sysbot-test 144 sammy1997",
+    "token": "9WMeKrR9ig79X8PY1jGnzkn5",
+    "trigger_id": "393282244247.8416220484.c13108a9fb90e2f6da8d76c04f2823e9",
+    "user_id": "U7KMRCS5Q",
+    "user_name": "f2016165"
+}
+
+slash_command_approve_issue_data = {
+    "channel_id": "CAP9GA5MJ",
+    "channel_name": "sysbot-testing",
+    "command": "/sysbot_approve_issue",
+    "response_url": "https://hooks.slack.com/commands/T08C86GE8/392362793973/VpLXVTSsEwMsMmTMfBL0OJ8Y",
+    "team_domain": "systers-opensource",
+    "team_id": "T08C86GE8",
+    "text": "sysbot-test 144",
+    "token": "9WMeKrR9ig79X8PY1jGnzkn5",
+    "trigger_id": "393282244247.8416220484.c13108a9fb90e2f6da8d76c04f2823e9",
+    "user_id": "U7KMRCS5Q",
+    "user_name": "f2016165"
+}
+
+slash_command_invite_data = {
+    "channel_id": "CAP9GA5MJ",
+    "channel_name": "sysbot-testing",
+    "command": "/sysbot_invite",
+    "response_url": "https://hooks.slack.com/commands/T08C86GE8/392362793973/VpLXVTSsEwMsMmTMfBL0OJ8Y",
+    "team_domain": "systers-opensource",
+    "team_id": "T08C86GE8",
+    "text": "",
+    "token": "9WMeKrR9ig79X8PY1jGnzkn5",
+    "trigger_id": "393282244247.8416220484.c13108a9fb90e2f6da8d76c04f2823e9",
+    "user_id": "U7KMRCS5Q",
+    "user_name": "f2016165"
+}
+
+data_with_challenge_token = {
+    "challenge": "abcde12345"
+}
+
+data_member_joined_channel = {
+    "event": {
+        "type": "member_joined_channel",
+        "channel": "C08C8DE01"
+    }
+}
+
+data_app_mention_channel = {
+    "event": {
+        "type": "app_mention",
+        "channel": "C08C8DE01",
+        "text": "<@UASFP3GHW>"
+    }
+}
+
+data_message_reply = {
+    "event": {
+        "type": "message",
+        "channel": "CAM6T4AGH",
+        "user": "UXAB234CQ",
+        "channel_type": "channel"
+    }
+}
+
+query_getting_started = "Can someone guide me on how to start contributing?"
+query_gender_participation = "Are female participants preferred over male at Systers?"
