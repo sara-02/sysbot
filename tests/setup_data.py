@@ -263,3 +263,86 @@ data_message_reply = {
 
 query_getting_started = "Can someone guide me on how to start contributing?"
 query_gender_participation = "Are female participants preferred over male at Systers?"
+
+pr_template_with_fixes_number = "## Description\r\n" \
+              "%s\r\n Fixes #123\r\n # Type of Change:\r\n" \
+              "%s \r\n\r\n# How Has This Been Tested?" \
+              "%s \r\n# Checklist:\r\n " \
+              "- [ ] %s.\r\n"
+
+pr_template_with_fixes_text = "## Description\r\n" \
+              "%s\r\n Fixes #abc\r\n # Type of Change:\r\n" \
+              "%s \r\n\r\n# How Has This Been Tested?" \
+              "%s \r\n# Checklist:\r\n " \
+              "- [ ] %s.\r\n"
+
+pr_template_without_fixes = "## Description\r\n" \
+              "%s\r\n # Type of Change:\r\n" \
+              "%s \r\n\r\n# How Has This Been Tested?" \
+              "%s \r\n# Checklist:\r\n " \
+              "- [ ] %s.\r\n"
+
+event_data_issue_opened = {
+    "action": "opened",
+    "issue": {
+        "body": "Anything",
+        "number": "151",
+    },
+    "repository": {
+        "name": "sysbot-test",
+        "owner": {
+            "login": "systers"
+        }
+    }
+}
+
+event_data_comment = {
+    "action": "created",
+    "issue": {
+        "body": "",
+        "number": "151",
+    },
+    "repository": {
+        "name": "sysbot-test",
+        "owner": {
+            "login": "systers"
+        }
+    },
+    "comment": {
+        "body": "Coverage decreased",
+        "user": {
+            "login": "coveralls"
+        },
+        "author_association": "USER"
+    }
+}
+
+event_data_pr_opened = {
+    "action": "opened",
+    "pull_request": {
+        "body": "## Description\r\n"
+                "Some Description\r\n Fixes #151\r\n "
+                "# Type of Change:\r\n"
+                "Explain the changes \r\n"
+                "# How Has This Been Tested?\r\n"
+                "Tested \r\n# Checklist:\r\n"
+                "- [ ] Checklist Point.\r\n",
+        "number": "13",
+    },
+    "repository": {
+        "name": "sysbot-test",
+        "owner": {
+            "login": "systers"
+        }
+    }
+}
+
+new_user_data={
+    "event": {
+        "text": "Hello <@UASFP3GHW> How to get started?",
+        "channel": "CAP9GA5MJ",
+        "user": "U7KMRCS5Q"
+    }
+}
+
+faq_sentence = "I am new here. Can anyone tell me about GSoC?"

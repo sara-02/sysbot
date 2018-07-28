@@ -63,9 +63,9 @@ def is_maintainer_comment(commenter_id):
 
 
 def approve_issue_label_slack(data):
-    result = is_maintainer_comment(data.get('user_id', ''))
     channel_id = data.get('channel_id', '')
     uid = data.get('user_id', '')
+    result = is_maintainer_comment(uid)
     response = get_detailed_profile(uid)
     if response.get('ok', False):
         profile = response.get('profile', '')
@@ -90,11 +90,11 @@ def approve_issue_label_slack(data):
                         # Information given is wrong
                         send_message_ephemeral(channel_id, uid, MESSAGE.get('wrong_info', ''))
                         return {"message": "Information provided is wrong", "status": 404}
-                    elif status == 200:
+                    elif status == 200:  # pragma: no cover
                         # Successful labeling
                         send_message_ephemeral(channel_id, uid, MESSAGE.get('success', ''))
                         return {"message": "Success", "status": 200}
-                    elif status == 500:
+                    elif status == 500:  # pragma: no cover
                         # Some internal error occured
                         send_message_ephemeral(channel_id, uid, MESSAGE.get('error_slash_command', ''))
                         return {"message": "Error with slash command", "status": 500}
@@ -158,11 +158,11 @@ def assign_issue_slack(data):
                 # Information given is wrong
                 send_message_ephemeral(channel_id, uid, MESSAGE.get('wrong_info', ''))
                 return {"message": "Wrong information provided", "status": 404}
-            elif status == 200:
+            elif status == 200:  # pragma: no cover
                 # Successful assignment
                 send_message_ephemeral(channel_id, uid, MESSAGE.get('success', ''))
                 return {"message": "Success", "status": 200}
-            elif status == 500:
+            elif status == 500:  # pragma: no cover
                 # Some internal error occured
                 send_message_ephemeral(channel_id, uid, MESSAGE.get('error_slash_command', ''))
                 return {"message": "Author cannot approve an issue", "status": 500}
@@ -225,11 +225,11 @@ def claim_issue_slack(data):
                 # Information given is wrong
                 send_message_ephemeral(channel_id, uid, MESSAGE.get('wrong_info', ''))
                 return {"message": "Wrong information provided"}
-        elif status == 200:
+        elif status == 200:  # pragma: no cover
             # Successful claim
             send_message_ephemeral(channel_id, uid, MESSAGE.get('success', ''))
             return {"message": "Success", "status": 404}
-        elif status == 500:
+        elif status == 500:  # pragma: no cover
             # Some internal error occured
             send_message_ephemeral(channel_id, uid, MESSAGE.get('error_slash_command', ''))
             return {"message": "Error slash command", "status": 500}
@@ -322,7 +322,7 @@ def slack_team_name_reply(data):
         # Check if query is empty or if channel doesn't have a team.
         if query != '' and team_details != '':
             # This is a constant command which will always work
-            if query == 'maintainer team name':
+            if query == 'maintainer team name':  # pragma: no cover
                 send_message_ephemeral(channel_id, uid, MESSAGE.get('slack_team_message') % (
                     team_details[0], team_details[1]))
                 return {'message': 'Team name requested'}
@@ -333,7 +333,7 @@ def slack_team_name_reply(data):
                 # Checking by matching intent. Keeping score high to prevent false positives.
                 condition1 = response.get('topScoringIntent', {}).get('intent', '') == 'Maintainers'
                 condition2 = float(response.get('topScoringIntent', {}).get('score', '0')) > 0.965
-                if condition1 and condition2:
+                if condition1 and condition2:  # pragma: no cover
                     send_message_ephemeral(channel_id, uid, MESSAGE.get('slack_team_message') % (
                         team_details[0], team_details[1]))
                     return {'message': 'Team name requested'}
@@ -409,6 +409,7 @@ def answer_keyword_faqs(comment_text, channel, reply_ts):
                 if topic.lower() in message_key_vs_list_of_alternatives[key]:
                     send_message_thread(channel, ANSWERS_FAQS.get(key, ""), reply_ts)
                     break
+    return {"message": "Keyword FAQs answered"}
 
 
 def check_is_question(sentence):

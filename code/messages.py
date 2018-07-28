@@ -61,6 +61,14 @@ MESSAGE = {
                       "## Definition of Done\r\n - [ ] All of the required "
                       "items are completed.\r\n - [ ] Approval by 1 mentor.\r\n\r\n"
                       "## Estimation\r\n %s hours.\r\n",
+    "issue_template_feature": "**Is your feature request related to a problem? Please describe.**\r\n"
+                              "%s\r\n\r\n **Describe the solution you'd like**\r\n %s \r\n\r\n"
+                              "**Describe alternatives you've considered**\r\n %s",
+    "issue_template_bug": "**Describe the bug**\r\n"
+                          "%s\r\n\r\n **To Reproduce**\r\n"
+                          "%s \r\n\r\n**Expected behavior**\r\n %s"
+                          "\r\n **Desktop (please complete the following information):**\r\n\r\n"
+                          "%s\r\n",
     'slack_team_message': 'For any doubt related to this project, mention <!subteam^%s|%s> in your queries.',
     'slack_team_DNE': 'I have no information about the team for this channel.',
     'wrong_query_format': 'Query format is wrong. Please read the docs or use /sysbot_help to know more',
