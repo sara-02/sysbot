@@ -27,9 +27,9 @@ to know which function handles what.
 
 #### On Github:
 1. Each newly opened issue is labelled to be Not Approved by the bot.
-2. Any member of the organization can claim issues by using leaving a comment of '@sys-bot claim' on the issue.
-3. Similarly, maintainers and collaborators can assign an issue to a member by the comment '@sys-bot assign <assignee_github_username>'
-4. Any issue can be approved by maintainers and collaborators via a comment '@sys-bot approve' or via normal comments which have variants of the word approval and issue(E.g - I am approving this issue, Approve this issue, etc). Also, a check has been kept so that the author of an issue cannot approve it.
+2. Any member of the organization can claim issues by using leaving a comment of `@sys-bot claim` on the issue.
+3. Similarly, maintainers and collaborators can assign an issue to a member by the comment `@sys-bot assign <assignee_github_username>`
+4. Any issue can be approved by maintainers and collaborators via a comment `@sys-bot approve` or via normal comments which have variants of the word approval and issue(E.g - I am approving this issue, Approve this issue, etc). Also, a check has been kept so that the author of an issue cannot approve it.
 5. A check has been kept for multiple claims( same issue can't be claimed by or assigned to multiple members) on the same issue and also any unapproved issue cannot be claimed or assigned.
 6. Any new PR that's opened get's labelled as 'not reviewed'.
 7. If a PR is sent to un-approved issue, it will get closed.
@@ -42,21 +42,21 @@ template missing, then the PR gets closed.
 
 #### On Slack:
 1. Any newcomer who joins Systers slack workspace gets a DM from the bot with a welcome message, providing help on how to start and how to use the bot.
-2. A slash command /sysbot_invite can be used to get invited to the newcomers team and hence become a member of the org. However it checks if the
+2. A slash command `/sysbot_invite` can be used to get invited to the newcomers team and hence become a member of the org. However it checks if the
 newcomer member level is completed as mentioned [here](http://systers.io/member-levels)
-3. A slash command /sysbot_approve_issue <repo_name> <issue_number> can be used to approve an issue on Github directly from Slack.
+3. A slash command `/sysbot_approve_issue <repo_name> <issue_number>` can be used to approve an issue on Github directly from Slack.
 However this command can only be used by members of @maintainers team on Slack. E.g. of usage - /sysbot_approve_issue sysbot 23 .
-4. A slash command /sysbot_assign_issue <repo_name> <issue_number> <assignee_github_username> can be used to assign any issue from Github directly via Slack.
+4. A slash command `/sysbot_assign_issue <repo_name> <issue_number> <assignee_github_username>` can be used to assign any issue from Github directly via Slack.
 However this command can only be used by members of @maintainers team on Slack. E.g. of usage - /sysbot_assign_issue sysbot 23 sammy1997.
-5. A slash command /sysbot_claim <repo_name> <issue_number> <assignee_github_username> or /sysbot_claim <repo_name> <issue_number> 
+5. A slash command `/sysbot_claim <repo_name> <issue_number> <assignee_github_username>` or `/sysbot_claim <repo_name> <issue_number>` 
 ( the latter option will work if your github URL is provided on Slack) can be used to claim any issue from Github directly via Slack.
 E.g. of usage - /sysbot_claim sysbot 23.
 [NOTE: To claim or assign an issue, it must first be approved]
-6. A slash command /sysbot_open_issue <repo_name> <author_username> * Title of issue * Issue Description * Issue Requirement Item * Estimation. 
+6. A slash command `/sysbot_open_issue <repo_name> <author_username>` * Title of issue * Issue Description * Issue Requirement Item * Estimation. 
 The issues are opened in full markdown format, and the author's name is mentioned at the top.
-7. A slash command /sysbot_help provides a list of all the commands and functionalities of the bot.  
+7. A slash command `/sysbot_help` provides a list of all the commands and functionalities of the bot.  
 8. Each week prs which have been opened that week but have not been reviewed yet are collected and sent to respective Slack channels.
-9. A slash command /sysbot_help provides a list of all functionalities that the bot provides
+9. A slash command `/sysbot_help` provides a list of all functionalities that the bot provides
 10. Each channel is notified about unreviewed PRs opened in that week 
 in each respective repository.
 11. The bot uses a trained agent provided by LUIS API to recognise 
