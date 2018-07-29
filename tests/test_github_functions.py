@@ -5,9 +5,11 @@ from code.github_functions import (check_approved_tag, label_opened_issue, send_
                                    issue_claim_github, check_multiple_issue_claim,
                                    get_issue_author, unassign_issue, check_issue_template,
                                    close_pr, are_issue_essential_components_present,
-                                   list_open_prs_from_repo, open_issue_github)
+                                   list_open_prs_from_repo, open_issue_github, check_pr_template)
 from code.messages import MESSAGE
-from setup_data import (correct_issue_data, wrong_issue_data, missing_params_issue_data)
+from setup_data import (correct_issue_data, wrong_issue_data, missing_params_issue_data,
+                        pr_template_with_fixes_number, pr_template_with_fixes_text,
+                        pr_template_without_fixes)
 
 
 class TestGithubFunctions(unittest.TestCase):
@@ -111,8 +113,31 @@ class TestGithubFunctions(unittest.TestCase):
         self.assertEqual(template_matching_issue, {"message": "Issue Template match"})
 
     def test_are_issue_essential_components_present(self):
-        correct_template = are_issue_essential_components_present(MESSAGE.get("issue_template") % ('author', 'body',
-                                                                                                   'list item', '1'))
+        correct_template_user_story = are_issue_essential_components_present(MESSAGE.get("issue_template") %
+                                                                             ('author', 'body', 'list item', '1'))
+        self.assertEqual(correct_template_user_story, True)
+        correct_template_feature = are_issue_essential_components_present(MESSAGE.get("issue_template_feature") %
+                                                                          ("Yes.", "Solution", "Alternatives"))
+        self.assertEqual(correct_template_feature, True)
+        correct_template_bug = are_issue_essential_components_present(MESSAGE.get("issue_template_bug") %
+                                                                      ("Description", "Reproduce", "Expected", "Linux"))
+        self.assertEqual(correct_template_bug, True)
         wrong_template = are_issue_essential_components_present("Test test")
-        self.assertEqual(correct_template, True)
         self.assertEqual(wrong_template, False)
+
+    def test_check_pr_template(self):
+        response_correct_template = check_pr_template(pr_template_with_fixes_number %
+                                                      ("Description", "Type of Change", "Tested", "Checklist Point"),
+                                                      'systers', 'sysbot-testing', '12')
+        self.assertEqual(response_correct_template, True)
+        response_no_fixes_statement = check_pr_template(pr_template_without_fixes %
+                                                        ("Description", "Type of Change", "Tested", "Checklist Point"),
+                                                        'systers', 'sysbot-testing', '12')
+        self.assertEqual(response_no_fixes_statement, False)
+        response_text_fixes_statement = check_pr_template(pr_template_with_fixes_text %
+                                                          ("Description", "Type of Change", "Tested", "Checklist Point"),
+                                                          'systers', 'sysbot-testing', '12')
+        self.assertEqual(response_text_fixes_statement, False)
+        response_wrong_template = check_pr_template("Test test",
+                                                    'systers', 'sysbot-testing', '12')
+        self.assertEqual(response_wrong_template, False)

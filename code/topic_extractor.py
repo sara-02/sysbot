@@ -30,18 +30,18 @@ cfg = {
 
 class NPExtractor(object):
 
-    def __init__(self, sentence):
+    def __init__(self, sentence):  # pragma: no cover
         self.sentence = sentence
 
     # Split the sentence into single words/tokens
     @staticmethod
-    def tokenize_sentence(sentence):
+    def tokenize_sentence(sentence):  # pragma: no cover
         tokens = nltk.word_tokenize(sentence)
         return tokens
 
     # Normalize brown corpus' tags ("NN", "NN-PL", "NNS" > "NN")
     @staticmethod
-    def normalize_tags(tagged):
+    def normalize_tags(tagged):  # pragma: no cover
         n_tagged = []
         for t in tagged:
             if t[1] == "NP-TL" or t[1] == "NP":
@@ -57,7 +57,7 @@ class NPExtractor(object):
         return n_tagged
 
     # Extract the main topics from the sentence
-    def extract(self):
+    def extract(self):  # pragma: no cover
 
         tokens = self.tokenize_sentence(self.sentence)
         tags = self.normalize_tags(bigram_tagger.tag(tokens))

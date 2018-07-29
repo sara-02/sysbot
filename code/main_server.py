@@ -21,7 +21,7 @@ CHANNEL_LIST = {'C0CAF47RQ', 'C0S15BFNX', 'CAM6T4AGH'}
 app = Flask(__name__)
 
 
-def collect_unreviewed_prs():
+def collect_unreviewed_prs():  # pragma: no cover
     for key, value in repo_vs_channel_id_dict.iteritems():
         # Collect PRs for each repo
         pr_list = list_open_prs_from_repo('systers', key)
@@ -30,7 +30,6 @@ def collect_unreviewed_prs():
             message = MESSAGE.get('list_of_unreviewed_prs', '%s') % pr_list[0:-1]
             # Send pr_list to respective channels
             send_message_to_channels(value, message)
-            return {}
 
 
 schedule = BackgroundScheduler(daemon=True)
@@ -60,6 +59,7 @@ def github_hook_receiver_function():
                 label_opened_issue(data)
                 # Check if opened issue follows issue template
                 check_issue_template(repo_owner, repo_name, issue_number, issue_body)
+                return jsonify({'message': "New issue opened event"})
             elif action == 'created' and data.get('comment', '') != '':
                 # If it's a issue comment event
                 issue_number = data.get('issue', {}).get('number', '')
@@ -74,58 +74,65 @@ def github_hook_receiver_function():
                 # Check if the comment by coveralls
                 if commenter == 'coveralls' and 'Coverage decreased' in comment_body:
                     github_comment(MESSAGE.get('add_tests', ''), repo_owner, repo_name, issue_number)
+                    return jsonify({'message': "Coveralls comment"})
 
                 # If comment is for approving issue
                 if comment_body.lower().strip().startswith('@sys-bot approve'):
                     issue_comment_approve_github(issue_number, repo_name, repo_owner, commenter, False)
-                    return jsonify(request.json)
+                    return jsonify({"message": "Approve command"})
 
                 # If comment is to assign issue
                 if comment_body.lower().strip().startswith('@sys-bot assign'):
                     is_approved = check_approved_tag(repo_owner, repo_name, issue_number)
                     if len(tokens) == 3 and not is_issue_claimed_or_assigned and \
                             (author_association == 'COLLABORATOR' or author_association == 'OWNER') and is_approved:
-                        issue_assign(issue_number, repo_name, tokens[2], repo_owner)
+                        issue_assign(issue_number, repo_name, tokens[2], repo_owner)  # pragma: no cover
                     elif len(tokens) != 3 and not is_issue_claimed_or_assigned:
                         github_comment(MESSAGE.get('wrong_format_github', ''), repo_owner, repo_name, issue_number)
+                        return jsonify({"message": "Wrong command format"})
                     elif not is_approved:
                         github_comment(MESSAGE.get('not_approved', ''), repo_owner, repo_name, issue_number)
+                        return jsonify({"message": "Issue not approved"})
                     elif is_issue_claimed_or_assigned:
                         github_comment(MESSAGE.get('already_claimed', ''), repo_owner, repo_name, issue_number)
+                        return jsonify({"message": "Issue already claimed"})
                     elif author_association != 'COLLABORATOR' and author_association != 'OWNER':
                         github_comment(MESSAGE.get('no_permission', ''), repo_owner, repo_name, issue_number)
-                    return jsonify(request.json)
+                        return jsonify({"message": "Not permitted"})
 
                 # If comment is to claim issue
                 if comment_body.lower().strip().startswith('@sys-bot claim'):
                     is_approved = check_approved_tag(repo_owner, repo_name, issue_number)
-                    if len(tokens) == 2 and not is_issue_claimed_or_assigned and is_approved:
+                    if len(tokens) == 2 and not is_issue_claimed_or_assigned and is_approved:  # pragma: no cover
                         assignee = commenter
                         issue_claim_github(assignee, issue_number, repo_name, repo_owner)
                     elif len(tokens) != 2 and not is_issue_claimed_or_assigned:
                         github_comment(MESSAGE.get('wrong_format_github', ''), repo_owner, repo_name, issue_number)
+                        return jsonify({"message": "Wrong command format"})
                     elif is_issue_claimed_or_assigned:
                         github_comment(MESSAGE.get('already_claimed', ''), repo_owner, repo_name, issue_number)
+                        return jsonify({"message": "Already claimed"})
                     elif not is_approved:
                         github_comment(MESSAGE.get('not_approved', ''), repo_owner, repo_name, issue_number)
-                    elif is_issue_claimed_or_assigned:
-                        github_comment(MESSAGE.get('already_claimed', ''), repo_owner, repo_name, issue_number)
-                    return jsonify(request.json)
+                        return jsonify({"message": "Issue not approved"})
 
                 # If comment is to unclaim an issue
                 if comment_body.lower().startswith('@sys-bot unclaim'):
                     if len(tokens) == 2:
                         assignee = commenter
                         unassign_issue(repo_owner, repo_name, issue_number, assignee)
+                        return jsonify({"message": "Issue unclaimed"})
                     else:
                         github_comment(MESSAGE.get('wrong_format_github', ''), repo_owner, repo_name, issue_number)
-
+                        return jsonify({"message": "Wrong command format"})
                 # If comment is to unassign an issue
                 if comment_body.lower().startswith('@sys-bot unassign'):
                     if len(tokens) == 3:
                         unassign_issue(repo_owner, repo_name, issue_number, tokens[2])
+                        return jsonify({"message": "Issue unassigned"})
                     else:
                         github_comment(MESSAGE.get('wrong_format_github', ''), repo_owner, repo_name, issue_number)
+                        return jsonify({"message": "Wrong command format"})
             elif (action == 'opened' or action == 'reopened') and data.get('pull_request', '') != '':
                 # If a new PR has been sent
                 pr_number = data.get('number', '')
@@ -135,18 +142,16 @@ def github_hook_receiver_function():
                 is_template_followed = check_pr_template(pr_body, repo_owner, repo_name, pr_number)
                 if is_template_followed:
                     github_pull_request_label(pr_number, repo_name, repo_owner)
-                    if pr_body != '':
-                        # Extract the issue number mentioned in PR body if PR follows template
-                        issue_number = pr_body.split('Fixes #')[1].split('\r\n')[0].strip()
-                        if issue_number != '':
-                            is_issue_approved = check_approved_tag(repo_owner, repo_name, issue_number)
-                            if not is_issue_approved:
-                                github_comment(MESSAGE.get('pr_to_unapproved_issue', ''), repo_owner, repo_name, pr_number)
-                                close_pr(repo_owner, repo_name, pr_number)
-        else:
-            pass
-            # Currently the bot isn't handeling any other cases
-        return jsonify(request.json)
+                    # Extract the issue number mentioned in PR body if PR follows template
+                    issue_number = pr_body.split('Fixes #')[1].split('\r\n')[0].strip()
+                    is_issue_approved = check_approved_tag(repo_owner, repo_name, issue_number)
+                    if not is_issue_approved:
+                        github_comment(MESSAGE.get('pr_to_unapproved_issue', ''), repo_owner, repo_name, pr_number)
+                        close_pr(repo_owner, repo_name, pr_number)
+                        return jsonify({"message": "PR sent to unapproved issue"})
+                else:
+                    return jsonify({"message": "PR template not followed"})
+        return jsonify({"message": "Unknown event"})
 
 
 @app.route('/challenge', methods=['POST'])
