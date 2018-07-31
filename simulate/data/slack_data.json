@@ -1,0 +1,144 @@
+{
+  "sysbot_invite": {
+    "channel_id": "CAPQXV811",
+    "channel_name": "sample_test",
+    "command": "/sysbot_invite",
+    "response_url": "https://hooks.slack.com/commands/T9MRVJLBD/407331863872/VsjsdjSDMVXhd4jhiBUfRRja",
+    "team_domain": "sysbotsample",
+    "team_id": "T9MRVJLBD",
+    "text": "",
+    "token": "UQamT2o4X2fwMJpAxEWnN6IY",
+    "trigger_id": "408048263794.327879632387.ca104c373693107a080a55b07a4aa352",
+    "user_id": "U9MRVJLG3",
+    "user_name": "sombuddha2016"
+  },
+  "sysbot_help": {
+    "channel_id": "CAPQXV811",
+    "channel_name": "sample_test",
+    "command": "/sysbot_help",
+    "response_url": "https://hooks.slack.com/commands/T9MRVJLBD/407334588640/KCQomPzpS68DnlYGrM1iN68o",
+    "team_domain": "sysbotsample",
+    "team_id": "T9MRVJLBD",
+    "text": "",
+    "token": "UQamT2o4X2fwMJpAxEWnN6IY",
+    "trigger_id": "408189617541.327879632387.1e8cc50723133312d69297c46ccce302",
+    "user_id": "U9MRVJLG3",
+    "user_name": "sombuddha2016"
+  },
+  "sysbot_approve_issue": {
+    "channel_id": "CAPQXV811",
+    "channel_name": "sample_test",
+    "command": "/sysbot_approve_issue",
+    "response_url": "https://hooks.slack.com/commands/T9MRVJLBD/408190729813/Ptgf6aFIIu14iqRTo2LBOAKa",
+    "team_domain": "sysbotsample",
+    "team_id": "T9MRVJLBD",
+    "text": "sysbot-test 114",
+    "token": "UQamT2o4X2fwMJpAxEWnN6IY",
+    "trigger_id": "408052099362.327879632387.8b2dc1fd5f32f28dd7eb52e01c01db01",
+    "user_id": "U9MRVJLG3",
+    "user_name": "sombuddha2016"
+  },
+  "sysbot_assign_issue": {
+    "channel_id": "CAPQXV811",
+    "channel_name": "sample_test",
+    "command": "/sysbot_assign_issue",
+    "response_url": "https://hooks.slack.com/commands/T9MRVJLBD/407918925939/G9xbDOdQ5ohDTpTlg3IhJULL",
+    "team_domain": "sysbotsample",
+    "team_id": "T9MRVJLBD",
+    "text": "sysbot-test 114 sammy1997",
+    "token": "UQamT2o4X2fwMJpAxEWnN6IY",
+    "trigger_id": "409371474470.327879632387.5511a684747d2d9751da93b7b31ff0bb",
+    "user_id": "U9MRVJLG3",
+    "user_name": "sombuddha2016"
+  },
+  "sysbot_claim": {
+    "channel_id": "CAPQXV811",
+    "channel_name": "sample_test",
+    "command": "/sysbot_claim",
+    "response_url": "https://hooks.slack.com/commands/T9MRVJLBD/407920296531/7ARBFehPqmLcldUecFi3Raxj",
+    "team_domain": "sysbotsample",
+    "team_id": "T9MRVJLBD",
+    "text": "sysbot-test 114",
+    "token": "UQamT2o4X2fwMJpAxEWnN6IY",
+    "trigger_id": "407812447108.327879632387.a56acc167eabd7ab5a2a4998347d0dd4",
+    "user_id": "U9MRVJLG3",
+    "user_name": "sombuddha2016"
+  },
+  "sysbot_open_issue": {
+    "channel_id": "CAPQXV811",
+    "channel_name": "sample_test",
+    "command": "/sysbot_open_issue",
+    "response_url": "https://hooks.slack.com/commands/T9MRVJLBD/407924227987/BZiKaaelsOUDzVGhE8bRjYKo",
+    "team_domain": "sysbotsample",
+    "team_id": "T9MRVJLBD",
+    "text": "sysbot-test sammy1997 * Sample issue title * Some description * This is a requirement item * 1",
+    "token": "UQamT2o4X2fwMJpAxEWnN6IY",
+    "trigger_id": "409376793718.327879632387.8021aefbe1cae42395ff24cf1017ceed",
+    "user_id": "U9MRVJLG3",
+    "user_name": "sombuddha2016"
+  },
+  "member_joined_channel": {
+    "api_app_id": "A9MU85PRA",
+    "authed_users": ["U9MV72UMQ"],
+    "event": {
+      "channel": "CAPQXV811",
+      "channel_type": "channel",
+      "event_ts": "1533047382.000140",
+      "inviter": "U9MRVJLG3",
+      "team": "T9MRVJLBD",
+      "type": "member_joined_channel",
+      "user": "U9MV72UMQ"
+    },
+    "event_id": "EvC03EDYBC",
+    "event_time": 1533047382,
+    "team_id": "T9MRVJLBD",
+    "token": "UQamT2o4X2fwMJpAxEWnN6IY",
+    "type": "event_callback"
+  },
+  "app_mention": {
+    "api_app_id": "A9MU85PRA",
+    "authed_users": [
+      "U9MV72UMQ"
+    ],
+    "event": {
+      "channel": "CAPQXV811",
+      "client_msg_id": "221e3b53-ca47-40ad-a022-9a3bc3a46a77",
+      "event_ts": "1533047837.000120",
+      "text": "Hello <@UASFP3GHW> can you tell me who are the maintainers of this project?",
+      "ts": "1533047837.000120",
+      "type": "app_mention",
+      "user": "U9MRVJLG3"
+    },
+    "event_id": "EvBZBYC95W",
+    "event_time": 1533047837,
+    "team_id": "T9MRVJLBD",
+    "token": "UQamT2o4X2fwMJpAxEWnN6IY",
+    "type": "event_callback"
+  },
+  "challenge": {
+    "challenge": "sSDWkZzcQiexpDrsBU4NVpeU6dVYTFTHQawmT0X0VwsKwrFh72WR",
+    "token": "UQamT2o4X2fwMJpAxEWnN6IY",
+    "type": "url_verification"
+  },
+  "channel_message": {
+    "api_app_id": "A9MU85PRA",
+    "authed_users": [
+      "U9MV72UMQ"
+    ],
+    "event": {
+      "channel": "CAPQXV811",
+      "channel_type": "channel",
+      "client_msg_id": "cec5366a-ca9f-41be-8ba0-4a63c0e2f54f",
+      "event_ts": "1533052196.000553",
+      "text": "Can someone help me get started?",
+      "ts": "1533052196.000553",
+      "type": "message",
+      "user": "U9MRVJLG3"
+    },
+    "event_id": "EvC01K5CKV",
+    "event_time": 1533052196,
+    "team_id": "T9MRVJLBD",
+    "token": "UQamT2o4X2fwMJpAxEWnN6IY",
+    "type": "event_callback"
+  }
+}
