@@ -133,6 +133,15 @@ class TestMainServer(unittest.TestCase):
             response_unassign_wrong_format = self.client.post('/web_hook', data=json.dumps(event_data_comment),
                                                               content_type='application/json')
             self.assertEqual(response_unassign_wrong_format.data, '{\n  "message": "Wrong command format"\n}\n')
+            event_data_comment['comment']['body'] = "@sys-bot label test-label, approved, bug"
+            event_data_comment['issue']['number'] = "140"
+            response_label_correct_format = self.client.post('/web_hook', data=json.dumps(event_data_comment),
+                                                             content_type='application/json')
+            self.assertEqual(response_label_correct_format.data, '{\n  "message": "All labels added to issue"\n}\n')
+            event_data_comment['comment']['body'] = "@sys-bot label"
+            response_label_wrong_format = self.client.post('/web_hook', data=json.dumps(event_data_comment),
+                                                             content_type='application/json')
+            self.assertEqual(response_label_wrong_format.data, '{\n  "message": "Wrong command format"\n}\n')
             response_pr_to_unapproved_issue = self.client.post('/web_hook', data=json.dumps(event_data_pr_opened),
                                                                content_type='application/json')
             self.assertEqual(response_pr_to_unapproved_issue.data, '{\n  "message": "PR sent to unapproved issue"\n}\n')

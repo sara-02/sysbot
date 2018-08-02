@@ -3,7 +3,7 @@ from flask import request, json, Response
 from github_functions import (label_opened_issue, issue_comment_approve_github,
                               github_pull_request_label, issue_assign, github_comment, issue_claim_github,
                               check_multiple_issue_claim, check_approved_tag, unassign_issue, close_pr,
-                              check_issue_template, list_open_prs_from_repo, check_pr_template)
+                              check_issue_template, list_open_prs_from_repo, check_pr_template, label_list_issue)
 from stemming.porter2 import stem
 from nltk.tokenize import word_tokenize
 from auth_credentials import announcement_channel_id, BOT_UID
@@ -117,7 +117,7 @@ def github_hook_receiver_function():
                         return jsonify({"message": "Issue not approved"})
 
                 # If comment is to unclaim an issue
-                if comment_body.lower().startswith('@sys-bot unclaim'):
+                if comment_body.lower().strip().startswith('@sys-bot unclaim'):
                     if len(tokens) == 2:
                         assignee = commenter
                         unassign_issue(repo_owner, repo_name, issue_number, assignee)
@@ -126,13 +126,26 @@ def github_hook_receiver_function():
                         github_comment(MESSAGE.get('wrong_format_github', ''), repo_owner, repo_name, issue_number)
                         return jsonify({"message": "Wrong command format"})
                 # If comment is to unassign an issue
-                if comment_body.lower().startswith('@sys-bot unassign'):
-                    if len(tokens) == 3:
+                if comment_body.lower().strip().startswith('@sys-bot unassign'):
+                    if len(tokens) == 3 and (author_association == 'COLLABORATOR' or author_association == 'OWNER'):
                         unassign_issue(repo_owner, repo_name, issue_number, tokens[2])
                         return jsonify({"message": "Issue unassigned"})
+                    elif len(tokens) == 3 and (author_association != 'COLLABORATOR' or author_association != 'OWNER'):
+                        github_comment(MESSAGE.get('no_permission', ''), repo_owner, repo_name, issue_number)
                     else:
                         github_comment(MESSAGE.get('wrong_format_github', ''), repo_owner, repo_name, issue_number)
                         return jsonify({"message": "Wrong command format"})
+
+                # If comment is for labelling an issue
+                if comment_body.lower().strip().startswith("@sys-bot label"):
+                    if len(tokens) < 3:
+                        github_comment(MESSAGE.get('wrong_format_github', ''), repo_owner, repo_name, issue_number)
+                        return jsonify({"message": "Wrong command format"})
+                    elif len(tokens) > 3 and (author_association != 'COLLABORATOR' or author_association != 'OWNER'):
+                        github_comment(MESSAGE.get('no_permission', ''), repo_owner, repo_name, issue_number)
+                    else:
+                        response = label_list_issue(repo_owner, repo_name, issue_number, comment_body, commenter)
+                        return jsonify({"message": response.get("message")})
             elif (action == 'opened' or action == 'reopened') and data.get('pull_request', '') != '':
                 # If a new PR has been sent
                 pr_number = data.get('number', '')
