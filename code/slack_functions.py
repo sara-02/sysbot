@@ -2,7 +2,7 @@
 
 import requests
 from flask import json
-from nltk.tokenize import sent_tokenize
+from nltk.tokenize import sent_tokenize, word_tokenize
 
 from auth_credentials import (BOT_ACCESS_TOKEN, maintainer_usergroup_id, legacy_token, org_repo_owner, path_secret,
                               api_key)
@@ -368,9 +368,11 @@ def handle_message_answering(event_data):
     if channel == 'C0CAF47RQ':  # pragma: no cover
         techs = techstack_vs_projects.keys()
         suggest_projects_set = set()
+        search_text_tokens = word_tokenize(text.upper())
+        # Finding all languages mentioned in comment common with the ones in Systers language list
+        techs = list(set(search_text_tokens).intersection(set(techs)))
         for tech in techs:
-            if tech in text.upper():
-                suggest_projects_set = suggest_projects_set.union(set(techstack_vs_projects[tech]))
+            suggest_projects_set = suggest_projects_set.union(set(techstack_vs_projects[tech]))
         suggest_projects_list = list(suggest_projects_set)
         # No tech stack found in intro comment.
         if not suggest_projects_list and thread_ts is None:
