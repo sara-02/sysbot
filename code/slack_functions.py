@@ -12,7 +12,7 @@ from request_urls import (dm_channel_open_url, dm_chat_post_message_url, get_mai
 from messages import MESSAGE, ANSWERS_FAQS
 from github_functions import (send_github_invite, issue_comment_approve_github, issue_assign,
                               check_assignee_validity, check_multiple_issue_claim,
-                              open_issue_github, get_issue_author, check_approved_tag)
+                              open_issue_github, get_issue_author, check_approved_tag, fetch_issue_body)
 from dictionaries import slack_team_vs_repo_dict, techstack_vs_projects, message_key_vs_list_of_alternatives
 
 headers = {'Content-type': 'application/json', 'Authorization': 'Bearer {}'.format(BOT_ACCESS_TOKEN)}
@@ -436,3 +436,21 @@ def luis_classifier(query, channel, reply_ts):
     elif top_intent == 'getting-started' and top_intent_score > 0.6:
         send_message_thread(channel, ANSWERS_FAQS.get('getting_started'), reply_ts)
         return {'message': 'Getting started question'}
+
+
+def view_issue_slack(event_data):
+    command_text = event_data.get('text', '')
+    channel_id = event_data.get('channel_id', '')
+    uid = event_data.get('user_id', '')
+    tokens = command_text.strip().split(' ')
+    if len(tokens) == 2:
+        response = fetch_issue_body(org_repo_owner, tokens[0], tokens[1])
+        if response.get('status', 404) == 200:
+            send_message_ephemeral(channel_id, uid, response.get('issue_body', ''))
+            return {'message': 'Success in viewing.'}
+        else:
+            send_message_ephemeral(channel_id, uid, MESSAGE.get('incorrect_info_provided', ''))
+            return {'message': "Wrong info provided"}
+    else:
+        send_message_ephemeral(channel_id, uid, MESSAGE.get('error_view_command', ''))
+        return {'message': "Error in using command"}

@@ -6,7 +6,7 @@ from code.github_functions import (check_approved_tag, label_opened_issue, send_
                                    get_issue_author, unassign_issue, check_issue_template,
                                    close_pr, are_issue_essential_components_present,
                                    list_open_prs_from_repo, open_issue_github, check_pr_template,
-                                   label_list_issue)
+                                   label_list_issue, fetch_issue_body)
 from code.messages import MESSAGE
 from setup_data import (correct_issue_data, wrong_issue_data, missing_params_issue_data,
                         pr_template_with_fixes_number, pr_template_with_fixes_text,
@@ -148,3 +148,9 @@ class TestGithubFunctions(unittest.TestCase):
         self.assertEqual(response_all_labelled, {"message": "All labels added to issue", "status": 200})
         response_error = label_list_issue('systers', 'sysbot-testing', 140, "@sys-bot label test-label, bug", "sammy1997")
         self.assertEqual(response_error, {"message": "Some error occurred", "status": 400})
+
+    def test_fetch_issue_body(self):
+        response_successful_fetch = fetch_issue_body('systers', 'sysbot-test', 178)
+        self.assertEqual(response_successful_fetch, {'issue_body': 'Abcd', 'status': 200})
+        response_failed_fetch = fetch_issue_body('systers', 'sysbot-testing', 178)
+        self.assertEqual(response_failed_fetch, {'message': 'Wrong information provided', 'status': 404})

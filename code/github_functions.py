@@ -334,3 +334,15 @@ def label_list_issue(repo_owner, repo_name, issue_number, comment, commenter):
         return {"message": "Some error occurred", "status": 400}
     else:
         return {"message": "Some labels added to issue", "status": 204}
+
+
+def fetch_issue_body(repo_owner, repo_name, issue_number):
+    session = requests.Session()
+    session.auth = (USERNAME, PASSWORD)
+    request_url = get_issue_url % (repo_owner, repo_name, issue_number)
+    response = session.get(request_url, headers=headers)
+    if response.status_code == 200:
+        issue_content = response.json().get('body', '').replace('#', '').replace('\r', '')
+        return {'issue_body': issue_content, 'status': 200}
+    else:
+        return {'message': 'Wrong information provided', 'status': 404}
