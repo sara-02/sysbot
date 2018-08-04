@@ -6,11 +6,12 @@ from code.github_functions import (check_approved_tag, label_opened_issue, send_
                                    get_issue_author, unassign_issue, check_issue_template,
                                    close_pr, are_issue_essential_components_present,
                                    list_open_prs_from_repo, open_issue_github, check_pr_template,
-                                   label_list_issue)
+                                   label_list_issue, pr_reviewed_label)
 from code.messages import MESSAGE
 from setup_data import (correct_issue_data, wrong_issue_data, missing_params_issue_data,
                         pr_template_with_fixes_number, pr_template_with_fixes_text,
-                        pr_template_without_fixes)
+                        pr_template_without_fixes, pr_changes_requested_review_event_data,
+                        pr_approved_review_event_data, pr_review_error_event_data)
 
 
 class TestGithubFunctions(unittest.TestCase):
@@ -148,3 +149,11 @@ class TestGithubFunctions(unittest.TestCase):
         self.assertEqual(response_all_labelled, {"message": "All labels added to issue", "status": 200})
         response_error = label_list_issue('systers', 'sysbot-testing', 140, "@sys-bot label test-label, bug", "sammy1997")
         self.assertEqual(response_error, {"message": "Some error occurred", "status": 400})
+
+    def test_pr_reviewed_label(self):
+        response_pr_changes_requested = pr_reviewed_label(pr_changes_requested_review_event_data)
+        self.assertEqual(response_pr_changes_requested, {"message": "Labelled as under review", "status": 200})
+        response_pr_approved = pr_reviewed_label(pr_approved_review_event_data)
+        self.assertEqual(response_pr_approved, {"message": "Labelled as approved", "status": 200})
+        response_pr_error = pr_reviewed_label(pr_review_error_event_data)
+        self.assertEqual(response_pr_error, {"message": "Some error occurred", "status": 400})
