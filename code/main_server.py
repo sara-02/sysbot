@@ -3,7 +3,8 @@ from flask import request, json, Response
 from github_functions import (label_opened_issue, issue_comment_approve_github,
                               github_pull_request_label, issue_assign, github_comment, issue_claim_github,
                               check_multiple_issue_claim, check_approved_tag, unassign_issue, close_pr,
-                              check_issue_template, list_open_prs_from_repo, check_pr_template, label_list_issue)
+                              check_issue_template, list_open_prs_from_repo, check_pr_template, label_list_issue,
+                              pr_reviewed_label)
 from stemming.porter2 import stem
 from nltk.tokenize import word_tokenize
 from auth_credentials import announcement_channel_id, BOT_UID
@@ -164,6 +165,8 @@ def github_hook_receiver_function():
                         return jsonify({"message": "PR sent to unapproved issue"})
                 else:
                     return jsonify({"message": "PR template not followed"})
+            elif action == "submitted" and data.get("review", "") != "":
+                pr_reviewed_label(data)
         return jsonify({"message": "Unknown event"})
 
 

@@ -18,7 +18,7 @@ wrong_issue_data = {
     "issue": {
         "number": 99
     },
-    "repository":{
+    "repository": {
         "name": "sysbot-testing",
         "owner": {
             "login": "syster"
@@ -265,22 +265,22 @@ query_getting_started = "Can someone guide me on how to start contributing?"
 query_gender_participation = "Are female participants preferred over male at Systers?"
 
 pr_template_with_fixes_number = "## Description\r\n" \
-              "%s\r\n Fixes #123\r\n # Type of Change:\r\n" \
-              "%s \r\n\r\n# How Has This Been Tested?" \
-              "%s \r\n# Checklist:\r\n " \
-              "- [ ] %s.\r\n"
+                                "%s\r\n Fixes #123\r\n # Type of Change:\r\n" \
+                                "%s \r\n\r\n# How Has This Been Tested?" \
+                                "%s \r\n# Checklist:\r\n " \
+                                "- [ ] %s.\r\n"
 
 pr_template_with_fixes_text = "## Description\r\n" \
-              "%s\r\n Fixes #abc\r\n # Type of Change:\r\n" \
-              "%s \r\n\r\n# How Has This Been Tested?" \
-              "%s \r\n# Checklist:\r\n " \
-              "- [ ] %s.\r\n"
+                              "%s\r\n Fixes #abc\r\n # Type of Change:\r\n" \
+                              "%s \r\n\r\n# How Has This Been Tested?" \
+                              "%s \r\n# Checklist:\r\n " \
+                              "- [ ] %s.\r\n"
 
 pr_template_without_fixes = "## Description\r\n" \
-              "%s\r\n # Type of Change:\r\n" \
-              "%s \r\n\r\n# How Has This Been Tested?" \
-              "%s \r\n# Checklist:\r\n " \
-              "- [ ] %s.\r\n"
+                            "%s\r\n # Type of Change:\r\n" \
+                            "%s \r\n\r\n# How Has This Been Tested?" \
+                            "%s \r\n# Checklist:\r\n " \
+                            "- [ ] %s.\r\n"
 
 event_data_issue_opened = {
     "action": "opened",
@@ -337,7 +337,7 @@ event_data_pr_opened = {
     }
 }
 
-new_user_data={
+new_user_data = {
     "event": {
         "text": "Hello <@UASFP3GHW> How to get started?",
         "channel": "CAP9GA5MJ",
@@ -359,4 +359,61 @@ slash_command_view_issue_data = {
     "trigger_id": "411060288533.8416220484.49610058e1a1a50a5f8231694862f9b5",
     "user_id": "U7KMRCS5Q",
     "user_name": "f2016165"
+}
+
+pr_approved_review_event_data = {
+    "action": "submitted",
+    "pull_request": {
+        # PR number on which review was submitted
+        "number": "29",
+    },
+    "repository": {
+        "name": "sysbot-test",
+        "owner": {
+            "login": "systers"
+        }
+    },
+    # Data about review
+    "review": {
+        "state": "approved",
+        "author_association": "COLLABORATOR"
+    }
+}
+
+pr_changes_requested_review_event_data = {
+    "action": "submitted",
+    "pull_request": {
+        # PR number on which review was submitted
+        "number": "29",
+    },
+    "repository": {
+        "name": "sysbot-test",
+        "owner": {
+            "login": "systers"
+        }
+    },
+    # Data about review
+    "review": {
+        "state": "changes_requested",
+        "author_association": "COLLABORATOR"
+    }
+}
+
+pr_review_error_event_data = {
+    "action": "submitted",
+    "pull_request": {
+        # PR number on which review was submitted
+        "number": "29",
+    },
+    "repository": {
+        "name": "sysbot-testing",
+        "owner": {
+            "login": "systers"
+        }
+    },
+    # Data about review
+    "review": {
+        "state": "changes_requested",
+        "author_association": "COLLABORATOR"
+    }
 }

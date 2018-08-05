@@ -346,3 +346,41 @@ def fetch_issue_body(repo_owner, repo_name, issue_number):
         return {'issue_body': issue_content, 'status': 200}
     else:
         return {'message': 'Wrong information provided', 'status': 404}
+
+
+def pr_reviewed_label(data):
+    session = requests.Session()
+    session.auth = (USERNAME, PASSWORD)
+    pr_number = data.get("pull_request", {}).get('number', '')
+    repo_name = data.get('repository', {}).get('name', '')
+    repo_owner = data.get('repository', {}).get('owner', {}).get('login', '')
+    # Get state of submitted review
+    review_state = data.get("review", {}).get("state", "")
+    author_association = data.get("review", {}).get("author_association", "")
+    request_url = add_label_url % (repo_owner, repo_name, pr_number)
+    if (review_state == "commented" or review_state == "changes_requested") and \
+            (author_association == "COLLABORATOR" or author_association == "OWNER"):
+        remove_label_not_reviewed = '/Not%20Reviewed'
+        remove_label_approved = '/Approved'
+        # Delete the not reviewed and approved labels first
+        session.delete(request_url + remove_label_not_reviewed, headers=headers)
+        session.delete(request_url + remove_label_approved, headers=headers)
+        label = '["under review"]'
+        response = session.post(request_url, data=label, headers=headers)
+        if response.status_code == 200:
+            return {"message": "Labelled as under review", "status": 200}
+        else:
+            return {"message": "Some error occurred", "status": 400}
+    elif review_state == "approved" and (author_association == "COLLABORATOR" or author_association == "OWNER"):
+        remove_label_not_reviewed = '/Not%20Reviewed'
+        remove_label_approved = '/under%20review'
+        # Delete the not reviewed and under review labels first
+        session.delete(request_url + remove_label_not_reviewed, headers=headers)
+        session.delete(request_url + remove_label_approved, headers=headers)
+        label = '["approved"]'
+        response = session.post(request_url, data=label, headers=headers)
+        if response.status_code == 200:
+            return {"message": "Labelled as approved", "status": 200}
+        else:
+            return {"message": "Some error occurred", "status": 400}
+    return
