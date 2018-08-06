@@ -1,14 +1,21 @@
+"""This module handles funtionalities via slack."""
+
 # -*- coding: utf-8 -*-
 
 import requests
 from flask import json
-from auth_credentials import BOT_ACCESS_TOKEN, maintainer_usergroup_id, legacy_token, org_repo_owner
+from nltk.tokenize import sent_tokenize, word_tokenize
+
+from auth_credentials import (BOT_ACCESS_TOKEN, maintainer_usergroup_id, legacy_token, org_repo_owner, path_secret,
+                              api_key)
+from topic_extractor import NPExtractor
 from request_urls import (dm_channel_open_url, dm_chat_post_message_url, get_maintainer_list,
-                          get_user_profile_info_url, chat_post_ephimeral_message_url)
-from messages import MESSAGE
+                          get_user_profile_info_url, chat_post_ephimeral_message_url, luis_agent_intent_classify_call)
+from messages import MESSAGE, ANSWERS_FAQS
 from github_functions import (send_github_invite, issue_comment_approve_github, issue_assign,
                               check_assignee_validity, check_multiple_issue_claim,
                               open_issue_github, get_issue_author, check_approved_tag)
+from dictionaries import slack_team_vs_repo_dict, techstack_vs_projects, message_key_vs_list_of_alternatives
 
 headers = {'Content-type': 'application/json', 'Authorization': 'Bearer {}'.format(BOT_ACCESS_TOKEN)}
 headers_legacy_urlencoded = {
@@ -18,6 +25,14 @@ headers_legacy_urlencoded = {
 
 
 def dm_new_users(data):
+    """DM sent to the newcommers.
+
+    Any newcomer who joins Systers slack workspace gets a DM
+    from the bot with a welcome message, providing help on
+    how to start and how to use the bot.
+    param data: json response with key value pairs containing user information.
+    return: response message and status code.
+    """
     # Get user id of the user who joined
     uid = data.get('event', {}).get('user', None)
     if uid is not None:
@@ -41,6 +56,11 @@ def dm_new_users(data):
 
 
 def is_maintainer_comment(commenter_id):
+    """Check if a certain commenter is a member of the Slack maintainers team.
+
+    param commenter_id: user id of the commenter.
+    return: response message and status code.
+    """
     # Using the id of usergroup maintainers
     body = {'usergroup': maintainer_usergroup_id, 'include_disabled': True}
     # Get list of maintainers. For more info :  usergroups.users.list in Slack API
@@ -58,16 +78,25 @@ def is_maintainer_comment(commenter_id):
 
 
 def approve_issue_label_slack(data):
-    result = is_maintainer_comment(data.get('user_id', ''))
+    """Approve issue via slack.
+
+    Handle approval of issue from Slack. Extracts info from
+    the event data and send the required data to github
+    function for approval.
+    param data: json response with key value pairs containing
+                user and channel information.
+    return: response message.
+    """
     channel_id = data.get('channel_id', '')
     uid = data.get('user_id', '')
+    result = is_maintainer_comment(uid)
     response = get_detailed_profile(uid)
     if response.get('ok', False):
         profile = response.get('profile', '')
         get_github_username = get_github_username_profile(profile)
         github_profile_present = get_github_username.get('github_profile_present', False)
         if not github_profile_present:
-            send_message_ephimeral(channel_id, uid, MESSAGE.get('newcomer_requirement_incomplete', ''))
+            send_message_ephemeral(channel_id, uid, MESSAGE.get('newcomer_requirement_incomplete', ''))
             return {"message": "Newcomer Requirement Incomplete"}
         else:
             github_id = get_github_username.get('github_id', '')
@@ -76,37 +105,44 @@ def approve_issue_label_slack(data):
                 if params != '' and len(params.split(' ')) == 2:
                     issue_author = get_issue_author(org_repo_owner, params.split(' ')[0], params.split(' ')[1])
                     if issue_author == github_id:
-                        send_message_ephimeral(channel_id, uid, MESSAGE.get('author_cannot_approve', ''))
+                        send_message_ephemeral(channel_id, uid, MESSAGE.get('author_cannot_approve', ''))
                         return {"message": "Author cannot approve an issue"}
                     response = issue_comment_approve_github(params.split(' ')[1], params.split(' ')[0],
                                                             org_repo_owner, github_id, True)
                     status = response.get('status', 500)
                     if status == 404:
                         # Information given is wrong
-                        send_message_ephimeral(channel_id, uid, MESSAGE.get('wrong_info', ''))
+                        send_message_ephemeral(channel_id, uid, MESSAGE.get('wrong_info', ''))
                         return {"message": "Information provided is wrong", "status": 404}
-                    elif status == 200:
+                    elif status == 200:  # pragma: no cover
                         # Successful labeling
-                        send_message_ephimeral(channel_id, uid, MESSAGE.get('success', ''))
+                        send_message_ephemeral(channel_id, uid, MESSAGE.get('success', ''))
                         return {"message": "Success", "status": 200}
-                    elif status == 500:
+                    elif status == 500:  # pragma: no cover
                         # Some internal error occured
-                        send_message_ephimeral(channel_id, uid, MESSAGE.get('error_slash_command', ''))
+                        send_message_ephemeral(channel_id, uid, MESSAGE.get('error_slash_command', ''))
                         return {"message": "Error with slash command", "status": 500}
                 else:
                     # Wrong format of command was used
-                    send_message_ephimeral(channel_id, uid, MESSAGE.get('correct_approve_format', ''))
+                    send_message_ephemeral(channel_id, uid, MESSAGE.get('correct_approve_format', ''))
                     return {"message": "Wrong parameters for for approval command"}
             else:
                 # The commentor is not a maintainer
-                send_message_ephimeral(channel_id, uid, MESSAGE.get('not_a_maintainer', ''))
+                send_message_ephemeral(channel_id, uid, MESSAGE.get('not_a_maintainer', ''))
                 return {"message": "Non-maintainer cannot use the command"}
     else:
-        send_message_ephimeral(channel_id, uid, MESSAGE.get('error_slash_command', ''))
+        send_message_ephemeral(channel_id, uid, MESSAGE.get('error_slash_command', ''))
         return {"message": "Error with slash command"}
 
 
 def check_newcomer_requirements(uid, channel_id):
+    """Check if the requirements are met.
+
+    Check if a newcomer has met the reqirements as mentioned in the membership levels guidelines.
+    param uid: ID of the newcomer.
+    param channel_id: ID of the channel.
+    return: response message if the requiremnets are satisfied.
+    """
     response = get_detailed_profile(uid)
     if response.get('ok', False):
         profile = response.get('profile', '')
@@ -117,17 +153,25 @@ def check_newcomer_requirements(uid, channel_id):
                 and not profile.get('phone', "").isdigit():
             github_id = get_github_username.get('github_id', '')
             send_github_invite(github_id)
-            send_message_ephimeral(channel_id, uid, MESSAGE.get('invite_sent', ''))
-            return {"message": "Invittion sent"}
+            send_message_ephemeral(channel_id, uid, MESSAGE.get('invite_sent', ''))
+            return {"message": "Invitation sent"}
         else:
-            send_message_ephimeral(channel_id, uid, MESSAGE.get('newcomer_requirement_incomplete', ''))
+            send_message_ephemeral(channel_id, uid, MESSAGE.get('newcomer_requirement_incomplete', ''))
             return {"message": "Newcomer requirements incomplete"}
     else:
-        send_message_ephimeral(channel_id, uid, MESSAGE.get('error_slash_command', ''))
+        send_message_ephemeral(channel_id, uid, MESSAGE.get('error_slash_command', ''))
         return {"message": "Error with slash command"}
 
 
 def assign_issue_slack(data):
+    """Assign issue via slack.
+
+    Handle assigning of issues from Slack. Extracts info from
+    the event data and send the required data to github function for assigning.
+    param data: json response with key value pairs containing
+                user and channel info.
+    return: response message
+    """
     result = is_maintainer_comment(data.get('user_id', ''))
     channel_id = data.get('channel_id', '')
     uid = data.get('user_id', '')
@@ -141,37 +185,45 @@ def assign_issue_slack(data):
             is_issue_approved = check_approved_tag(org_repo_owner, tokens[0], tokens[1])
             # If issue has been claimed, send message to the channel
             if is_issue_claimed_or_assigned:
-                send_message_ephimeral(channel_id, uid, MESSAGE.get('already_claimed', ''))
+                send_message_ephemeral(channel_id, uid, MESSAGE.get('already_claimed', ''))
                 return {"message": "Issue already claimed"}
             # If issue has not been approved, send message to the channel
             if not is_issue_approved:
-                send_message_ephimeral(channel_id, uid, MESSAGE.get('not_approved', ''))
+                send_message_ephemeral(channel_id, uid, MESSAGE.get('not_approved', ''))
                 return {"message": "Issue not approved"}
             # If issue is available, then check for assign status
             status = issue_assign(tokens[1], tokens[0], tokens[2], org_repo_owner)
             if status == 404:
                 # Information given is wrong
-                send_message_ephimeral(channel_id, uid, MESSAGE.get('wrong_info', ''))
+                send_message_ephemeral(channel_id, uid, MESSAGE.get('wrong_info', ''))
                 return {"message": "Wrong information provided", "status": 404}
-            elif status == 200:
+            elif status == 200:  # pragma: no cover
                 # Successful assignment
-                send_message_ephimeral(channel_id, uid, MESSAGE.get('success', ''))
+                send_message_ephemeral(channel_id, uid, MESSAGE.get('success', ''))
                 return {"message": "Success", "status": 200}
-            elif status == 500:
+            elif status == 500:  # pragma: no cover
                 # Some internal error occured
-                send_message_ephimeral(channel_id, uid, MESSAGE.get('error_slash_command', ''))
+                send_message_ephemeral(channel_id, uid, MESSAGE.get('error_slash_command', ''))
                 return {"message": "Author cannot approve an issue", "status": 500}
         else:
             # Wrong format of command was used
-            send_message_ephimeral(channel_id, uid, MESSAGE.get('correct_assign_format', ''))
+            send_message_ephemeral(channel_id, uid, MESSAGE.get('correct_assign_format', ''))
             return {"message": "Wrong format of command"}
     else:
         # The commentor is not a maintainer
-        send_message_ephimeral(channel_id, uid, MESSAGE.get('not_a_maintainer', ''))
+        send_message_ephemeral(channel_id, uid, MESSAGE.get('not_a_maintainer', ''))
         return {"message": "Not a maintainer"}
 
 
 def claim_issue_slack(data):
+    """Claim issue via slack.
+
+    Handle claiming of issues from Slack. Extracts info from the
+    event data and send the required data to github function for claiming.
+    param data: json response with key value pairs
+                containing user and channel information.
+    return: constructed message in response to different conditions.
+    """
     params = data.get('text', '')
     tokens = params.split(' ')
     channel_id = data.get('channel_id', '')
@@ -183,13 +235,12 @@ def claim_issue_slack(data):
         is_issue_approved = check_approved_tag(org_repo_owner, tokens[0], tokens[1])
         # If issue has been claimed, send message to the channel
         if is_issue_claimed_or_assigned:
-            send_message_ephimeral(channel_id, uid, MESSAGE.get('already_claimed', ''))
+            send_message_ephemeral(channel_id, uid, MESSAGE.get('already_claimed', ''))
             return {"message": "Issue already claimed"}
         # If issue has not been approved, send message to the channel
         if not is_issue_approved:
-            send_message_ephimeral(channel_id, uid, MESSAGE.get('not_approved', ''))
+            send_message_ephemeral(channel_id, uid, MESSAGE.get('not_approved', ''))
             return {"message": "Issue not approved"}
-        github_username = ''
         # If the format /sysbot_claim <repo_name> <issue_number> is used
         if len(tokens) == 2:
             response = get_detailed_profile(uid)
@@ -199,10 +250,10 @@ def claim_issue_slack(data):
                     # Find if the username is present in Slack profile
                     github_username = response.get('github_id', '')
                 else:
-                    send_message_ephimeral(channel_id, uid, MESSAGE.get('error_claim_alternate', ''))
+                    send_message_ephemeral(channel_id, uid, MESSAGE.get('error_claim_alternate', ''))
                     return {"message": "Incomplete profile for using command"}
             else:
-                send_message_ephimeral(channel_id, uid, MESSAGE.get('error_slash_command', ''))
+                send_message_ephemeral(channel_id, uid, MESSAGE.get('error_slash_command', ''))
                 return {"message": "Error in command parameters"}
         else:
             github_username = tokens[2]
@@ -215,39 +266,75 @@ def claim_issue_slack(data):
             assignee_status = check_assignee_validity(tokens[0], github_username, org_repo_owner)
             if assignee_status == 404:
                 # Can't be assigned as not a member
-                send_message_ephimeral(channel_id, uid, MESSAGE.get('not_a_member', ''))
+                send_message_ephemeral(channel_id, uid, MESSAGE.get('not_a_member', ''))
                 return {"message": "Not a member", "status": 404}
             else:
                 # Information given is wrong
-                send_message_ephimeral(channel_id, uid, MESSAGE.get('wrong_info', ''))
+                send_message_ephemeral(channel_id, uid, MESSAGE.get('wrong_info', ''))
                 return {"message": "Wrong information provided"}
-        elif status == 200:
+        elif status == 200:  # pragma: no cover
             # Successful claim
-            send_message_ephimeral(channel_id, uid, MESSAGE.get('success', ''))
+            send_message_ephemeral(channel_id, uid, MESSAGE.get('success', ''))
             return {"message": "Success", "status": 404}
-        elif status == 500:
+        elif status == 500:  # pragma: no cover
             # Some internal error occured
-            send_message_ephimeral(channel_id, uid, MESSAGE.get('error_slash_command', ''))
+            send_message_ephemeral(channel_id, uid, MESSAGE.get('error_slash_command', ''))
             return {"message": "Error slash command", "status": 500}
     else:
         # Wrong format of command was used
-        send_message_ephimeral(channel_id, uid, MESSAGE.get('correct_claim_format', ''))
+        send_message_ephemeral(channel_id, uid, MESSAGE.get('correct_claim_format', ''))
         return {"message": "Correct claim format"}
 
 
-def send_message_to_channels(channel_id, message):
+def send_message_to_channels(channel_id, message):  # pragma: no cover
+    """Send a message to a channel(public, private or DM channel).
+
+    param channel_id: ID of the channel.
+    param message: message to be sent.
+    return: response message and status code.
+    """
     body = {'username': 'Sysbot', 'as_user': True, 'text': message, 'channel': channel_id}
+    response = requests.post(dm_chat_post_message_url, data=json.dumps(body), headers=headers)
+    if response.json().get('ok', False):
+        return {'message': 'Success', 'status': 200}
+    else:
+        return {'message': 'Wrong information', 'status': 404}
+
+
+def send_message_thread(channel_id, message, thread_timestamp):  # pragma: no cover
+    """Sends the message thread.
+
+    param channel_id: ID of the channel.
+    param message: message to be sent.
+    param thread_timestamp: Current time of the event (thread)
+    return: response status code.
+    """
+    body = {'username': 'Sysbot', 'as_user': True, 'text': message, 'channel': channel_id, 'thread_ts': thread_timestamp}
     response = requests.post(dm_chat_post_message_url, data=json.dumps(body), headers=headers)
     return response.status_code
 
 
-def send_message_ephimeral(channel_id, uid, message):
+def send_message_ephemeral(channel_id, uid, message):
+    """Send ephimeral message.
+
+    Send message to channels, but is only visible to the
+    person who caused the message from the bot.
+    param channel_id: ID of the channel.
+    param uid: ID of the user.
+    param message: message to be sent.
+    return: response status code.
+    """
     body = {'username': 'Sysbot', 'as_user': True, 'text': message, 'channel': channel_id, 'user': uid}
     response = requests.post(chat_post_ephimeral_message_url, data=json.dumps(body), headers=headers)
     return response.status_code
 
 
-def open_issue_slack(data):
+def open_issue_slack(data):  # pragma: no cover
+    """Handle opening issues from slack.
+
+    param data: json response with key value pairs containing user information.
+    return: response message and status code.
+    """
     channel_id = data.get('channel_id', '')
     uid = data.get('user_id', '')
     # Get the command parameters used by the user
@@ -259,7 +346,7 @@ def open_issue_slack(data):
     if command_params == "" or len(tokens) < 6 or len(title_body_tokens) < 5 or \
             title_body_tokens[1] == '' or title_body_tokens[2] == '' or \
             title_body_tokens[3] == '' or title_body_tokens[4] == '':
-        send_message_ephimeral(channel_id, uid, MESSAGE.get('wrong_params_issue_command', ''))
+        send_message_ephemeral(channel_id, uid, MESSAGE.get('wrong_params_issue_command', ''))
         return {"message": "Wrong parameters for command"}
     # Each part is extracted and will be put into the template
     issue_title = title_body_tokens[1]
@@ -270,14 +357,19 @@ def open_issue_slack(data):
                                update_list_item, estimation, tokens[1])
     if status == 201:
         # If issue has been opened successfully
-        send_message_ephimeral(channel_id, uid, MESSAGE.get('success_issue', ''))
+        send_message_ephemeral(channel_id, uid, MESSAGE.get('success_issue', ''))
         return {"message": "Successfully opened issue", "status": 201}
     else:
-        send_message_ephimeral(channel_id, uid, MESSAGE.get('error_issue', ''))
+        send_message_ephemeral(channel_id, uid, MESSAGE.get('error_issue', ''))
         return {"message": "Error in opening issue", "status": status}
 
 
 def get_detailed_profile(uid):
+    """Get the detailed profile of a user(includes fields like date of birth).
+
+    param uid: ID of the user.
+    return: True if the profile request gets processed.
+    """
     body = {'user': uid, 'include_labels': True}
     profile_response_json = requests.post(get_user_profile_info_url, data=body, headers=headers_legacy_urlencoded).json()
     if profile_response_json.get('ok', False):
@@ -287,11 +379,180 @@ def get_detailed_profile(uid):
 
 
 def get_github_username_profile(profile):
-        custom_fields = profile.get('fields', {})
-        github_id = ""
+    """Extract the github username from github field value.
+
+    param profile: user profile information.
+    return: True if the profile is present.
+    """
+    custom_fields = profile.get('fields', {})
+    if custom_fields is not None:
         for key in custom_fields:
             github_link = custom_fields.get(key, {}).get('value', '')
             if 'github.com/' in github_link:
                 github_id = github_link.split('github.com/')[1]
                 return {'github_profile_present': True, 'github_id': github_id}
-        return {'github_profile_present': False}
+    return {'github_profile_present': False}
+
+
+def slack_team_name_reply(data):
+    """Reply to teams on slack.
+
+    The bot uses a trained agent provided by LUIS API to recognise
+    questions about team maintainers and responds with team names for
+    each channel. param data: json response with key value pairs
+    containing user and channel information.
+    """
+    message = data.get('event', {}).get('text', '')
+    channel_id = data.get('event', {}).get('channel', '')
+    uid = data.get('event', {}).get('user', '')
+    # Check if query format is ok
+    if message != '' and len(message.split('<@UASFP3GHW>')) >= 2:
+        # Extracting the query text from message. Here <@UASFP3GHW> is the bot mention.
+        query = message.split('<@UASFP3GHW>')[1].strip()
+        team_details = slack_team_vs_repo_dict.get(channel_id, '')
+        # Check if query is empty or if channel doesn't have a team.
+        if query != '' and team_details != '':
+            # This is a constant command which will always work
+            if query == 'maintainer team name':  # pragma: no cover
+                send_message_ephemeral(channel_id, uid, MESSAGE.get('slack_team_message') % (
+                    team_details[0], team_details[1]))
+                return {'message': 'Team name requested'}
+            else:
+                query = query.replace(' ', '%20')
+                request_url = luis_agent_intent_classify_call % (path_secret, api_key, query)
+                response = requests.get(request_url).json()
+                # Checking by matching intent. Keeping score high to prevent false positives.
+                condition1 = response.get('topScoringIntent', {}).get('intent', '') == 'Maintainers'
+                condition2 = float(response.get('topScoringIntent', {}).get('score', '0')) > 0.965
+                if condition1 and condition2:  # pragma: no cover
+                    send_message_ephemeral(channel_id, uid, MESSAGE.get('slack_team_message') % (
+                        team_details[0], team_details[1]))
+                    return {'message': 'Team name requested'}
+                else:
+                    # If query isn't recognized, return default answer
+                    send_message_ephemeral(channel_id, uid, MESSAGE.get('no_answer'))
+                    return {'message': 'Not classified query'}
+        elif team_details == '':
+            send_message_ephemeral(channel_id, uid, MESSAGE.get('slack_team_DNE'))
+            return {'message': 'Team does not exist in records.'}
+    send_message_ephemeral(channel_id, uid, MESSAGE.get('wrong_query_format'))
+    return {'message': 'Illegitimate query.'}
+
+
+def handle_message_answering(event_data):
+    """Handle answering of certain questions.
+
+    On the intro and newcomers channel, the bot responds
+    to questions on getting started and about Systers,
+    AnitaB, GSoC and other programs, and replies with
+    more information on these topics.
+    param event_data: information related to the occured event.
+    return: response message.
+    """
+    # Time stamp  of thread if present
+    thread_ts = event_data.get('thread_ts', None)
+    # Message time stamp
+    reply_ts = event_data.get('ts', None)
+    # If message is in a thread, then the UID of commenter of main message
+    parent_uid = event_data.get('parent_user_id', None)
+    # Current comment's author
+    comment_user_uid = event_data.get('user', None)
+    text = str(event_data.get('text', None))
+    channel = event_data.get('channel', None)
+    # Checking if it's a reply to a thread by any other user
+    if thread_ts is not None and parent_uid != comment_user_uid:
+        return {'message': 'Not handling replies made by others'}
+    # If the message is in a thread and made by the parent commenter
+    elif thread_ts is not None and parent_uid == comment_user_uid:
+        reply_ts = thread_ts
+    if channel == 'C0CAF47RQ':  # pragma: no cover
+        techs = techstack_vs_projects.keys()
+        suggest_projects_set = set()
+        search_text_tokens = word_tokenize(text.upper())
+        # Finding all languages mentioned in comment common with the ones in Systers language list
+        techs = list(set(search_text_tokens).intersection(set(techs)))
+        for tech in techs:
+            suggest_projects_set = suggest_projects_set.union(set(techstack_vs_projects[tech]))
+        suggest_projects_list = list(suggest_projects_set)
+        # No tech stack found in intro comment.
+        if not suggest_projects_list and thread_ts is None:
+            message = MESSAGE.get('answer_to_intro') % (MESSAGE.get('no_project'))
+            send_message_thread(channel, message, reply_ts)
+        elif suggest_projects_list:
+            projects = ""
+            for i, project in enumerate(suggest_projects_list):
+                projects = projects + "\n" + str(i + 1) + ". www.github.com/systers/" + project + ", "
+            # Message is not in a thread. Reply with full message.
+            if thread_ts is None:
+                message = MESSAGE.get('answer_to_intro') % (MESSAGE.get('projects_message') % projects[0:-2])
+                send_message_thread(channel, message, reply_ts)
+            # Message in thread. Reply with projects.
+            elif thread_ts is not None:
+                message = MESSAGE.get('projects_message') % projects[0:-2]
+                send_message_thread(channel, message, reply_ts)
+    # Answering some FAQs
+    answer_keyword_faqs(text, channel, reply_ts)
+    # Answering classification questions only on questions and intro and not in threads
+    if thread_ts is None and (channel == 'C0S15BFNX' or channel == 'C0CAF47RQ'):
+        luis_classifier(text, channel, reply_ts)
+        return {'message': 'Sent for intent classification'}
+    return {'message': 'Not sent for classification'}
+
+
+def answer_keyword_faqs(comment_text, channel, reply_ts):
+    """Answer FAQs related to certain keywords.
+
+    param comment_text: comment message.
+    param channel: channel information.
+    param reply_ts: reply timestamp.
+    return: "Keyword FAQs answered" when the message thread is sent.
+    """
+    sentences = sent_tokenize(comment_text)
+    for sentence in sentences:
+        is_question = check_is_question(sentence)
+        if not is_question:
+            continue
+        main_subjects = NPExtractor(sentence).extract()
+        for topic in main_subjects:
+            for key in message_key_vs_list_of_alternatives.keys():
+                if topic.lower() in message_key_vs_list_of_alternatives[key]:
+                    send_message_thread(channel, ANSWERS_FAQS.get(key, ""), reply_ts)
+                    break
+    return {"message": "Keyword FAQs answered"}
+
+
+def check_is_question(sentence):
+    """Check if the message is a question.
+
+    param sentence: message that is to be checked.
+    return: True if sentence is a question.
+    """
+    start_words = ["who", "what", "when", "where", "why", "how", "is", "can", "does", "do"]
+    if sentence.endswith("?"):
+        return True
+    for word in start_words:
+        if sentence.startswith(word):
+            return True
+    return False
+
+
+def luis_classifier(query, channel, reply_ts):
+    """Classifies comments to intents like getting started, none, participant-
+    gender.
+
+    param query: question asked by the user.
+    param channel: ID of the channel.
+    param reply_ts: reply timestamp.
+    return: category name under which the question is classified.
+    """
+    query = query.replace(' ', '%20')
+    request_url = luis_agent_intent_classify_call % (path_secret, api_key, query)
+    response = requests.get(request_url).json()
+    top_intent = response.get('topScoringIntent', {}).get('intent', '')
+    top_intent_score = float(response.get('topScoringIntent', {}).get('score', '0'))
+    if top_intent == 'participation-gender' and top_intent_score > 0.6:
+        send_message_thread(channel, ANSWERS_FAQS.get('contributor_gender'), reply_ts)
+        return {'message': 'Participant gender question'}
+    elif top_intent == 'getting-started' and top_intent_score > 0.6:
+        send_message_thread(channel, ANSWERS_FAQS.get('getting_started'), reply_ts)
+        return {'message': 'Getting started question'}
