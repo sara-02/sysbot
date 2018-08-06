@@ -1,17 +1,32 @@
 # -*- coding: utf-8 -*-
 
 MESSAGE = {
-    'first_timer_message': 'Hello!\nWelcome to the Systers Open Source community!\nHow to get started:' + \
-                           '\n• Join <#C0CAF47RQ|intro> and introduce yourself! :slightly_smiling_face:\n• Join the <#C52CRK4HJ|code-of-conduct> and read the community rules.' + \
-                           '\n         - Update your profile in accordance with the community rules.' + \
-                           '\n• Find and join the other channels relevant to you (i.e. different projects).' + \
-                           '\nIf you have any questions, post them in the <#C0S15BFNX|questions> channel! :slightly_smiling_face:\nTag <@U0BKKUBQU|may> if no one answers immediately.' + \
-                           '\nTo get more information or ask questions about the larger community, post in <#C4KLZ90SV|systers>.' + \
-                           '\nTo track GitHub activity of all Systers\' repos, join the <#C6TBYMBPH|github-activity> channel.' + \
-                           '\nTo keep up with the Systers-Dev email list, join <#C4TRT3UEQ|mailing-list>.' + \
-                           '\nTo give any thanks or recognition to other members, shoutout in the <#C571VAZQR|celebrate> channel.'
-                           '\n\nHow to operate Sysbot?' + \
-                           '\nType /sysbot_help',
+    'first_timer_message': 'Hello!\nWelcome to the Systers Open Source community!\n\n'
+                           '*GETTING STARTED:*'
+                           '\n• Join <#C0CAF47RQ|intro> and introduce yourself! :slightly_smiling_face:'
+                           '\n• Join the <#C52CRK4HJ|code-of-conduct> and read the community rules, then type in the '
+                           'channel. *“I have read the Code of Conduct.“* (http://systers.io/code-of-conduct)'
+                           '\n         - Update your profile in accordance with the community rules.'
+                           '\nIf you have any questions, post them in the <#C0S15BFNX|questions> channel! :slightly_smiling_face:'
+                           '\n\n*Community Meetings:*'
+                           '\nGMT/UTC+00:00: https://calendar.google.com/calendar/embed?src=sh10tv3mtfve62somg9nngp9tg%40group.calendar.google.com'
+                           '\nTo change the calendar’s time zone, add the following at the end of the url for: '
+                           '\nPST: “&ctz=America/Los_Angeles” '
+                           '\nEST: “&ctz=America/New_York” '
+                           '\nGMT: Nothing! It’s currently in GMT. '
+                           '\nWAT: “&ctz=Africa/Lagos” '
+                           '\nIST: “&ctz=Asia/Colombo” '
+                           '\nJST: “&ctz=Asia/Tokyo”'
+                           '\nTo keep up with the Systers-Dev email list, join <#C4TRT3UEQ|mailing-list>.'
+                           '\n*If you’re a Newcomer*, check some tutorials and various non-coding '
+                           'contributions: http://systers.io/newcomers. '
+                           '\n\n*About Sysbot* '
+                           '\n The Systers Community has a bot of their own - Sysbot. '
+                           'It is integrated on Slack and Github, and has a number of features to automate '
+                           'Open Source workflow, like - claiming issues, getting invite to the organization on Github,'
+                           'assigning issues etc.'
+                           '\n\nHow to operate Sysbot?'
+                           '\nType /sysbot_help to get detailed information on the bot. Join #sysbot channel for more info.',
     'newcomer_requirement_incomplete': 'Please complete the newcomers requirements! Visit http://systers.io/member-levels for more info.',
     'wrong_info': 'You have either provided wrong info or you are not eligible to be assigned this issue.',
     'success': 'Success',
@@ -34,22 +49,48 @@ MESSAGE = {
     'help_message': 'Following are the functionalities of the Sysbot:-\n' + \
                     '*On Github*:\n' + \
                     '1. Each newly opened issue is labelled to be *Not Approved*.\n' + \
-                    '2. If you are a member of the org on Github, you can claim an issue by commenting *@sys-bot claim* on the issue.\n' + \
-                    '3. This is for maintainers/mentors/owners: You can assign an issue to a member of the Github org using command *@sys-bot assign <assignee_github_username> *.\n' + \
-                    '4. Any issue can be approved by maintainers and collaborators via a comment *@sys-bot approve* or via normal comments which have variants of the word approval' + \
-                    ' and issue(E.g - I am approving this issue, Approve this issue, etc). Also, a check has been kept so that the author of an issue cannot approve it.\n' + \
-                    '5. Any newly opened PRs will be labelled *Under Review*.\n\n' + \
-                    '*On Slack*:\n' + \
-                    '1. A slash command */sysbot_invite* can be used to get invited to the newcomers team and hence become a member of the org on Github.' + \
-                    ' However it checks if the newcomer member level is completed as mentioned here(http://systers.io/member-levels).\n' + \
-                    '2. A slash command */sysbot_approve_issue <repo_name> <issue_number>* can be used to approve an issue on Github directly from Slack.' + \
-                    'However this command can only be used by members of *@maintainers* team on Slack.\n' + \
-                    '3. A slash command */sysbot_assign_issue <repo_name> <issue_number> <assignee_github_username>* can be used to assign any issue from Github directly via Slack.' + \
-                    'However this command can only be used by members of *@maintainers* team on Slack.\n' + \
-                    '4. A slash command */sysbot_claim <repo_name> <issue_number> <assignee_github_username>* or */sysbot_claim <repo_name> <issue_number>* ' + \
-                    ' ( the latter option will work if your github URL is provided on Slack) can be used to claim any issue from Github directly via Slack.\n' + \
-                    '5. You can mention the bot in a channel and query it about slack team for the channel. Format: @Sysbot <Your query>. The bot will always respond to the command:' + \
-                    '@Sysbot maintainer team name . You can play around and try some other variants. Eg: "@Sysbot I have a doubt about this project. Who to contact?" and similar questions',
+                    '2. If you are a member of the org on Github, you can claim an issue by commenting *@sys-bot claim* on the issue.\n'
+                    '3. This is for maintainers/mentors/owners: You can assign an issue to a member of the Github org using command *@sys-bot assign <assignee_github_username> *.\n'
+                    '4. Any issue can be approved by maintainers and collaborators via a comment *@sys-bot approve* or via normal comments which have variants of the word approval'
+                    ' and issue(E.g - I am approving this issue, Approve this issue, etc). Also, a check has been kept so that the author of an issue cannot approve it.\n'
+                    '5. Any newly opened PRs will be labelled *Under Review*.\n'
+                    '6. If a PR is sent to *un-approved issue*, it will be closed.\n'
+                    '7. A check has been kept on the PR template. If the PR is not linked to an issue using the '
+                    '*Fixes #<issue-number>* or if it has any of the necessary elements of the template missing, '
+                    'then the PR gets closed.\n'
+                    '8. We can have three types of issue templates - Feature Request, User Story, and Bug report. '
+                    'The bot checks if each issue follows at least one of these options. If not a Template Mismatch '
+                    'label is added, and PR cant be sent to it.\n'
+                    '9. The bot checks for multiple claims on the same issue( same issue can\'t be claimed by or assigned to '
+                    'multiple members at the same time). \n'
+                    '10. PR is labelled under review or approved based on the reviews submitted by Collaborators/Owners\n'
+                    '11. Use command @sys-bot label <list of comma seperated labels>, to label an issue or PR with '
+                    'multiple labels. Eg:- *@sys-bot label* bug, enhancement, GSoC-18\n\n'
+                    '*On Slack*:\n'
+                    '1. A slash command */sysbot_invite* can be used to get invited to the newcomers team and hence become a member of the org on Github.'
+                    ' However it checks if the newcomer member level is completed as mentioned here(http://systers.io/member-levels).\n'
+                    '2. A slash command */sysbot_approve_issue <repo_name> <issue_number>* can be used to approve an issue on Github directly from Slack.'
+                    'However this command can only be used by members of *@maintainers* team on Slack.\n'
+                    '3. A slash command */sysbot_assign_issue <repo_name> <issue_number> <assignee_github_username>* '
+                    'can be used to assign any issue from Github directly via Slack.'
+                    'However this command can only be used by members of *@maintainers* team on Slack.\n'
+                    '4. A slash command */sysbot_claim <repo_name> <issue_number> <assignee_github_username>* or '
+                    '*/sysbot_claim <repo_name> <issue_number>* '
+                    ' ( the latter option will work if your github URL is provided on Slack) can be used to claim any'
+                    ' issue from Github directly via Slack.\n'
+                    '5. You can mention the bot in a channel and query it about slack team for the channel. '
+                    'Format: @Sysbot <Your query>. The bot will always respond to the command:'
+                    '@Sysbot maintainer team name . You can play around and try some other variants. '
+                    'Eg: "@Sysbot I have a doubt about this project. Who to contact?" and similar questions. \n'
+                    '6. A slash command to open issues with the following format: */sysbot_open_issue <repo_name> '
+                    '<author_username>* * Title of issue * Issue Description * Issue Requirement Item * Estimation .\n'
+                    '7. A slash command */sysbot_help* provides a list of all the commands and functionalities of the bot.\n'
+                    '8. Each week prs which have been opened that week but have not been reviewed yet are collected and'
+                    ' sent to respective Slack channels.\n'
+                    '9. On the *intro, questions and newcomers* channels, the bot responds with list of projects based on'
+                    ' the tech stack mentioned in the comments.\n'
+                    '10. On the *intro and newcomers* channel, the bot responds to questions on *getting started and about'
+                    ' Systers, AnitaB, GSoC and other programs*, and replies with more information on these topics.',
     'no_permission': 'You do not have permissions for this action.',
     'not_approved': 'This issue has not been approved yet. Please try a different issue.',
     'pr_to_unapproved_issue': 'Please send PRs only to approved issues.',
