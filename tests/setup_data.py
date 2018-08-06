@@ -347,6 +347,20 @@ new_user_data = {
 
 faq_sentence = "I am new here. Can anyone tell me about GSoC?"
 
+slash_command_view_issue_data = {
+    "channel_id": "CAP9GA5MJ",
+    "channel_name": "sysbot-testing",
+    "command": "/sysbot_view_issue",
+    "response_url": "https://hooks.slack.com/commands/T08C86GE8/411060288517/Aj1nuE1p8x4bEbBRIfQ44hRT",
+    "team_domain": "systers-opensource",
+    "team_id": "T08C86GE8",
+    "text": "sysbot-test 178",
+    "token": "9WMeKrR9ig79X8PY1jGnzkn5",
+    "trigger_id": "411060288533.8416220484.49610058e1a1a50a5f8231694862f9b5",
+    "user_id": "U7KMRCS5Q",
+    "user_name": "f2016165"
+}
+
 pr_approved_review_event_data = {
     "action": "submitted",
     "pull_request": {

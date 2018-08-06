@@ -81,7 +81,9 @@ MESSAGE = {
     'projects_message': "From the techstack you mentioned, I suggest you to look into the following "
                         "projects: You can go to www.github.com/systers and look for these projects -- %s",
     'pr_not_linked_to_issue': "This PR is not linked to any issue. Please follow the template and link it to an issue.",
-    'pr_template_not_followed': "This PR does not follow the PR template"
+    'pr_template_not_followed': "This PR does not follow the PR template",
+    'error_view_command': "The parameters for view command are wrong. Please check again.",
+    'incorrect_info_provided': "Information provided is wrong. Please check repo name and issue number."
 }
 
 ANSWERS_FAQS = {
