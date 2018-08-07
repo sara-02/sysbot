@@ -35,13 +35,15 @@ This workspace has been set to mock the main Systers workspace.
 All the project channels have been created with same name as that 
 on Systers.
 
-Here are the sample tokens:
+To generate the tokens for the sample workspace, 
+simply activate the virtual environment and then type:
+
 ```
-legacy_token='xoxp-327879632387-327879632547-329042880807-656e3aa59b5abd1ea7d59056e55a7fc9'
-BOT_TOKEN='xoxb-327993096738-Kg5v6qqsFlyZkngQcTRQ7R4N'
+sudo bash ./generate_tokens.sh
 ```
-Export these into the environment as well.
-Export announcement_channel_id='C9MCGNSQH'
+It will generate the bot and legacy tokens. Export these into the environment as well.  
+
+Export announcement_channel_id='C9MCGNSQH'  
 Export maintainer_usergroup_id='SAQDWBCE7'
 
  
