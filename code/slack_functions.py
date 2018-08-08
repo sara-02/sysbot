@@ -13,7 +13,8 @@ from messages import MESSAGE, ANSWERS_FAQS
 from github_functions import (send_github_invite, issue_comment_approve_github, issue_assign,
                               check_assignee_validity, check_multiple_issue_claim,
                               open_issue_github, get_issue_author, check_approved_tag, fetch_issue_body)
-from dictionaries import slack_team_vs_repo_dict, techstack_vs_projects, message_key_vs_list_of_alternatives
+from dictionaries import slack_team_vs_repo_dict, techstack_vs_projects, message_key_vs_list_of_alternatives, \
+    CHANNEL_LIST
 
 headers = {'Content-type': 'application/json', 'Authorization': 'Bearer {}'.format(BOT_ACCESS_TOKEN)}
 headers_legacy_urlencoded = {
@@ -365,7 +366,7 @@ def handle_message_answering(event_data):
     # If the message is in a thread and made by the parent commenter
     elif thread_ts is not None and parent_uid == comment_user_uid:
         reply_ts = thread_ts
-    if channel == 'C0CAF47RQ':  # pragma: no cover
+    if channel == CHANNEL_LIST.get('intro'):  # pragma: no cover
         techs = techstack_vs_projects.keys()
         suggest_projects_set = set()
         search_text_tokens = word_tokenize(text.upper())
@@ -393,7 +394,7 @@ def handle_message_answering(event_data):
     # Answering some FAQs
     answer_keyword_faqs(text, channel, reply_ts)
     # Answering classification questions only on questions and intro and not in threads
-    if thread_ts is None and (channel == 'C0S15BFNX' or channel == 'C0CAF47RQ'):
+    if thread_ts is None and (channel == CHANNEL_LIST.get('questions') or channel == CHANNEL_LIST.get('intro')):
         luis_classifier(text, channel, reply_ts)
         return {'message': 'Sent for intent classification'}
     return {'message': 'Not sent for classification'}
