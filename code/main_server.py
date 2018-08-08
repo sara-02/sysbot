@@ -15,9 +15,10 @@ from slack_functions import (dm_new_users, check_newcomer_requirements,
 from nltk.stem import WordNetLemmatizer
 from messages import MESSAGE
 from apscheduler.schedulers.background import BackgroundScheduler
-from dictionaries import repo_vs_channel_id_dict
+from dictionaries import repo_vs_channel_id_dict, CHANNEL_LIST
+
 # The list of channels on which the bot will respond to queries
-CHANNEL_LIST = {'C0CAF47RQ', 'C0S15BFNX', 'CAM6T4AGH'}
+
 
 app = Flask(__name__)
 
@@ -200,7 +201,7 @@ def slack_hook_receiver_function():
                 return jsonify({'message': 'App mentioned'})
             # Check if the message is made on the 3 required channels
             elif event == 'message' and condition_user and condition_subtype and \
-                    channel_type == 'channel' and channel in CHANNEL_LIST:
+                    channel_type == 'channel' and channel in CHANNEL_LIST.values():
                 handle_message_answering(data.get('event', {}))
                 return jsonify({'message': 'FAQ answered'})
         return json.dumps(request.json)
