@@ -14,7 +14,7 @@ from slack_functions import (dm_new_users, check_newcomer_requirements,
                              slack_team_name_reply, handle_message_answering, view_issue_slack)
 from nltk.stem import WordNetLemmatizer
 from messages import MESSAGE
-from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.scheduler import Scheduler
 from dictionaries import repo_vs_channel_id_dict
 # The list of channels on which the bot will respond to queries
 CHANNEL_LIST = {'C0CAF47RQ', 'C0S15BFNX', 'CAM6T4AGH'}
@@ -31,10 +31,12 @@ def collect_unreviewed_prs():  # pragma: no cover
             message = MESSAGE.get('list_of_unreviewed_prs', '%s') % pr_list[0:-1]
             # Send pr_list to respective channels
             send_message_to_channels(value, message)
+        else:
+            send_message_to_channels(value, MESSAGE.get('no_unreviewed_prs', ""))
 
 
-schedule = BackgroundScheduler(daemon=True)
-schedule.add_job(collect_unreviewed_prs, 'interval', days=7)
+schedule = Scheduler(daemon=True)
+schedule.add_cron_job(collect_unreviewed_prs, day_of_week='thu', hour=15, minute=30)
 schedule.start()
 
 
