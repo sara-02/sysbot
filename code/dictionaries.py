@@ -65,7 +65,8 @@ techstack_vs_projects = {
     'NODEJS': ['PC-Prep-Kit', 'systers.github.io'],
     'BOTS': ['sysbot'],
     'RUBY': ['pchub', 'language-translation'],
-    'PHP': ['crowdmap', 'FirstAide-web']
+    'PHP': ['crowdmap', 'FirstAide-web'],
+    'MEAN STACK': ['communities', 'systers.github.io']
 }
 
 message_key_vs_list_of_alternatives = {

@@ -1,4 +1,4 @@
-APScheduler==3.5.1
+APScheduler==2.1.2
 nltk==3.3
 stemming==1.0
 certifi==2018.1.18
@@ -17,3 +17,4 @@ websocket-client==0.47.0
 Werkzeug==0.14.1
 flake8==2.4.1
 awsebcli==3.14.1
+runp==0.0.2

@@ -93,7 +93,9 @@ MESSAGE = {
                     'about Systers, AnitaB, GSoC and other programs*, and replies with more information on these topics.'
                     '11. A slash command- /sysbot_label_issue <repo-name> <issue-number> [list of labels] to label an '
                     'issue directly from Slack. Access only to members of maintainers team. '
-                    'Eg- /sysbot_label_issue sysbot-test 180 [bug, enhancement]',
+                    'Eg- /sysbot_label_issue sysbot-test 180 [bug, enhancement]'
+                    '12. A slash command /sysbot_view_issue <repo-name> <issue-number> can be used to view issue content'
+                    'on Slack. Eg- /sysbot_view_issue sysbot 140',
     'no_permission': 'You do not have permissions for this action.',
     'not_approved': 'This issue has not been approved yet. Please try a different issue.',
     'pr_to_unapproved_issue': 'Please send PRs only to approved issues.',
@@ -121,13 +123,15 @@ MESSAGE = {
                        " start contributing, make sure you have read the welcome bot's messages"
                        " and contribution guidelines. %s",
     'no_project': "With the given information, I was unable to find any project for you. "
-                  "Please mention the languages you are familiar with so that I can suggest some projects.",
+                  "Please mention the languages you are familiar with in this thread so "
+                  "that I can suggest some projects.",
     'projects_message': "From the techstack you mentioned, I suggest you to look into the following "
                         "projects: You can go to www.github.com/systers and look for these projects -- %s",
     'pr_not_linked_to_issue': "This PR is not linked to any issue. Please follow the template and link it to an issue.",
     'pr_template_not_followed': "This PR does not follow the PR template",
     'error_view_command': "The parameters for view command are wrong. Please check again.",
-    'incorrect_info_provided': "Information provided is wrong. Please check repo name and issue number."
+    'incorrect_info_provided': "Information provided is wrong. Please check repo name and issue number.",
+    'no_unreviewed_prs': "All PR reviews up to date. None pending."
 }
 
 ANSWERS_FAQS = {

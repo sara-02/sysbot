@@ -32,10 +32,12 @@ def collect_unreviewed_prs():  # pragma: no cover
             message = MESSAGE.get('list_of_unreviewed_prs', '%s') % pr_list[0:-1]
             # Send pr_list to respective channels
             send_message_to_channels(value, message)
+        else:
+            send_message_to_channels(value, MESSAGE.get('no_unreviewed_prs', ""))
 
 
 schedule = Scheduler(daemon=True)
-schedule.add_cron_job(collect_unreviewed_prs, day_of_week='sun')
+schedule.add_cron_job(collect_unreviewed_prs, day_of_week='thu', hour=15, minute=30)
 schedule.start()
 
 
