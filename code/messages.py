@@ -89,8 +89,11 @@ MESSAGE = {
                     ' sent to respective Slack channels.\n'
                     '9. On the *intro, questions and newcomers* channels, the bot responds with list of projects based on'
                     ' the tech stack mentioned in the comments.\n'
-                    '10. On the *intro and newcomers* channel, the bot responds to questions on *getting started and about'
-                    ' Systers, AnitaB, GSoC and other programs*, and replies with more information on these topics.',
+                    '10. On the *intro and newcomers* channel, the bot responds to questions on *getting started and '
+                    'about Systers, AnitaB, GSoC and other programs*, and replies with more information on these topics.'
+                    '11. A slash command- /sysbot_label_issue <repo-name> <issue-number> [list of labels] to label an '
+                    'issue directly from Slack. Access only to members of maintainers team. '
+                    'Eg- /sysbot_label_issue sysbot-test 180 [bug, enhancement]',
     'no_permission': 'You do not have permissions for this action.',
     'not_approved': 'This issue has not been approved yet. Please try a different issue.',
     'pr_to_unapproved_issue': 'Please send PRs only to approved issues.',

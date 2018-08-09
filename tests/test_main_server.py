@@ -5,7 +5,8 @@ from setup_data import (slash_command_help_data, sentence, slash_command_open_is
                         slash_command_claim_data, slash_command_assign_issue_data,
                         slash_command_approve_issue_data, data_with_challenge_token,
                         data_member_joined_channel, data_app_mention_channel, data_message_reply,
-                        event_data_issue_opened, event_data_comment, event_data_pr_opened)
+                        event_data_issue_opened, event_data_comment, event_data_pr_opened,
+                        slash_command_label_issue_data)
 
 
 class TestMainServer(unittest.TestCase):
@@ -126,6 +127,7 @@ class TestMainServer(unittest.TestCase):
                                                              content_type='application/json')
             self.assertEqual(response_unclaim_wrong_format.data, '{\n  "message": "Wrong command format"\n}\n')
             event_data_comment['comment']['body'] = "@sys-bot unassign sammy1997"
+            event_data_comment['comment']['author_association'] = 'COLLABORATOR'
             response_unassign = self.client.post('/web_hook', data=json.dumps(event_data_comment),
                                                  content_type='application/json')
             self.assertEqual(response_unassign.data, '{\n  "message": "Issue unassigned"\n}\n')
@@ -153,6 +155,12 @@ class TestMainServer(unittest.TestCase):
             response_unhandled = self.client.post('/web_hook', data=json.dumps(event_data_pr_opened),
                                                   content_type='application/json')
             self.assertEqual(response_unhandled.data, '{\n  "message": "Unknown event"\n}\n')
+
+    def test_label_issue(self):
+        with self.client:
+            response = self.client.post('/label', data=json.dumps(slash_command_label_issue_data),
+                                        content_type='application/json')
+            self.assertEqual(200, response.status_code)
 
 
 if __name__ == '__main__':

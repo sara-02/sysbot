@@ -11,10 +11,10 @@ from auth_credentials import announcement_channel_id, BOT_UID
 from slack_functions import (dm_new_users, check_newcomer_requirements,
                              approve_issue_label_slack, assign_issue_slack, claim_issue_slack,
                              open_issue_slack, send_message_ephemeral, send_message_to_channels,
-                             slack_team_name_reply, handle_message_answering, view_issue_slack)
+                             slack_team_name_reply, handle_message_answering, view_issue_slack, label_issue_slack)
 from nltk.stem import WordNetLemmatizer
 from messages import MESSAGE
-from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.scheduler import Scheduler
 from dictionaries import repo_vs_channel_id_dict, CHANNEL_LIST
 
 # The list of channels on which the bot will respond to queries
@@ -34,8 +34,8 @@ def collect_unreviewed_prs():  # pragma: no cover
             send_message_to_channels(value, message)
 
 
-schedule = BackgroundScheduler(daemon=True)
-schedule.add_job(collect_unreviewed_prs, 'interval', days=7)
+schedule = Scheduler(daemon=True)
+schedule.add_cron_job(collect_unreviewed_prs, day_of_week='sun')
 schedule.start()
 
 
@@ -265,6 +265,14 @@ def view_issue_command():
     if request.headers['Content-Type'] == 'application/x-www-form-urlencoded':
         event_data = request.form
         view_issue_slack(event_data)
+        return Response(status=200)
+
+
+@app.route('/label', methods=['POST'])
+def label_issue():
+    if request.headers['Content-Type'] == 'application/x-www-form-urlencoded':
+        event_data = request.form
+        label_issue_slack(event_data)
         return Response(status=200)
 
 

@@ -66,6 +66,8 @@ with list of projects based on the tech stack mentioned in the comments.
 13. On the intro and newcomers channel, the bot responds to questions 
 on getting started and about Systers, AnitaB, GSoC and other programs,
 and replies with more information on these topics.
+14. A slash command- /sysbot_label_issue <repo-name> <issue-number> [list of labels] to label an issue directly from Slack.
+Access only to members of maintainers team. Eg- /sysbot_label_issue sysbot-test 180 [bug, enhancement]
 
 More explanations on NLP part can be found [here](nlp_explainations.md)
 
