@@ -285,8 +285,8 @@ def check_pr_template(pr_body, repo_owner, repo_name, pr_number):
     # Remove blank strings
     tokens = [s.strip() for s in tokens if s != '']
     # Necessary components in the PR template
-    necessary_elements_set = {'# Description', '# Type of Change:', '# How Has This Been Tested?',
-                              '# Checklist:'}
+    necessary_elements_set = {'### Description', '### Type of Change:', '### How Has This Been Tested?',
+                              '### Checklist:'}
     # Check if issue linking statement is present
     if 'Fixes #' not in pr_body:
         github_comment(MESSAGE.get('pr_not_linked_to_issue'), repo_owner, repo_name, pr_number)
@@ -314,7 +314,7 @@ def check_pr_template(pr_body, repo_owner, repo_name, pr_number):
     return False
 
 
-def label_list_issue(repo_owner, repo_name, issue_number, comment, commenter):
+def label_list_issue(repo_owner, repo_name, issue_number, comment):
     tokens = comment.split(",")
     labelled = 0
     for label_name in tokens:

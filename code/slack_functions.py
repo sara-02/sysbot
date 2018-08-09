@@ -12,7 +12,8 @@ from request_urls import (dm_channel_open_url, dm_chat_post_message_url, get_mai
 from messages import MESSAGE, ANSWERS_FAQS
 from github_functions import (send_github_invite, issue_comment_approve_github, issue_assign,
                               check_assignee_validity, check_multiple_issue_claim,
-                              open_issue_github, get_issue_author, check_approved_tag, fetch_issue_body)
+                              open_issue_github, get_issue_author, check_approved_tag, fetch_issue_body,
+                              label_list_issue)
 from dictionaries import slack_team_vs_repo_dict, techstack_vs_projects, message_key_vs_list_of_alternatives, \
     CHANNEL_LIST
 
@@ -455,3 +456,28 @@ def view_issue_slack(event_data):
     else:
         send_message_ephemeral(channel_id, uid, MESSAGE.get('error_view_command', ''))
         return {'message': "Error in using command"}
+
+
+def label_issue_slack(event_data):
+    label_text = event_data.get('text', '')
+    channel_id = event_data.get('channel_id', '')
+    uid = event_data.get('user_id', '')
+    response = is_maintainer_comment(uid)
+    tokens = label_text.split(' ')
+    label_list_tokens = label_text.split('[')
+    if response.get('is_maintainer', False):
+        if len(tokens) < 3 and len(label_list_tokens) != 2 and "]" not in label_text:
+            send_message_ephemeral(channel_id, uid, MESSAGE.get('error_view_command', ''))
+            return {'message': 'Wrong format'}
+        else:
+            label_list_tokens = '@sys-bot label %s' % label_list_tokens[1].split(']')[0]
+            response = label_list_issue(org_repo_owner, tokens[0], tokens[1], label_list_tokens)
+            if response.get('status', 400) == 400:
+                send_message_ephemeral(channel_id, uid, MESSAGE.get('incorrect_info_provided', ''))
+                return {'message': 'Wrong info'}
+            else:
+                send_message_ephemeral(channel_id, uid, MESSAGE.get('success', ''))
+                return {'message': 'Labelled issue'}
+    else:
+        send_message_ephemeral(channel_id, uid, MESSAGE.get('not_a_maintainer', ''))
+        return {'message': "Not a maintainer"}

@@ -68,7 +68,9 @@ The issues are opened in full markdown format, and the author's name is mentione
 12. On the intro, questions and newcomers channels, the bot responds with the list of projects based on the tech stack mentioned in the comments.
 13. On the intro and newcomers channel, the bot responds to questions on getting started and about Systers, AnitaB, GSoC and other programs,
 and replies with more information on these topics.
-14. A slash command on Slack to view issues directly on Slack has been added. 
+14. A slash command- /sysbot_label_issue <repo-name> <issue-number> [list of labels] to label an issue directly from Slack.
+Access only to members of maintainers team. Eg- /sysbot_label_issue sysbot-test 180 [bug, enhancement]
+15. A slash command on Slack to view issues directly on Slack has been added. 
 Format: /sysbot_view_issue <repo-name> <issue-name> . Eg- /sysbot_view_issue sysbot 123
 
 More explanations on NLP part can be found [here](nlp_explainations.md)

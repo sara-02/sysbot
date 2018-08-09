@@ -3,11 +3,11 @@ from code.slack_functions import (get_github_username_profile, get_detailed_prof
                                   is_maintainer_comment, check_newcomer_requirements,
                                   luis_classifier, dm_new_users, slack_team_name_reply,
                                   answer_keyword_faqs, approve_issue_label_slack,
-                                  assign_issue_slack, claim_issue_slack, view_issue_slack)
+                                  assign_issue_slack, claim_issue_slack, view_issue_slack, label_issue_slack)
 from setup_data import (profile_with_github, profile_without_github, query_getting_started,
                         query_gender_participation, new_user_data, faq_sentence,
                         slash_command_approve_issue_data, slash_command_assign_issue_data,
-                        slash_command_claim_data, slash_command_view_issue_data)
+                        slash_command_claim_data, slash_command_view_issue_data, slash_command_label_issue_data)
 
 
 class TestSlackFunctions(unittest.TestCase):
@@ -107,3 +107,13 @@ class TestSlackFunctions(unittest.TestCase):
         slash_command_view_issue_data['text'] = "sysbot-testing 178 sammy1997"
         response_wrong_params = view_issue_slack(slash_command_view_issue_data)
         self.assertEqual(response_wrong_params, {'message': "Error in using command"})
+
+    def test_label_issue_slack(self):
+        label_success = label_issue_slack(slash_command_label_issue_data)
+        self.assertEqual(label_success, {'message': 'Labelled issue'})
+        slash_command_label_issue_data['text'] = "sysbot-testing 181 [bug, enhancement]"
+        label_wrong_info = label_issue_slack(slash_command_label_issue_data)
+        self.assertEqual(label_wrong_info, {'message': 'Wrong info'})
+        slash_command_label_issue_data['text'] = "sysbot-testing 181"
+        label_wrong_params = label_issue_slack(slash_command_label_issue_data)
+        self.assertEqual(label_wrong_params, {'message': 'Wrong format'})

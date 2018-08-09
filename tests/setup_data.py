@@ -264,22 +264,22 @@ data_message_reply = {
 query_getting_started = "Can someone guide me on how to start contributing?"
 query_gender_participation = "Are female participants preferred over male at Systers?"
 
-pr_template_with_fixes_number = "## Description\r\n" \
+pr_template_with_fixes_number = "### Description\r\n" \
                                 "%s\r\n Fixes #123\r\n # Type of Change:\r\n" \
-                                "%s \r\n\r\n# How Has This Been Tested?" \
-                                "%s \r\n# Checklist:\r\n " \
+                                "%s \r\n\r\n### How Has This Been Tested?" \
+                                "%s \r\n### Checklist:\r\n " \
                                 "- [ ] %s.\r\n"
 
-pr_template_with_fixes_text = "## Description\r\n" \
-                              "%s\r\n Fixes #abc\r\n # Type of Change:\r\n" \
-                              "%s \r\n\r\n# How Has This Been Tested?" \
-                              "%s \r\n# Checklist:\r\n " \
+pr_template_with_fixes_text = "### Description\r\n" \
+                              "%s\r\n Fixes #abc\r\n ### Type of Change:\r\n" \
+                              "%s \r\n\r\n### How Has This Been Tested?" \
+                              "%s \r\n### Checklist:\r\n " \
                               "- [ ] %s.\r\n"
 
-pr_template_without_fixes = "## Description\r\n" \
-                            "%s\r\n # Type of Change:\r\n" \
-                            "%s \r\n\r\n# How Has This Been Tested?" \
-                            "%s \r\n# Checklist:\r\n " \
+pr_template_without_fixes = "### Description\r\n" \
+                            "%s\r\n ### Type of Change:\r\n" \
+                            "%s \r\n\r\n### How Has This Been Tested?" \
+                            "%s \r\n### Checklist:\r\n " \
                             "- [ ] %s.\r\n"
 
 event_data_issue_opened = {
@@ -320,12 +320,12 @@ event_data_comment = {
 event_data_pr_opened = {
     "action": "opened",
     "pull_request": {
-        "body": "## Description\r\n"
+        "body": "### Description\r\n"
                 "Some Description\r\n Fixes #151\r\n "
-                "# Type of Change:\r\n"
+                "### Type of Change:\r\n"
                 "Explain the changes \r\n"
-                "# How Has This Been Tested?\r\n"
-                "Tested \r\n# Checklist:\r\n"
+                "### How Has This Been Tested?\r\n"
+                "Tested \r\n### Checklist:\r\n"
                 "- [ ] Checklist Point.\r\n",
         "number": "13",
     },
@@ -416,4 +416,18 @@ pr_review_error_event_data = {
         "state": "changes_requested",
         "author_association": "COLLABORATOR"
     }
+}
+
+slash_command_label_issue_data = {
+    "channel_id": "CAP9GA5MJ",
+    "channel_name": "sysbot-testing",
+    "command": "/sysbot_label_issue",
+    "response_url": "https://hooks.slack.com/commands/T08C86GE8/411060288517/Aj1nuE1p8x4bEbBRIfQ44hRT",
+    "team_domain": "systers-opensource",
+    "team_id": "T08C86GE8",
+    "text": "sysbot-test 181 [bug, enhancement]",
+    "token": "9WMeKrR9ig79X8PY1jGnzkn5",
+    "trigger_id": "411060288533.8416220484.49610058e1a1a50a5f8231694862f9b5",
+    "user_id": "U7KMRCS5Q",
+    "user_name": "f2016165"
 }
