@@ -81,7 +81,8 @@ def github_hook_receiver_function():
                     return jsonify({'message': "Coveralls comment"})
 
                 # If comment is for approving issue
-                if comment_body.lower().strip().startswith('@sys-bot approve'):
+                if comment_body.lower().strip().startswith('@sys-bot approve') or \
+                        is_variant_of_approve(comment_body.lower()):
                     issue_comment_approve_github(issue_number, repo_name, repo_owner, commenter, False)
                     return jsonify({"message": "Approve command"})
 
@@ -148,7 +149,7 @@ def github_hook_receiver_function():
                     elif len(tokens) > 3 and (author_association != 'COLLABORATOR' or author_association != 'OWNER'):
                         github_comment(MESSAGE.get('no_permission', ''), repo_owner, repo_name, issue_number)
                     else:
-                        response = label_list_issue(repo_owner, repo_name, issue_number, comment_body, commenter)
+                        response = label_list_issue(repo_owner, repo_name, issue_number, comment_body)
                         return jsonify({"message": response.get("message")})
             elif (action == 'opened' or action == 'reopened') and data.get('pull_request', '') != '':
                 # If a new PR has been sent
@@ -290,6 +291,13 @@ def lemmatize_sent(sentence):
     # and appending to stemmed tokens to lists and overheads of string conversion.
     lemmatized_sentence = ' '.join(WordNetLemmatizer().lemmatize(token) for token in word_tokenize(sentence))
     return lemmatized_sentence
+
+
+def is_variant_of_approve(sentence):
+    stemmed_sentence_tokens = get_stems(sentence).split()
+    # All variants of approve like approve, approved, approving and approval have the same stem approv
+    return ('approv' in stemmed_sentence_tokens and 'no' not in stemmed_sentence_tokens and
+            'not' not in stemmed_sentence_tokens)
 
 
 if __name__ == '__main__':  # pragma: no cover
