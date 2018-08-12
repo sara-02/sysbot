@@ -91,7 +91,7 @@ class TestSlackFunctions(unittest.TestCase):
         self.assertEqual(response_assign_wrong_format, {"message": "Wrong format of command"})
 
     def test_claim_issue_slack(self):
-        slash_command_claim_data["text"] = "sysbot-test 150 sammy1997"
+        slash_command_claim_data["text"] = "sysbot-test 150 sys-bot"
         response_already_claimed = claim_issue_slack(slash_command_claim_data)
         self.assertEqual(response_already_claimed, {"message": "Issue already claimed"})
         slash_command_claim_data["text"] = "sysbot-test 152 sammy1997"

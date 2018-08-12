@@ -74,7 +74,6 @@ def github_hook_receiver_function():
                 commenter = data.get('comment', {}).get('user', {}).get('login', '')
                 author_association = data.get('comment', {}).get('author_association', '')
                 is_issue_claimed_or_assigned = check_multiple_issue_claim(repo_owner, repo_name, issue_number)
-
                 # Check if the comment by coveralls
                 if commenter == 'coveralls' and 'Coverage decreased' in comment_body:
                     github_comment(MESSAGE.get('add_tests', ''), repo_owner, repo_name, issue_number)
@@ -135,7 +134,7 @@ def github_hook_receiver_function():
                     if len(tokens) == 3 and (author_association == 'COLLABORATOR' or author_association == 'OWNER'):
                         unassign_issue(repo_owner, repo_name, issue_number, tokens[2])
                         return jsonify({"message": "Issue unassigned"})
-                    elif len(tokens) == 3 and (author_association != 'COLLABORATOR' or author_association != 'OWNER'):
+                    elif len(tokens) == 3 and (author_association != 'COLLABORATOR' and author_association != 'OWNER'):
                         github_comment(MESSAGE.get('no_permission', ''), repo_owner, repo_name, issue_number)
                     else:
                         github_comment(MESSAGE.get('wrong_format_github', ''), repo_owner, repo_name, issue_number)
@@ -146,8 +145,9 @@ def github_hook_receiver_function():
                     if len(tokens) < 3:
                         github_comment(MESSAGE.get('wrong_format_github', ''), repo_owner, repo_name, issue_number)
                         return jsonify({"message": "Wrong command format"})
-                    elif len(tokens) > 3 and (author_association != 'COLLABORATOR' or author_association != 'OWNER'):
+                    elif len(tokens) >= 3 and (author_association != 'COLLABORATOR' and author_association != 'OWNER'):
                         github_comment(MESSAGE.get('no_permission', ''), repo_owner, repo_name, issue_number)
+                        return jsonify({"message": "Not permitted"})
                     else:
                         response = label_list_issue(repo_owner, repo_name, issue_number, comment_body)
                         return jsonify({"message": response.get("message")})

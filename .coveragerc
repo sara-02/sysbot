@@ -2,4 +2,5 @@
 omit =
     */tests/*
     code/messages.py
+    code/dictionaries_test.py
     simulate/*
