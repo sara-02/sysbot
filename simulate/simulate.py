@@ -1,18 +1,20 @@
 import json
-
 import os
 import requests
 
 host = os.environ.get("HOST", "127.0.0.1")
 port = os.environ.get("PORT", "5000")
-SERVER_URL = "http://{}:{}".format(host, port)
+SERVER_URL = "http://{}:{}/".format(host, port)
 slack_data = ""
 github_data = ""
 
-with open('data/github_data.json') as f:
+
+cwd = os.path.dirname(os.path.realpath(__file__))
+
+with open(cwd + '/data/github_data.json') as f:
     github_data = json.load(f)
 
-with open('data/slack_data.json') as f:
+with open(cwd + '/data/slack_data.json') as f:
     slack_data = json.load(f)
 
 header_application_json = {

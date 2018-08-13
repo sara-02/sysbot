@@ -1,6 +1,7 @@
 import nltk
 from nltk.corpus import brown
 
+nltk.download('brown')
 brown_train = brown.tagged_sents(categories='news')
 regexp_tagger = nltk.RegexpTagger(
     [(r'^-?[0-9]+(.[0-9]+)?$', 'CD'),

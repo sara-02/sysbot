@@ -1,9 +1,9 @@
-###Sysbot
+### Sysbot
 By - Sammy1997  
 Mentors: Ramit Sawhney, Akshita Aggarwal  
 Admin: Prachi Manchanda  
 
-###Design for Template matching
+### Design for Template matching
 **June 02, 2018**  
 
 Following are the links to a sample issue which follows the template

@@ -50,7 +50,7 @@ def send_github_invite(github_id):
     if r.status_code == 200:
         return {'message': 'Success', 'status': r.status_code}
     else:
-        return {'message': 'Error', 'status': r.status_code}
+        return {'message': 'Error', 'status': 404}
 
 
 def issue_comment_approve_github(issue_number, repo_name, repo_owner, comment_author, is_from_slack):
@@ -173,13 +173,17 @@ def check_approved_tag(repo_owner, repo_name, issue_number):
     session = requests.Session()
     session.auth = (USERNAME, PASSWORD)
     request_url = get_labels % (repo_owner, repo_name, issue_number)
-    labels = session.get(request_url).json()
+    label_response = session.get(request_url)
+    labels = label_response.json()
     label_approved_present = False
-    for label in labels:
-        if label.get('name', '') == 'issue-approved':
-            label_approved_present = True
-        if label.get('name', '') == 'Template Mismatch':
-            return False
+    if label_response.status_code == 200:
+        for label in labels:
+            if label.get('name', '') == 'issue-approved':
+                label_approved_present = True
+            if label.get('name', '') == 'Template Mismatch':
+                return False
+    elif label_response.status_code == 404:
+        return {'status': 404}
     return label_approved_present
 
 
@@ -303,12 +307,11 @@ def check_pr_template(pr_body, repo_owner, repo_name, pr_number):
                     return False
     # Check if the template format has been followed and contents under any header isn't empty
     if set(tokens).intersection(necessary_elements_set) == necessary_elements_set:
-        if tokens[tokens.index('# Description') + 1] != '# Type of Change:' and \
-                tokens[tokens.index('# Type of Change:') + 1] != '# How Has This Been Tested?' and \
-                tokens[tokens.index('# How Has This Been Tested?') + 1] != '# Checklist:' and \
-                tokens[-1] != '# Checklist:':
+        if tokens[tokens.index('### Description') + 1] != '### Type of Change:' and \
+                tokens[tokens.index('### Type of Change:') + 1] != '### How Has This Been Tested?' and \
+                tokens[tokens.index('### How Has This Been Tested?') + 1] != '### Checklist:' and \
+                tokens[-1] != '### Checklist:':
             return True
-
     github_comment(MESSAGE.get('pr_template_not_followed'), repo_owner, repo_name, pr_number)
     close_pr(repo_owner, repo_name, pr_number)
     return False

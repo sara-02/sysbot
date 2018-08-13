@@ -151,6 +151,9 @@ def assign_issue_slack(data):
                 send_message_ephemeral(channel_id, uid, MESSAGE.get('already_claimed', ''))
                 return {"message": "Issue already claimed"}
             # If issue has not been approved, send message to the channel
+            if type(is_issue_approved) is dict:
+                send_message_ephemeral(channel_id, uid, MESSAGE.get('wrong_info', ''))
+                return {"message": "Wrong information provided", "status": 404}
             if not is_issue_approved:
                 send_message_ephemeral(channel_id, uid, MESSAGE.get('not_approved', ''))
                 return {"message": "Issue not approved"}
@@ -193,6 +196,9 @@ def claim_issue_slack(data):
             send_message_ephemeral(channel_id, uid, MESSAGE.get('already_claimed', ''))
             return {"message": "Issue already claimed"}
         # If issue has not been approved, send message to the channel
+        if isinstance(is_issue_approved, dict):
+            send_message_ephemeral(channel_id, uid, MESSAGE.get('wrong_info', ''))
+            return {"message": "Wrong information provided", "status": 404}
         if not is_issue_approved:
             send_message_ephemeral(channel_id, uid, MESSAGE.get('not_approved', ''))
             return {"message": "Issue not approved"}

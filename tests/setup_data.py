@@ -198,7 +198,7 @@ slash_command_assign_issue_data = {
     "response_url": "https://hooks.slack.com/commands/T08C86GE8/392362793973/VpLXVTSsEwMsMmTMfBL0OJ8Y",
     "team_domain": "systers-opensource",
     "team_id": "T08C86GE8",
-    "text": "sysbot-test 144 sammy1997",
+    "text": "sysbot-test 144 sys-bot",
     "token": "9WMeKrR9ig79X8PY1jGnzkn5",
     "trigger_id": "393282244247.8416220484.c13108a9fb90e2f6da8d76c04f2823e9",
     "user_id": "U7KMRCS5Q",
@@ -265,20 +265,20 @@ query_getting_started = "Can someone guide me on how to start contributing?"
 query_gender_participation = "Are female participants preferred over male at Systers?"
 
 pr_template_with_fixes_number = "### Description\r\n" \
-                                "%s\r\n Fixes #123\r\n # Type of Change:\r\n" \
-                                "%s \r\n\r\n### How Has This Been Tested?" \
+                                "%s\r\n Fixes #123\r\n ### Type of Change:\r\n" \
+                                "%s \r\n\r\n### How Has This Been Tested?\r\n" \
                                 "%s \r\n### Checklist:\r\n " \
                                 "- [ ] %s.\r\n"
 
 pr_template_with_fixes_text = "### Description\r\n" \
                               "%s\r\n Fixes #abc\r\n ### Type of Change:\r\n" \
-                              "%s \r\n\r\n### How Has This Been Tested?" \
+                              "%s \r\n\r\n### How Has This Been Tested?\r\n" \
                               "%s \r\n### Checklist:\r\n " \
                               "- [ ] %s.\r\n"
 
 pr_template_without_fixes = "### Description\r\n" \
                             "%s\r\n ### Type of Change:\r\n" \
-                            "%s \r\n\r\n### How Has This Been Tested?" \
+                            "%s \r\n\r\n### How Has This Been Tested?\r\n" \
                             "%s \r\n### Checklist:\r\n " \
                             "- [ ] %s.\r\n"
 

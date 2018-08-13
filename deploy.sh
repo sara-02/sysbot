@@ -15,7 +15,7 @@ fi
 # Checking branch
 if [ "$TRAVIS_BRANCH" == "develop" ]; then
     SERVER="Development"
-elif [ "$TRAVIS_BRANCH" == "production" ]; then
+elif [ "$TRAVIS_BRANCH" == "master" ]; then
     SERVER="Production"
 else
     echo "Skip publishing, we don't publish for '$TRAVIS_BRANCH' branch"

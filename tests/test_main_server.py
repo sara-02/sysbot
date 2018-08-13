@@ -93,15 +93,17 @@ class TestMainServer(unittest.TestCase):
             response_assign_wrong_format = self.client.post('/web_hook', data=json.dumps(event_data_comment),
                                                             content_type='application/json')
             self.assertEqual(response_assign_wrong_format.data, '{\n  "message": "Wrong command format"\n}\n')
-            event_data_comment['comment']['body'] = "@sys-bot assign sammy1997"
+            event_data_comment['comment']['body'] = "@sys-bot assign sys-bot"
             response_assign_not_approved = self.client.post('/web_hook', data=json.dumps(event_data_comment),
                                                             content_type='application/json')
             self.assertEqual(response_assign_not_approved.data, '{\n  "message": "Issue not approved"\n}\n')
             event_data_comment['issue']['number'] = "150"
+            event_data_comment['comment']['author_association'] = 'COLLABORATOR'
             response_assign_already_claimed = self.client.post('/web_hook', data=json.dumps(event_data_comment),
                                                                content_type='application/json')
             self.assertEqual(response_assign_already_claimed.data, '{\n  "message": "Issue already claimed"\n}\n')
             event_data_comment['issue']['number'] = "149"
+            event_data_comment['comment']['author_association'] = 'USER'
             response_assign_not_permitted = self.client.post('/web_hook', data=json.dumps(event_data_comment),
                                                              content_type='application/json')
             self.assertEqual(response_assign_not_permitted.data, '{\n  "message": "Not permitted"\n}\n')
@@ -135,14 +137,15 @@ class TestMainServer(unittest.TestCase):
             response_unassign_wrong_format = self.client.post('/web_hook', data=json.dumps(event_data_comment),
                                                               content_type='application/json')
             self.assertEqual(response_unassign_wrong_format.data, '{\n  "message": "Wrong command format"\n}\n')
-            event_data_comment['comment']['body'] = "@sys-bot label test-label, approved, bug"
+            event_data_comment['comment']['body'] = "@sys-bot label enhancement, bug"
             event_data_comment['issue']['number'] = "140"
+            event_data_comment['comment']['author_association'] = 'COLLABORATOR'
             response_label_correct_format = self.client.post('/web_hook', data=json.dumps(event_data_comment),
                                                              content_type='application/json')
             self.assertEqual(response_label_correct_format.data, '{\n  "message": "All labels added to issue"\n}\n')
             event_data_comment['comment']['body'] = "@sys-bot label"
             response_label_wrong_format = self.client.post('/web_hook', data=json.dumps(event_data_comment),
-                                                             content_type='application/json')
+                                                           content_type='application/json')
             self.assertEqual(response_label_wrong_format.data, '{\n  "message": "Wrong command format"\n}\n')
             response_pr_to_unapproved_issue = self.client.post('/web_hook', data=json.dumps(event_data_pr_opened),
                                                                content_type='application/json')
@@ -159,7 +162,7 @@ class TestMainServer(unittest.TestCase):
     def test_label_issue(self):
         with self.client:
             response = self.client.post('/label', data=json.dumps(slash_command_label_issue_data),
-                                        content_type='application/json')
+                                        content_type='application/x-www-form-urlencoded')
             self.assertEqual(200, response.status_code)
 
 
