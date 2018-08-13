@@ -14,9 +14,9 @@ fi
 
 # Checking branch
 if [ "$TRAVIS_BRANCH" == "develop" ]; then
-    SERVER="Development"
+    SERVER="sysbot-dev"
 elif [ "$TRAVIS_BRANCH" == "master" ]; then
-    SERVER="Production"
+    SERVER="sysbot-prod"
 else
     echo "Skip publishing, we don't publish for '$TRAVIS_BRANCH' branch"
     exit 0
