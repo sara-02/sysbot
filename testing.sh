@@ -12,5 +12,7 @@ if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then
     exit 0
 fi
 
+# Works for Python 2
+python -m nltk.downloader -d /usr/share/nltk_data brown
 coverage run --source code -m unittest discover tests
 coverage report -m
